@@ -1,0 +1,32 @@
+
+Analyse Stratégie : OB Pullback GAP (sans filtre) - SL70
+
+🏁 Total trades : 53
+🎯 TP1 atteint : 32 | ❌ SL touché : 21
+📈 Winrate TP1 global : 60.38%
+
+🕒 Répartition par session :
+- Asia : 47.1% | 8 TP1 / 9 SL
+- London : 60.9% | 14 TP1 / 9 SL
+- New York : 76.9% | 10 TP1 / 3 SL
+
+📅 Répartition par jour :
+- Friday: 55.6% winrate (5 TP1 / 4 SL)
+- Monday: 60.0% winrate (9 TP1 / 6 SL)
+- Thursday: 71.4% winrate (5 TP1 / 2 SL)
+- Tuesday: 44.4% winrate (4 TP1 / 5 SL)
+- Wednesday: 69.2% winrate (9 TP1 / 4 SL)
+
+🎯 TP2 (sur les 32 TP1 touchés) :
+- TP2 atteint : 16
+- SL sur tentative TP2 : 15
+- Winrate TP2 : 50%
+
+📌 Notes :
+- Winrate TP1 moyen (41.7%), mais plus stable que certaines variantes RSI
+- NY session = 60% → à prioriser clairement
+- Mardi et jeudi OK (50%), vendredi correct, lundi très mauvais
+- TP2 bon à 66.67%, donc extension jouable
+
+Recommandation :
+Setup basique mais exploitable. NY session + mardi/jeudi = les zones à prioriser. Bonne base pour du scalping propre avec SL70 si filtré par heure.

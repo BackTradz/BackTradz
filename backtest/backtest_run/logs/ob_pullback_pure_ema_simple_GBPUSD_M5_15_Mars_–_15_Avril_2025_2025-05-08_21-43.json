@@ -1,0 +1,17 @@
+{
+    "date": "2025-05-08_21-43",
+    "strategy": "ob_pullback_pure_ema_simple",
+    "pair": "GBPUSD",
+    "timeframe": "M5",
+    "period": "15 Mars \u2013 15 Avril 2025",
+    "params": {
+        "min_wait_candles": 3,
+        "max_wait_candles": 20,
+        "allow_multiple_entries": false,
+        "ema": 50,
+        "sl": 70,
+        "tp1": 70,
+        "tp2": 140
+    },
+    "note": "backtest ob normal + ema simple buy si prix> ema(50) ou l'inverse. Setup d\u00e9tect\u00e9s OK."
+}

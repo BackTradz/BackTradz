@@ -1,0 +1,21 @@
+{
+    "date": "2025-06-03 22:07:08",
+    "strategy": "fvg_pullback_tendance_ema_rsi_sl70",
+    "pair": "EUR",
+    "timeframe": "m5",
+    "period": "01-05,31-05-25",
+    "params": {
+        "min_pips": 5.0,
+        "min_wait_candles": 1,
+        "max_wait_candles": 20,
+        "max_touch": 4,
+        "ema_fast": "EMA_50",
+        "ema_slow": "EMA_200",
+        "rsi_key": "RSI",
+        "rsi_threshold": 30.0,
+        "sl_pips": 70,
+        "tp1_pips": 70,
+        "tp2": 140
+    },
+    "note": "R\u00e9sultat runner V5 - fvg_pullback_tendance_ema_rsi_sl70"
+}

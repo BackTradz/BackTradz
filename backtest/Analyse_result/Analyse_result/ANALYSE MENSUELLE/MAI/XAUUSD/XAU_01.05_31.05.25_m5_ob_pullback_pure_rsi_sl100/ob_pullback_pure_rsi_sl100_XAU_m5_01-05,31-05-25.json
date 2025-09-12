@@ -1,0 +1,19 @@
+{
+    "date": "2025-06-03 21:53:04",
+    "strategy": "ob_pullback_pure_rsi_sl100",
+    "pair": "XAU",
+    "timeframe": "m5",
+    "period": "01-05,31-05-25",
+    "params": {
+        "min_wait_candles": 3,
+        "max_wait_candles": 20,
+        "allow_multiple_entries": false,
+        "rsi_key": "RSI",
+        "rsi_threshold": 40.0,
+        "time_key": "Datetime",
+        "sl_pips": 100,
+        "tp1_pips": 100,
+        "tp2": 200
+    },
+    "note": "R\u00e9sultat runner V5 - ob_pullback_pure_rsi_sl100"
+}

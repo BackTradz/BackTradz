@@ -1,0 +1,38 @@
+# === 🛡️ Sécurité : toujours ignorer les clés secrètes ===
+.env
+
+# === 🐍 Python : fichiers temporaires et cache ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# === 🐍 Environnements virtuels ===
+env/
+venv/
+winpython*/  # Si tu bosses avec WinPython portable
+
+# === 📦 Node.js / React ===
+node_modules/
+dist/
+build/
+.npm/
+
+# === 📁 Données personnelles et lourdes ===
+*.zip
+*.rar
+
+# === Sécurité : ne jamais push fichiers vendus ou résultats perso ===
+*.csv
+*.xlsx
+
+backend/data/analysis/
+backend/output/
+backend/output_live/
+
+# === ⚙️ Config éditeur / OS ===
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

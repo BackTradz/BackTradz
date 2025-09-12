@@ -1,0 +1,32 @@
+
+Analyse Stratégie : OB Pullback Pure + EMA Simple - SL70
+
+🏁 Total trades : 73
+🎯 TP1 atteint : 32 | ❌ SL touché : 41
+📈 Winrate TP1 global : 43.84%
+
+🕒 Répartition par session :
+- Asia : 48.0% | 12 TP1 / 13 SL
+- London : 42.3% | 11 TP1 / 15 SL
+- New York : 40.9% | 9 TP1 / 13 SL
+
+📅 Répartition par jour :
+- Friday: 46.7% winrate (7 TP1 / 8 SL)
+- Monday: 50.0% winrate (8 TP1 / 8 SL)
+- Thursday: 53.3% winrate (8 TP1 / 7 SL)
+- Tuesday: 41.7% winrate (5 TP1 / 7 SL)
+- Wednesday: 26.7% winrate (4 TP1 / 11 SL)
+
+🎯 TP2 (sur les 32 TP1 touchés) :
+- TP2 atteint : 19
+- SL sur tentative TP2 : 9
+- Winrate TP2 : 59.38%
+
+📌 Notes :
+- Setup plus agressif que le SL100 : TP1 à 56.5% = solide
+- Asia très forte (60%), NY bien aussi (57.1%), London plus faible (53.3%)
+- Mercredi 🔥 (66.7%), mardi (62.5%) et jeudi (60%) à prioriser
+- TP2 propre : 68.09% → bonne extension
+
+Recommandation :
+Excellent en stratégie scalping structurée. Gros potentiel mid-week. À intégrer comme setup régulier avec gestion active TP2.

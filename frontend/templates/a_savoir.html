@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>À savoir — Stratify</title>
+  <link rel="stylesheet" href="/static/css/a_savoir.css">
+  <link rel="stylesheet" href="/static/css/responsive.css" />
+
+</head>
+<body>
+    <header>
+        <div class="logo">Stratify</div>
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        <nav id="main-nav">
+            <ul>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="/backtest">Lancer un backtest</a></li>
+            <li><a href="/csv-shop">CSV Library</a></li>
+            <li><a href="/dashboard-user">Mon dashboard</a></li>
+            <li><a href="/a-savoir">À savoir</a></li>
+            <li><a href="/pricing">Prix</a></li>
+            <li style="display: flex; align-items: center; gap: 4px;">
+              <a href="#" onclick="goProfile()">Mon profil</a>
+              <span id="credit-counter" class="credit-badge" style="white-space: nowrap; font-size: 0.9em;">🪙 ...</span>
+            </li>
+
+            <li id="admin-link" style="display: none;"><a href="/admin">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+
+  <main>
+    <h1>🧠 À savoir avant d’utiliser Stratify</h1>
+    <p>Cette page contiendra toutes les informations importantes sur l’utilisation de la plateforme, les crédits, les stratégies, les limitations, etc.</p>
+    <p>💡 Tu pourras l’éditer quand tu veux plus tard.</p>
+  </main>
+
+  <script src="/static/js/a_savoir.js"></script>
+  <script src="/static/js/global.js"></script>
+
+</body>
+</html>

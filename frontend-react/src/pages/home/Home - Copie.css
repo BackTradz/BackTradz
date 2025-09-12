@@ -1,0 +1,583 @@
+/* ====== HOME THEME (pro tech, full CSS, no image) ====== */
+.home-page{
+  --bg:#1e293b;     /* fond uni (comme Pricing) */
+  --card:#0f1627;   /* cartes/nav plus sombres */
+  --ink:#e6ecff;
+  --muted:#94a3b8;
+  --dots:#ffffff0a; /* points de texture */
+  --beam:#ffffff10; /* balayage */
+  --glow:#3b82f620; /* halos discrets */
+
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+}
+
+/* container standard */
+.container-std{max-width:1160px;margin:0 auto;padding:20px}
+
+/* ====== HERO LAYERED EFFECTS ====== */
+.hero{
+  position:relative;
+  min-height:80vh;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center; overflow:hidden;
+  background:var(--bg);
+  isolation:isolate;
+}
+
+/* (Grille retirée) */
+
+/* 2) Texture de points qui dérive lentement */
+.hero .fx-dots{
+  position:absolute; inset:-20%; pointer-events:none; z-index:0;
+  background-image: radial-gradient(var(--dots) 1px, transparent 1px);
+  background-size:24px 24px;
+  animation:drift 48s linear infinite; /* plus lent qu'avant */
+  will-change: background-position;
+}
+
+/* 3) Balayage vertical doux type “scanner” */
+.hero .fx-sweep{
+  position:absolute; inset:0; pointer-events:none; z-index:1;
+  background:linear-gradient(180deg, transparent, var(--beam), transparent);
+  transform:translateY(-120%);
+  animation:sweep 16s ease-in-out infinite; /* plus lent */
+  mix-blend-mode:screen;
+}
+
+/* 4) Deux halos très légers pour la profondeur */
+.hero .orb{
+  position:absolute; pointer-events:none; z-index:0; filter:blur(28px);
+  background:radial-gradient(closest-side, var(--glow), transparent 70%);
+  opacity:.8; will-change:transform;
+}
+.hero .orb--tl{ width:42vw; height:42vw; top:-14%; left:-12%; animation:float 28s ease-in-out infinite; }
+.hero .orb--br{ width:46vw; height:46vw; right:-10%; bottom:-18%; animation:float 30s ease-in-out -8s infinite; }
+
+/* Typo */
+.hero h1{font-weight:800}
+.hero p{color:var(--muted)}
+
+/* Animations */
+@keyframes drift{
+  from{background-position:0 0}
+  to{background-position:180px 120px}
+}
+@keyframes sweep{
+  0%,25%{transform:translateY(-130%); opacity:0}
+  45%,55%{transform:translateY(0%); opacity:1}
+  100%{transform:translateY(130%); opacity:0}
+}
+@keyframes float{
+  0%,100%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(2.5vw,-1.4vw,0)}
+}
+
+/* Canvas derrière le contenu */
+.hero { position: relative; }
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+/* Contenu au-dessus */
+.hero .content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Wrapper de section */
+.ts-wrap {
+  width: min(1180px, 96vw);
+  margin: 0 auto 40px;
+  padding: 0 8px;
+}
+
+/* Message d'erreur */
+.ts-error {
+  color: #ef4444;
+  margin: 8px 0 14px;
+}
+
+/* Grille responsive (3 → 2 → 1) */
+.ts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 1024px) {
+  .ts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .ts-grid { grid-template-columns: 1fr; }
+}
+
+/* Carte */
+.ts-card {
+  background: rgba(15, 23, 42, 0.92);          /* comme tes autres cartes */
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 10px 26px rgba(2, 6, 23, 0.45);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.ts-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.10);
+  box-shadow: 0 16px 34px rgba(2, 6, 23, 0.55);
+}
+
+/* Header */
+.ts-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.ts-badges { display: flex; gap: 8px; align-items: center; }
+.ts-badge {
+  font-size: 12px; color: #cfe0ff;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(11,18,33,0.85);
+  padding: 6px 10px; border-radius: 999px; white-space: nowrap;
+}
+.ts-badge--pair { font-weight: 700; color: #e6ecff; }
+.ts-badge--tf   { opacity: .95; }
+.ts-range {
+  color: rgba(198,210,235,0.75); font-size: 12px;
+}
+.ts-range .mx { opacity: .6; padding: 0 4px; }
+
+/* Lignes */
+.ts-body { display: grid; gap: 8px; }
+.ts-row {
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: center; gap: 8px;
+  padding: 8px 0;
+  border-top: 1px dashed rgba(255,255,255,0.06);
+}
+.ts-row:first-child { border-top: 0; padding-top: 0; }
+
+.ts-label {
+  color: rgba(198,210,235,0.90);
+  font-size: 14px;
+}
+.ts-value {
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.ts-strat {
+  font-weight: 800; color: #e6ecff;
+}
+.ts-kpi {
+  font-weight: 800; color: #e6ecff;
+}
+.ts-kpi.good { color: #34d399; }  /* vert quand winrate >= 55% */
+
+/* Skeleton */
+.ts-skel .skel {
+  height: 12px; border-radius: 8px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.06) 0%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.06) 100%);
+  background-size: 200% 100%;
+  animation: skel 1.2s infinite linear;
+}
+@keyframes skel { to { background-position-x: -200%; } }
+
+/* src/components/home/HeroMessage.css */
+
+.hero-msg { z-index:3; }
+.hero-msg--docked {
+  position:absolute; inset:0;
+  display:flex; align-items:flex-end; justify-content:center;
+  pointer-events:none; /* laisse cliquer CTA via la card */
+  padding:12px 16px 18px;
+}
+.hero-msg--below {
+  position:relative; pointer-events:auto;
+  margin: 22px auto 0; display:flex; justify-content:center;
+}
+
+.hero-card {
+  background: rgba(15,23,42,0.78);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+}
+
+/* Docked : ruban compact intégré au graphe */
+.hero-card--docked {
+  width: min(1100px, 94%);
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px; padding: 10px 14px;
+  pointer-events:auto;
+}
+.hero-title--small { margin:0; color:#e6ecff; font-size: clamp(16px,1.8vw,20px); font-weight:800; }
+.hero-docked-left { display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.hero-docked-right { display:flex; gap:12px; align-items:center; }
+.chips { display:flex; gap:8px; flex-wrap:wrap; }
+.chips--scroll { overflow-x:auto; max-width:56vw; padding-bottom:4px; }
+.chips--scroll::-webkit-scrollbar { height:6px; }
+.chips--scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:999px; }
+.chip {
+  font-size:12px; color:#cfe0ff;
+  border:1px solid rgba(255,255,255,0.08);
+  background: rgba(11,18,33,0.85);
+  padding:6px 10px; border-radius:999px; white-space:nowrap;
+}
+
+/* Below : bloc complet, mais raisonnable */
+.hero-card--below {
+  width: min(980px, 92vw);
+  padding: 18px 20px;
+}
+.hero-title {
+  margin:0 0 6px; font-size: clamp(24px,4vw,36px);
+  font-weight:800; color:#e6ecff; letter-spacing: .2px;
+}
+.accent { color:#39c5ff; }
+.hero-sub {
+  margin:0; color:rgba(198,210,235,0.95);
+  font-size: clamp(14px,2vw,16px); line-height:1.45;
+}
+.hero-actions { display:flex; gap:12px; align-items:center; margin-top:14px; }
+.link-ghost {
+  font-size:14px; color:#cfe6ff; text-decoration:none;
+  padding:8px 10px; border-radius:10px;
+  border:1px solid rgba(255,255,255,0.08);
+  background: rgba(11,18,33,0.6);
+}
+.link-ghost:hover { background: rgba(11,18,33,0.8); }
+
+.hero-bullets {
+  margin:14px 0 0; padding-left:18px; color:rgba(198,210,235,0.92);
+  display:grid; gap:6px; font-size:13px; line-height:1.35;
+}
+
+/* Responsive */
+@media (max-width:880px){
+  .chips--scroll{ max-width:60vw; }
+  .hero-docked-right .link-ghost{ display:none; }
+}
+@media (max-width:640px){
+  .hero-card--docked{ gap:10px; }
+  .hero-title--small{ font-size:16px; }
+}
+
+/* Conteneur sous le graphe */
+.hero-msg--below {
+  position: relative;
+  pointer-events: auto;
+  margin: 22px auto 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Card */
+.hero-card {
+  background: rgba(15,23,42,0.78);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+  backdrop-filter: blur(8px);
+}
+
+.hero-card--below {
+  /* plus large et respirant */
+  width: min(1280px, 96vw);
+  padding: 18px 22px;
+}
+
+/* version minimal : espaces + compacité */
+.hero-card--minimal {
+  padding: clamp(16px, 2.4vw, 24px);
+}
+
+/* Typo */
+.hero-title {
+  margin: 0 0 6px;
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 800;
+  color: #e6ecff;
+  letter-spacing: 0.1px;
+}
+.accent { color: #39c5ff; }
+
+.hero-sub {
+  margin: 0;
+  color: rgba(198,210,235,0.95);
+  font-size: clamp(14px, 2vw, 16px);
+  line-height: 1.45;
+}
+
+/* Chips réduites à 3 */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.chips--minimal .chip {
+  font-size: 12px;
+  color: #cfe0ff;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(11,18,33,0.85);
+  padding: 6px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* CTA */
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+}
+.link-ghost {
+  font-size: 14px;
+  color: #cfe6ff;
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(11,18,33,0.6);
+}
+.link-ghost:hover { background: rgba(11,18,33,0.8); }
+
+/* Bullets : 3 points max, en grille sur desktop */
+.hero-bullets {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  color: rgba(198,210,235,0.92);
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.hero-bullets--grid {
+  padding-left: 0;            /* on enlève les puces natives */
+  list-style: none;
+  gap: 8px;
+}
+.hero-bullets--grid li { padding-left: 0; }
+
+@media (min-width: 980px) {
+  .hero-bullets--grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Ajustements responsives */
+@media (max-width: 640px) {
+  .hero-actions .link-ghost { display: none; }
+}
+
+/* ====== HOME LAYOUT OVERRIDES (large) ====== */
+:root{
+  --home-max: 1280px;   /* <- augmente ici si tu veux encore plus large */
+}
+
+/* Hero message (variant "below") — élargir la card et respirer */
+.home-page .hero-card--below{
+  width: min(var(--home-max), 98vw) !important;
+  padding: clamp(16px, 2.4vw, 26px) !important;
+}
+
+/* Top stratégies — élargir le wrapper + grille plus large */
+.home-page .ts-wrap{
+  width: min(var(--home-max), 98vw) !important;
+  margin-top: 28px;   /* petit spacing sous le hero message */
+}
+
+/* Grille + cartes */
+.home-page .ts-grid{
+  gap: 20px !important;
+}
+
+/* Cartes : un chouïa plus “compact pro” pour éviter l’effet massif */
+.home-page .ts-card{
+  padding: 14px 16px 12px !important;
+  border-radius: 16px !important;
+}
+
+/* Header de carte : resserrer légèrement */
+.home-page .ts-head{ margin-bottom: 8px !important; }
+.home-page .ts-badge{ padding: 5px 10px !important; font-size: 12px !important; }
+
+/* Lignes intérieur carte */
+.home-page .ts-row{ padding: 7px 0 !important; }
+
+/* Responsive breakpoints cohérents */
+@media (max-width: 1024px){
+  .home-page .ts-grid{ gap: 16px !important; }
+}
+@media (max-width: 640px){
+  .home-page .hero-card--below{ width: 94vw !important; }
+}
+
+/* sections pleine largeur */
+.home-wide{
+  width:100%;
+  max-width:none;
+  margin:0;
+  padding:0;
+}
+.section-pad{ padding: 28px 0; }
+
+/* largeur cible globale des blocs larges */
+:root{ --home-max: 1280px; } /* monte à 1360/1400 si tu veux */
+
+/* HeroMessage (below) : largeur + centrage garanti */
+.home-page .hero-card--below{
+  width: min(var(--home-max), 98vw) !important;
+  margin: 0 auto !important;   /* <-- centre la card */
+  padding: clamp(16px, 2.4vw, 26px) !important;
+}
+
+.home-page .ts-wrap{
+  width: min(var(--home-max), 98vw) !important;
+  margin: 16px auto 32px !important; /* réduit l’espace au-dessus */
+  padding: 0 8px !important;
+}
+
+
+/* Optionnel: un peu plus d'espace entre cartes */
+.home-page .ts-grid{ gap: 20px !important; }
+
+/* ===== Tight spacing for hero ===== */
+.hero .content-tight > * { margin-top: 0 !important; }
+.hero .content-tight > * + * { margin-top: 8px !important; } /* espace unique entre h1, p, bouton */
+
+.hero .content-tight h1 {
+  margin: 0 !important;
+  line-height: 1.15 !important; /* resserre le titre */
+}
+
+.hero .content-tight p {
+  margin: 0 !important;
+  color: #cfe3ff;              /* un peu plus lisible */
+  font-size: 1.125rem;
+  opacity: 0.95;
+}
+
+/* Certains CTA ont un margin-top intégré : on le neutralise */
+.hero .content-tight .cta-button,
+.hero .content-tight a[class*="cta"],
+.hero .content-tight a[href="/dashboard"] {
+  margin-top: 0 !important;
+}
+
+/* ===== Bridge (phrase entre HeroMessage et TopStrategies) ===== */
+.home-page .home-bridge{
+  /* ↓ réduit fortement l'espace autour de la phrase */
+  margin: 12px auto 18px !important;
+  max-width: 1100px;
+  text-align: center;
+  font-size: 1.05rem;
+  color: #cfe3ff;          /* plus lisible */
+  opacity: .95;
+}
+
+/* ===== Section HeroMessage (carte) : réduire la marge inférieure ===== */
+.home-page .hero-msg{
+  margin-bottom: 14px !important;   /* était bien plus grand */
+}
+.home-page .hero-msg .hero-card{
+  padding-bottom: 18px !important;  /* compense les paddings internes trop hauts */
+}
+
+/* ===== TopStrategies : rapprocher du bridge ===== */
+.home-page .ts-wrap{
+  margin-top: 14px !important;      /* rapproche les cartes du pont */
+  margin-bottom: 32px !important;
+}
+.home-page .ts-wrap .section-title{
+  margin-top: 6px !important;       /* évite un titre qui redescend trop */
+}
+
+/* Sécurité : neutralise d'éventuels gap/margins hérités */
+.home-page .hero-msg + .home-bridge{ margin-top: 10px !important; }
+.home-page .home-bridge + .ts-wrap{  margin-top: 12px !important; }
+
+/* Home.css */
+.home-page .ts-wrap {
+  width: min(1280px, 96vw) !important; /* aligné sur HeroMessage */
+}
+
+/* === Alignement largeur hero card / top strategies === */
+:root { --home-max: 1280px; } /* même valeur pour les deux blocs */
+
+.home-page .hero-card--below {
+  width: min(var(--home-max), 96vw) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.home-page .ts-wrap {
+  width: min(var(--home-max), 96vw) !important; /* <- aligné sur hero */
+  margin-left: auto !important;
+  margin-right: auto !important;
+  /* rapproche encore du bridge si tu veux */
+  margin-top: 12px !important;
+}
+
+/* ==== [FIX WIDTH ALIGNMENT] HeroMessage vs TopStrategies ==== */
+:root{
+  --home-max: 1280px;   /* même valeur pour les deux blocs */
+  --home-gutter: 12px;  /* même padding latéral */
+}
+
+/* 1) même boîte, même largeur, même padding, centrés */
+.home-page .hero-msg .hero-card.hero-card--below,
+.home-page .ts-wrap{
+  box-sizing: border-box !important;
+  width: min(var(--home-max), 96vw) !important;
+  padding-left: var(--home-gutter) !important;
+  padding-right: var(--home-gutter) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  max-width: none !important; /* neutralise des max-width précédents */
+}
+
+/* 2) neutralise d’anciennes règles qui rétrécissaient ts-wrap (ex: 1180px) */
+.home-page .ts-wrap{ width: min(var(--home-max), 96vw) !important; }
+
+/* 3) si la card a un padding interne énorme qui “déborde” visuellement, on l’uniformise */
+.home-page .hero-msg .hero-card.hero-card--below{
+  padding-left: var(--home-gutter) !important;
+  padding-right: var(--home-gutter) !important;
+}
+
+/* ===== Unified container for hero & top strategies ===== */
+:root{
+  --btz-container: 1280px;   /* largeur max commune */
+  --btz-vw: 96vw;            /* largeur relative commune */
+  --btz-gutter: 12px;        /* padding latéral identique */
+}
+
+/* HeroMessage card (below) — plus spécifique pour battre HeroMessage.css */
+.home-page .hero-msg.hero-msg--below .hero-card.hero-card--below{
+  box-sizing: border-box !important;
+  width: min(var(--btz-container), var(--btz-vw)) !important;
+  padding-left: var(--btz-gutter) !important;
+  padding-right: var(--btz-gutter) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* TopStrategies wrapper */
+.home-page .ts-wrap{
+  box-sizing: border-box !important;
+  width: min(var(--btz-container), var(--btz-vw)) !important;
+  padding-left: var(--btz-gutter) !important;
+  padding-right: var(--btz-gutter) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+
+

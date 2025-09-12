@@ -1,0 +1,43 @@
+..\Analyse_result\backtest_result\ob_pullback_pure_rsi_sl100\backtest_result.csv- seulement 4 lignes
+..\Analyse_result\backtest_result\ob_pullback_pure_tendance_ema_rsi_sl100\backtest_result.csv- seulement 3 lignes
+..\Analyse_result\backtest_result\ob_pullback_pure_rsi_sl100\backtest_result.csv- seulement 4 lignes
+..\Analyse_result\backtest_result\ob_pullback_pure_tendance_ema_rsi_sl100\backtest_result.csv- seulement 3 lignes
+..\Analyse_result\backtest_result\ob_pullback_pure_rsi_sl70\backtest_result.csv- seulement 3 lignes
+..\Analyse_result\backtest_result\ob_pullback_pure_tendance_ema_rsi_sl70\backtest_result.csv- seulement 3 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_rsi_sl100\backtest_result.csv - seulement 3 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_rsi_sl70\backtest_result.csv - seulement 4 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_tendance_ema_sl100\backtest_result.csv - seulement 1 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_tendance_ema_sl70\backtest_result.csv - seulement 1 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_tendance_ema_sl100\backtest_result.csv - seulement 1 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_tendance_ema_sl70\backtest_result.csv - seulement 1 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_rsi_sl100\backtest_result.csv - seulement 4 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_rsi_sl70\backtest_result.csv - seulement 4 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_rsi_sl100\backtest_result.csv - seulement 4 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_rsi_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_rsi_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_rsi_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_rsi_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_simple_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_simple_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_tendance_ema_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_tendance_ema_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_rsi_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_rsi_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_simple_sl100\backtest_result.csv - seulement 4 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_ema_simple_sl70\backtest_result.csv - seulement 3 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_rsi_sl100\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_rsi_sl70\backtest_result.csv - seulement 2 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl100\backtest_result.csv - seulement 4 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_sl70\backtest_result.csv - seulement 3 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_tendance_ema_sl100\backtest_result.csv - seulement 4 lignes
+..\Analyse_result\backtest_result\ob_pullback_gap_tendance_ema_sl70\backtest_result.csv - seulement 3 lignes

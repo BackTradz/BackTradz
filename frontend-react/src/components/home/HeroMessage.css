@@ -1,0 +1,203 @@
+/* src/components/home/HeroMessage.css */
+
+.hero-msg { z-index:3; }
+.hero-msg--docked {
+  position:absolute; inset:0;
+  display:flex; align-items:flex-end; justify-content:center;
+  pointer-events:none; /* laisse cliquer CTA via la card */
+  padding:12px 16px 18px;
+}
+.hero-msg--below {
+  position:relative; pointer-events:auto;
+  margin: 22px auto 0; display:flex; justify-content:center;
+}
+
+.hero-card {
+  background: rgba(15,23,42,0.78);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+}
+
+/* Docked : ruban compact intégré au graphe */
+.hero-card--docked {
+  width: min(1100px, 94%);
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px; padding: 10px 14px;
+  pointer-events:auto;
+}
+.hero-title--small { margin:0; color:#e6ecff; font-size: clamp(16px,1.8vw,20px); font-weight:800; }
+.hero-docked-left { display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.hero-docked-right { display:flex; gap:12px; align-items:center; }
+.chips { display:flex; gap:8px; flex-wrap:wrap; }
+.chips--scroll { overflow-x:auto; max-width:56vw; padding-bottom:4px; }
+.chips--scroll::-webkit-scrollbar { height:6px; }
+.chips--scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:999px; }
+.chip {
+  font-size:12px; color:#cfe0ff;
+  border:1px solid rgba(255,255,255,0.08);
+  background: rgba(11,18,33,0.85);
+  padding:6px 10px; border-radius:999px; white-space:nowrap;
+}
+
+/* Below : bloc complet, mais raisonnable */
+.hero-card--below {
+  width: min(980px, 92vw);
+  padding: 18px 20px;
+}
+.hero-title {
+  margin:0 0 6px; font-size: clamp(24px,4vw,36px);
+  font-weight:800; color:#e6ecff; letter-spacing: .2px;
+}
+.accent { color:#15057b;  }
+.hero-sub {
+  margin:0; color:rgba(198,210,235,0.95);
+  font-size: clamp(14px,2vw,16px); line-height:1.45;
+}
+.hero-actions { display:flex; gap:12px; align-items:center; margin-top:14px; }
+.link-ghost {
+  font-size:14px; color:#cfe6ff; text-decoration:none;
+  padding:8px 10px; border-radius:10px;
+  border:1px solid rgba(255,255,255,0.08);
+  background: rgba(11,18,33,0.6);
+}
+.link-ghost:hover { background: rgba(11,18,33,0.8); }
+
+.hero-bullets {
+  margin:14px 0 0; padding-left:18px; color:rgba(198,210,235,0.92);
+  display:grid; gap:6px; font-size:13px; line-height:1.35;
+}
+
+/* Responsive */
+@media (max-width:880px){
+  .chips--scroll{ max-width:60vw; }
+  .hero-docked-right .link-ghost{ display:none; }
+}
+@media (max-width:640px){
+  .hero-card--docked{ gap:10px; }
+  .hero-title--small{ font-size:16px; }
+}
+
+/* Conteneur sous le graphe */
+.hero-msg--below {
+  position: relative;
+  pointer-events: auto;
+  margin: 22px auto 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Card */
+.hero-card {
+  background: rgba(15,23,42,0.78);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+  backdrop-filter: blur(8px);
+}
+
+.hero-card--below {
+  /* plus large et respirant */
+  width: min(1280px, 96vw);
+  padding: 18px 22px;
+}
+
+/* version minimal : espaces + compacité */
+.hero-card--minimal {
+  padding: clamp(16px, 2.4vw, 24px);
+}
+
+/* Typo */
+.hero-title {
+  margin: 0 0 6px;
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 800;
+  color: #e6ecff;
+  letter-spacing: 0.1px;
+}
+
+
+.hero-sub {
+  margin: 0;
+  color: rgba(198,210,235,0.95);
+  font-size: clamp(14px, 2vw, 16px);
+  line-height: 1.45;
+}
+
+/* Chips réduites à 3 */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.chips--minimal .chip {
+  font-size: 12px;
+  color: #cfe0ff;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(11,18,33,0.85);
+  padding: 6px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* CTA */
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+}
+.link-ghost {
+  font-size: 14px;
+  color: #cfe6ff;
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(11,18,33,0.6);
+}
+.link-ghost:hover { background: rgba(11,18,33,0.8); }
+
+/* Bullets : 3 points max, en grille sur desktop */
+.hero-bullets {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  color: rgba(198,210,235,0.92);
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.hero-bullets--grid {
+  padding-left: 0;            /* on enlève les puces natives */
+  list-style: none;
+  gap: 8px;
+}
+.hero-bullets--grid li { padding-left: 0; }
+
+@media (min-width: 980px) {
+  .hero-bullets--grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Ajustements responsives */
+@media (max-width: 640px) {
+  .hero-actions .link-ghost { display: none; }
+}
+
+/* Animation polish */
+@media (prefers-reduced-motion: reduce) {
+  .hero-card { transition: none !important; }
+}
+
+/* Légère mise en avant visuelle au reveal */
+.hero-card.hero-card--below {
+  transition: box-shadow .35s ease, transform .35s ease;
+}
+.hero-card.hero-card--below:where(:is(:focus-within, :hover)) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 36px rgba(0,0,0,.32);
+}

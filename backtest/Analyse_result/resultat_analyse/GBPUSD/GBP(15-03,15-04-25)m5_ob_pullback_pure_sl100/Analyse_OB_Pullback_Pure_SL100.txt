@@ -1,0 +1,32 @@
+
+Analyse Stratégie : OB Pullback Pure (sans filtre) - SL100
+
+🏁 Total trades : 148
+🎯 TP1 atteint : 65 | ❌ SL touché : 83
+📈 Winrate TP1 global : 43.92%
+
+🕒 Répartition par session :
+- Asia : 37.0% | 20 TP1 / 34 SL
+- London : 44.9% | 22 TP1 / 27 SL
+- New York : 51.1% | 23 TP1 / 22 SL
+
+📅 Répartition par jour :
+- Friday: 46.4% winrate (13 TP1 / 15 SL)
+- Monday: 38.2% winrate (13 TP1 / 21 SL)
+- Thursday: 44.4% winrate (12 TP1 / 15 SL)
+- Tuesday: 46.7% winrate (14 TP1 / 16 SL)
+- Wednesday: 44.8% winrate (13 TP1 / 16 SL)
+
+🎯 TP2 (sur les 65 TP1 touchés) :
+- TP2 atteint : 54
+- SL sur tentative TP2 : 6
+- Winrate TP2 : 83.08%
+
+📌 Notes :
+- Setup plus stable que SL70 : TP1 à 50.0% → bon score
+- Sessions : NY (57.1%) > London (47.6%) > Asia (45.5%)
+- Jeudi 🔥 (75.0%), mardi et mercredi stables, lundi faible
+- TP2 à 76.92% = excellent ratio pour prolonger les setups valides
+
+Recommandation :
+À jouer clairement sur NY + jeudi. Setup propre pour structure principale. TP2 très rentable → gestion partielle ou all-in possible selon profil.

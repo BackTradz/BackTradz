@@ -1,0 +1,153 @@
+/* ==========================================================================
+   Select — DA alignée à l'input (rectangle arrondi dark)
+   - Hauteur = var(--input-h, 44px)
+   - Rayon   = var(--input-radius, 10px)
+   - Fond    = #0f172a
+   - Bord    = #334155
+   ========================================================================== */
+
+/* ---- Root ---- */
+.strt-select{
+  position: relative;
+  display: inline-block;
+  min-width: 0;
+  isolation: isolate;                     /* coupe les pseudo-éléments globaux */
+}
+.strt--full{ display:block; width:100%; }
+
+/* ---- Tailles (match input) ---- */
+.strt--sm .strt-btn{ height: calc(var(--input-h, 44px) - 8px); font-size:13px; padding: 0 12px; }
+.strt--md .strt-btn{ height: var(--input-h, 44px);              font-size:14px; padding: 0 14px; }
+.strt--lg .strt-btn{ height: calc(var(--input-h, 44px) + 4px);  font-size:15px; padding: 0 16px; }
+
+/* ---- Variants (solid recommandé pour coller à l'input) ---- */
+.strt--solid   .strt-btn{ background:#0f172a; border-color:#334155; }
+.strt--outline .strt-btn{ background:transparent; border-color:#334155; }
+
+/* ---- Trigger (UN seul contour, rectangle arrondi) ---- */
+.strt-btn{
+  width:100%;
+  border-radius: var(--input-radius, 10px);
+  color:#f8fafc;
+  border:1px solid #334155;
+  display:inline-flex; align-items:center; justify-content:space-between;
+  gap:10px; line-height:1.25;
+  transition:border-color .15s ease, box-shadow .2s ease, background .15s ease;
+  box-shadow:none; outline:none;
+  background-clip: padding-box;
+}
+.strt-btn:hover{ border-color:#3f4f6c; }
+.strt-btn:focus-visible{
+  border-color:#7c3aed;                   /* même halo violet que le reste du site */
+  box-shadow:0 0 0 3px rgba(124,58,237,.22);
+}
+.strt-btn[disabled]{ opacity:.6; cursor:not-allowed; }
+.strt-label.is-placeholder{ color:#9aa6bf; }
+.strt-chevron{ display:inline-flex; color:#a6b3cc; }
+.strt-btn:hover .strt-chevron{ color:#cbd5e1; }
+
+/* ---- Panel (menu dark) ---- */
+.strt-panel{
+  position:absolute; top: calc(100% + 8px); left:0; min-width:100%;
+  z-index:60;
+  border-radius: 12px;
+  background:#0f172a;
+  border:1px solid #334155;
+  box-shadow: 0 12px 32px rgba(0,0,0,.35);
+  overflow:hidden;
+}
+
+/* ---- Liste & scrollbar sombre ---- */
+.strt-list{
+  list-style:none; margin:0; padding:6px;
+  max-height: 260px; overflow:auto;
+  scrollbar-width: thin;                    /* Firefox */
+  scrollbar-color: #44557a #0f172a;
+}
+.strt-list::-webkit-scrollbar{ width: 10px; }
+.strt-list::-webkit-scrollbar-track{
+  background:#0f172a; border-left: 1px solid #2a364f;
+}
+.strt-list::-webkit-scrollbar-thumb{
+  background:#44557a; border-radius:8px; border:2px solid #0f172a;
+}
+.strt-list::-webkit-scrollbar-thumb:hover{ background:#586e9a; }
+
+/* ---- Items ---- */
+.strt-item{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:10px 12px; border-radius:8px;
+  color:#e6e9f2; cursor:pointer; user-select:none;
+}
+.strt-item:hover,
+.strt-item.is-highlighted{ background: rgba(124,58,237,.14); }
+.strt-item.is-selected{
+  background: rgba(56,189,248,.14);
+  color:#d9f0ff;
+  border:1px solid rgba(56,189,248,.35);
+}
+.strt-tick{ opacity:.9; }
+
+/* ---- Kill totale des halos/pseudo-éléments hérités ---- */
+.strt-select::before,
+.strt-select::after,
+.strt-btn::before,
+.strt-btn::after{
+  content:none !important; display:none !important; box-shadow:none !important;
+  background:none !important; border:0 !important; filter:none !important; backdrop-filter:none !important;
+}
+
+/* ===== Adaptations mobile (pointer: coarse) ===== */
+@media (pointer: coarse) {
+  .strt-panel {
+    top: calc(100% + 6px);
+    border-radius: 14px;
+  }
+  .strt-item { padding: 12px 14px; } /* cibles plus confortables */
+}
+
+/* ===== Petits écrans : s'assurer que le panneau ne dépasse pas ===== */
+@media (max-width: 520px) {
+  .strt-panel {
+    left: 0;
+    right: 0;
+    min-width: unset;
+    width: 100%;
+  }
+}
+
+/* Aligne tous les labels de la toolbar (selects, search, etc.) */
+.bt-ctrl .bt-label {
+  display: block;
+  text-align: left;      /* garde l’alignement gauche */
+  margin-left: 2px;      /* léger décalage pour caler avec les champs */
+  margin-bottom: 4px;    /* espace régulier avec l’input/select */
+  font-size: 0.9rem;     /* harmonise la taille */
+  color: var(--text-soft);
+}
+
+/* === Inline label dans le trigger, sans modifier le composant === */
+/* Utilise l'attribut data-inline-label="..." sur .strt-select */
+
+.strt-select[data-inline-label] .strt-btn { gap: 8px; }
+
+.strt-select[data-inline-label] .strt-btn::before{
+  /* on réactive ::before malgré le "kill" plus haut */
+  content: attr(data-inline-label) !important;
+  display: inline-block !important;
+
+  font-size: .85rem;
+  color: var(--text-soft, #9ca3af);
+  opacity: .75;
+  padding-right: 8px;
+  position: relative;
+}
+
+/* petit séparateur discret optionnel */
+.strt-select[data-inline-label] .strt-btn::before {
+  margin-right: 2px;
+}
+.strt-select[data-inline-label] .strt-btn::before {
+  /* fine barre verticale (retire si tu n'en veux pas) */
+  background: none;
+}

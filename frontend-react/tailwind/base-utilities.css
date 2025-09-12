@@ -1,0 +1,8 @@
+
+/* Tes classes custom Tailwind ici */
+@import "./tailwind/ui/theme.css";
+
+
+/* ⚠️ PAS de @tailwind base ici */
+@tailwind utilities;
+

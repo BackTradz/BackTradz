@@ -1,0 +1,199 @@
+.ts-cta-row { display:flex; justify-content:flex-end; margin-top: 12px; }
+.ts-cta {
+  padding: 10px 14px; border-radius: 12px;
+  background: #2b76ff; color: #fff; font-weight: 600;
+  border: none; cursor: pointer; transition: transform .08s ease, opacity .2s;
+}
+.ts-cta:hover { opacity: .92; }
+.ts-cta:active { transform: translateY(1px); }
+
+.ts-cta-row {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.ts-cta {
+  padding: 10px 14px; border-radius: 12px;
+  background: #2b76ff; color: #fff; font-weight: 600;
+  border: none; cursor: pointer; transition: transform .08s ease, opacity .2s;
+}
+.ts-cta:hover { opacity: .92; }
+.ts-cta:active { transform: translateY(1px); }
+
+/* ✅ Mobile: CTA centré + largeur adaptée, sans casser la grille */
+@media (max-width: 640px){
+  .ts-cta-row { justify-content: center; }
+  .ts-cta { width: 100%; max-width: 320px; }
+}
+
+/* --- Pastille (badge) dans les tabs --- */
+.pill-badge{
+  display:inline-block;
+  font-size:11px;
+  font-weight:700;
+  line-height:1;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid #334155;   /* gris-bleu sombre */
+  background:#0f172a;         /* fond dark */
+  margin-left:8px;
+  vertical-align:middle;
+  opacity:.9;
+}
+
+/* (déjà ajouté précédemment) CTA responsive */
+.ts-cta-row { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap; }
+.ts-cta { padding:10px 14px; border-radius:12px; background:#2b76ff; color:#fff; font-weight:600; border:none; cursor:pointer; transition:transform .08s ease, opacity .2s; }
+.ts-cta:hover { opacity:.92; } .ts-cta:active { transform:translateY(1px); }
+@media (max-width:640px){ .ts-cta-row{ justify-content:center; } .ts-cta{ width:100%; max-width:320px; } }
+
+/* Layout header */
+.ins-head { display:flex; align-items:center; gap:12px; }
+.ins-actions { margin-left:auto; display:flex; align-items:center; gap:10px; }
+
+/* CTA styles existants + variante compacte */
+.ts-cta { padding:10px 14px; border-radius:12px; background:#2b76ff; color:#fff; font-weight:600; border:none; cursor:pointer; transition:transform .08s ease, opacity .2s; }
+.ts-cta:hover { opacity:.92; } .ts-cta:active { transform: translateY(1px); }
+.ts-cta--sm { padding:8px 12px; border-radius:10px; font-size:.95rem; line-height:1.1; }
+
+/* Rangée CTA sous tabs */
+.ts-cta-row { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap; }
+@media (max-width: 640px){
+  .ts-cta-row { justify-content:center; }
+  .ts-cta { width:100%; max-width:320px; }
+}
+
+
+/* --- Fix scroll tabs en mobile: atteindre le tout début (0px) --- */
+@media (max-width: 360px){
+  /* Conteneur scroll des pills */
+  .ins-tabs .pill-tabs{
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    overflow-x: auto;
+    scroll-padding-left: 0 !important;
+    scroll-snap-type: none !important;      /* évite un snap qui bloque à gauche */
+    -webkit-mask-image: none !important;    /* désactive un éventuel gradient mask */
+            mask-image: none !important;
+  }
+
+  /* Certains skins ajoutent des fades en pseudo-élément qui mangent le bord gauche */
+  .ins-tabs .pill-tabs::before,
+  .ins-tabs .pill-tabs::after{
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  /* Pas de marge fantôme sur le premier onglet */
+  .ins-tabs .pill-tabs .pill:first-child{
+    margin-left: 0 !important;
+  }
+}
+
+/* Mobile: les tabs partent bien du bord gauche (pas centrés) */
+@media (max-width: 360px){
+  .ins-tabs .pill-tabs{
+    justify-content: flex-start !important;
+    padding-left: 0 !important;
+    scroll-padding-left: 0 !important;
+  }
+}
+
+/* --- Public overlay: corrige le scroll des tabs vers l'extrémité gauche --- */
+
+/* 1) Toujours réduire le padding gauche du conteneur de tabs (prend le dessus sur insights.css) */
+.ins-tabs .pill-tabs {
+  padding-left: 8px !important;   /* au lieu de 30px */
+  scroll-padding-left: 0 !important;
+}
+
+/* 2) En vue étroite, ne pas centrer les onglets, partir du bord gauche */
+@media (max-width: 900px){
+  .ins-tabs .pill-tabs{
+    justify-content: flex-start !important;
+    /* pas de snap/fade qui bloque le bord */
+    scroll-snap-type: none !important;
+    -webkit-mask-image: none !important;
+            mask-image: none !important;
+  }
+  .ins-tabs .pill-tabs::before,
+  .ins-tabs .pill-tabs::after{
+    display: none !important;
+    pointer-events: none !important;
+  }
+  /* pas de marge fantôme sur le 1er pill */
+  .ins-tabs .pill-tabs .pill:first-child{
+    margin-left: 0 !important;
+  }
+}
+
+/* ===== Toolbar UTC + CTA (Public) — alignement desktop & mobile ===== */
+.tz-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:nowrap;              /* reste sur une seule ligne */
+}
+
+.tz-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;                   /* permet au select de shrink */
+}
+
+.tz-label{ opacity:.85; }
+
+/* Select UTC : garde la skin dark existante */
+.tz-left .bt-select{
+  min-width: 100px;
+  max-width: 180px;
+}
+
+/* CTA : ne rétrécit pas, texte non coupé */
+.tz-cta{
+  flex-shrink:0;
+  white-space:nowrap;
+}
+
+/* Texte long par défaut, version courte auto en très petit écran */
+.tz-cta .t-short{ display:none; }
+@media (max-width: 420px){
+  .tz-cta .t-long{ display:none; }
+  .tz-cta .t-short{ display:inline; }
+}
+
+/* ===== Toolbar publique commune (tous les onglets) ===== */
+.pub-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;   /* par défaut: CTA collé à droite */
+  gap:12px;
+  margin: 2px 0 6px;
+}
+.pub-toolbar.has-left{
+  justify-content:space-between; /* si select présent: left + CTA à droite */
+}
+
+/* Zone gauche quand présente (Par_Heure) */
+.tz-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.tz-label{ opacity:.85; }
+
+/* Select UTC (skin dark déjà appliquée ailleurs) */
+.tz-left .bt-select{ min-width:100px; max-width:180px; }
+
+/* CTA : texte non coupé + version courte auto en très petit écran */
+.tz-cta{ flex-shrink:0; white-space:nowrap; }
+.tz-cta .t-short{ display:none; }
+@media (max-width: 420px){
+  .tz-cta .t-long{ display:none; }
+  .tz-cta .t-short{ display:inline; }
+}

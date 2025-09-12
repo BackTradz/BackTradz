@@ -1,0 +1,21 @@
+{
+    "date": "2025-07-15 14:56:18",
+    "strategy": "ob_pullback_gap_ema_rsi_sl70",
+    "pair": "EUR",
+    "timeframe": "m5",
+    "period": "01-06,30-06-25",
+    "params": {
+        "min_wait_candles": 3,
+        "max_wait_candles": 20,
+        "allow_multiple_entries": false,
+        "ema_fast": "EMA_50",
+        "ema_slow": "EMA_200",
+        "rsi_key": "RSI",
+        "rsi_threshold": 40.0,
+        "time_key": "Datetime",
+        "sl_pips": 70,
+        "tp1_pips": 70,
+        "tp2": 140
+    },
+    "note": "R\u00e9sultat runner V5 - ob_pullback_gap_ema_rsi_sl70"
+}

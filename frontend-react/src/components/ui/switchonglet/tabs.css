@@ -1,0 +1,50 @@
+/* ========= Pill Tabs (switch réutilisable) ========= */
+.pill-tabs{
+  display:inline-flex;
+  background: rgba(18,25,40,.85);
+  border:1px solid rgba(91,141,255,.25);
+  border-radius:16px;
+  padding:6px;
+  gap:6px;
+}
+.pill-tabs--block{ display:flex; width:100% }
+.pill-tabs--sm{ padding:4px }
+.pill-tabs--md{ padding:6px }
+.pill-tabs--lg{ padding:8px }
+
+.pill-tab-btn{
+  padding:10px 18px;
+  background:transparent;
+  border:0;
+  color:#b9c6dc;
+  border-radius:12px;
+  cursor:pointer;
+  transition:all .2s;
+  outline:none;
+}
+.pill-tabs--sm .pill-tab-btn{ padding:8px 14px; font-size:14px }
+.pill-tabs--lg .pill-tab-btn{ padding:12px 20px; font-size:16px }
+
+.pill-tab-btn:hover{ color:#e7f0ff }
+.pill-tab-btn.active{
+  background: linear-gradient(135deg, #111827 0%, #1e40af 100%) !important; 
+  color:#fff;
+  box-shadow:0 6px 22px rgba(37,99,235,.25);
+}
+.pill-ic{ display:inline-flex; margin-right:8px }
+
+.pill-tabs{
+  display:inline-flex;
+  background: rgba(18,25,40,.85);
+  border:1px solid rgba(91,141,255,.25);
+  border-radius:16px;
+  padding:6px;
+  gap:6px;
+
+  /* NEW: espace sous le switch */
+  margin: 8px 0 22px;
+}
+
+@media (min-width: 768px){
+  .pill-tabs{ margin-bottom: 28px; } /* un peu plus d’air sur desktop */
+}

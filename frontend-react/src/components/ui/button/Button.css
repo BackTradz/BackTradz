@@ -1,0 +1,34 @@
+/* Reusable CTA button (.dbt-*) */
+.dbt-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:10px 14px;border-radius:12px;font-weight:600;text-decoration:none;border:0;
+  transition:filter .15s ease, transform .06s ease;
+}
+.dbt-btn.dbt-primary{
+  background: linear-gradient(135deg, #111827 0%, #1e40af 100%) !important; 
+  color:#fff;
+  border: none !important;        /* pas de ligne de contour */
+  box-shadow: 
+    0 6px 18px rgba(17, 24, 39, .35),     /* ombre douce vers le bas */
+    0 0 14px rgba(37, 99, 235, .25);      /* léger halo bleu autour */
+}
+
+/* hover : on garde le brightness + on renforce très légèrement le glow */
+.dbt-btn.dbt-primary:hover{
+  filter: brightness(1.06);
+  box-shadow:
+    0 8px 22px rgba(17, 24, 39, .38),
+    0 0 18px rgba(37, 99, 235, .32);
+}
+
+
+.dbt-primary:hover{filter:brightness(1.06)}
+.dbt-secondary{background:rgba(255,255,255,.06);color:#eaf2ff;border:1px solid rgba(255,255,255,.12)}
+.dbt-secondary:hover{filter:brightness(1.05)}
+.dbt-disabled{background:rgba(255,255,255,.04);color:#9fb2d6;cursor:not-allowed}
+.dbt-btn-block{width:100%}
+.dbt-ic{display:inline-flex;align-items:center;margin-right:8px}
+
+
+/*background: linear-gradient(135deg, #111827 0%, #1e40af 100%) !important; /* bleu profond */
+/*   color:#fff;}*/

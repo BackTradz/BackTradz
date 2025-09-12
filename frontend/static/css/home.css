@@ -1,0 +1,125 @@
+/* frontend/static/css/home.css */
+
+body {
+  background-color: #0a0a0a;
+  color: #f2f2f2;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 2rem;
+}
+
+
+
+nav {
+  background-color: #0f0f12;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li a {
+  color: #00ffae;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: color 0.2s ease-in-out;
+}
+
+nav ul li a:hover {
+  color: #ffffff;
+}
+
+/* 📄 MAIN SECTION */
+
+
+h1 {
+  font-size: 2.5rem;
+  color: #ffffff;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+h2 {
+  font-size: 1.8rem;
+  color: #ffffff;
+  margin-top: 3rem;
+  text-align: center;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin: 1rem 0 0.3rem;
+  color: #00ffae;
+}
+
+p {
+  color: #cccccc;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+button, .cta-btn {
+  background-color: #00ffae;
+  color: #000000;
+  padding: 0.7rem 1.3rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+button:hover, .cta-btn:hover {
+  background-color: #00d69a;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 2rem;
+}
+
+.strategy-section {
+  margin-top: 2rem;
+}
+
+.strategy-card {
+  background-color: #1a1a1f;
+  border: 1px solid #2a2a2a;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  margin: 1rem auto;
+  width: 80%;
+  max-width: 500px;
+  text-align: left;
+}
+
+.strategy-card strong {
+  color: #ffffff;
+}
+
+.emoji {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+/*CREDITS*/
+.credit-badge {
+  padding: 2px 6px;
+  border-radius: 10px;
+  background-color: #222;
+  color: gold;
+  font-weight: bold;
+  font-size: 0.85em;
+}

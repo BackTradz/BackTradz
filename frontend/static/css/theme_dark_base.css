@@ -1,0 +1,83 @@
+/* 🎨 Thème dark unifié pour toutes les pages */
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0f0f12;
+  color: #f2f2f2;
+}
+
+h1, h2, h3, h4 {
+  color: #ffffff;
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+p, label, span, li, input::placeholder {
+  color: #cccccc;
+}
+
+a {
+  color: #00ffae;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  color: #00c58e;
+}
+
+input, select, textarea {
+  background-color: #1a1a1f;
+  color: #ffffff;
+  border: 1px solid #333;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #00ffae;
+  color: #000;
+  padding: 0.7rem 1.3rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #00d69a;
+}
+
+form, .card, .box, .panel {
+  background-color: #1a1a1f;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  margin: 1rem auto;
+  max-width: 700px;
+}
+
+pre, code {
+  background-color: #222;
+  padding: 1rem;
+  border-radius: 6px;
+  color: #eee;
+  overflow-x: auto;
+  font-size: 0.95rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem 0;
+}
+
+.center {
+  text-align: center;
+}

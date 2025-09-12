@@ -1,0 +1,125 @@
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #0a0a0a;
+      color: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #222;
+    }
+    h1 {
+      color: #00ffae;
+    }
+    .params {
+      font-size: 0.85em;
+      text-align: left;
+      white-space: pre-wrap;
+      background: #1a1a1a;
+      padding: 6px;
+      border-radius: 4px;
+      max-width: 300px;
+      overflow-wrap: break-word;
+    }
+
+    nav {
+  background-color: #0f0f12;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li a {
+  color: #00ffae;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: color 0.2s ease-in-out;
+}
+
+nav ul li a:hover {
+  color: #ffffff;
+}
+
+.user-card {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+}
+
+.user-card button {
+  margin-right: 8px;
+  margin-top: 5px;
+  background-color: #00ffae;
+  color: #000;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.user-card button:hover {
+  background-color: #fff;
+}
+
+
+/* HISTORIQUE PAIMENT*/ 
+
+.tx-history {
+  padding-left: 1.5rem;
+  margin-top: 10px;
+}
+.tx-history li {
+  margin-bottom: 4px;
+}
+.tx-hidden {
+  display: none;
+}
+
+
+/* STAT */
+
+.stats-table {
+  margin-top: 10px;
+  border-collapse: collapse;
+}
+.stats-table td {
+  padding: 4px 12px;
+  border-bottom: 1px solid #333;
+}
+.stats-table td:first-child {
+  color: #aaa;
+}
+.stats-table td:last-child {
+  font-weight: bold;
+}
+
+/* CREDIT */
+.credit-badge {
+  padding: 2px 6px;
+  border-radius: 10px;
+  background-color: #222;
+  color: gold;
+  font-weight: bold;
+  font-size: 0.85em;
+}

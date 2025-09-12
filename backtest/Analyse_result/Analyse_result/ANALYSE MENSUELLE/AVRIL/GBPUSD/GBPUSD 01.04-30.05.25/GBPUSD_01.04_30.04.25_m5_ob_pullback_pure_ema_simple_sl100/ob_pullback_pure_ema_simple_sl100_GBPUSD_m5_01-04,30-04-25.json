@@ -1,0 +1,18 @@
+{
+    "date": "2025-05-27 16:12:09",
+    "strategy": "ob_pullback_pure_ema_simple_sl100",
+    "pair": "GBPUSD",
+    "timeframe": "m5",
+    "period": "01-04,30-04-25",
+    "params": {
+        "min_wait_candles": 3,
+        "max_wait_candles": 20,
+        "allow_multiple_entries": false,
+        "ema_key": "EMA_50",
+        "time_key": "Datetime",
+        "sl_pips": 100,
+        "tp1_pips": 100,
+        "tp2": 200
+    },
+    "note": "R\u00e9sultat runner V5 - ob_pullback_pure_ema_simple_sl100"
+}

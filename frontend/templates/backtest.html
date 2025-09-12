@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Stratify – Testeur de Stratégie</title>
+  <link rel="stylesheet" type="text/css" href="/static/css/backtest_page.css">
+  <link rel="stylesheet" href="/static/css/responsive.css" />
+
+</head>
+<body>
+    <header>
+        <div class="logo">Stratify</div>
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        <nav id="main-nav">
+            <ul>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="/backtest">Lancer un backtest</a></li>
+            <li><a href="/csv-shop">CSV Library</a></li>
+            <li><a href="/dashboard-user">Mon dashboard</a></li>
+            <li><a href="/a-savoir">À savoir</a></li>
+            <li><a href="/pricing">Prix</a></li>
+             <li style="display: flex; align-items: center; gap: 4px;">
+              <a href="#" onclick="goProfile()">Mon profil</a>
+              <span id="credit-counter" class="credit-badge" style="white-space: nowrap; font-size: 0.9em;">🪙 ...</span>
+            </li>
+            <li id="admin-link" style="display: none;"><a href="/admin">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+
+    <main>
+  <h2>🚀 Lancer un Backtest Stratify</h2>
+
+  <div style="margin-bottom: 20px;">
+    <button onclick="showOfficial()" id="btnOfficial">📊 Mode Données Officielles</button>
+    <button onclick="showCustom()" id="btnCustom">📂 Mode CSV Perso</button>
+  </div>
+
+  <!-- === Formulaire Données Officielles === -->
+  <form id="officialForm">
+    <div class="row">
+      <label for="symbol">Paire :</label>
+      <select id="symbol"></select>
+
+      <label for="timeframe">Timeframe :</label>
+      <select id="timeframe"></select>
+    </div>
+
+    <label for="start_date">Date de début :</label>
+    <input type="date" id="start_date">
+
+    <label for="end_date">Date de fin :</label>
+    <input type="date" id="end_date">
+
+    <label for="strategy">Stratégie :</label>
+    <select id="strategy"></select>
+
+    <div id="paramsContainer"></div>
+
+    <h4>SL / TP :</h4>
+    <label for="sl_pips">Stop Loss (pips) :</label>
+    <input type="number" id="sl_pips" value="100">
+
+    <label for="tp1_pips">Take Profit 1 (pips) :</label>
+    <input type="number" id="tp1_pips" value="100">
+
+    <label for="tp2_pips">Take Profit 2 (pips) :</label>
+    <input type="number" id="tp2_pips" value="200">
+
+    <button type="submit">🚀 Lancer le Backtest (2 crédit)</button>
+  </form>
+
+  <!-- === Formulaire Upload CSV === -->
+  <form id="uploadForm" style="display:none;">
+    <label for="custom_csv">Fichier CSV :</label>
+    <input type="file" id="custom_csv" accept=".csv">
+
+    <label for="custom_pair">Nom de la paire :</label>
+    <input type="text" id="custom_pair" placeholder="Ex: BTCUSD, XAUUSD...">
+
+    <label for="custom_tf">Timeframe :</label>
+    <input type="text" id="custom_tf" placeholder="Ex: m5, h1...">
+
+    <label for="custom_start_date">Date de début (optionnel) :</label>
+    <input type="date" id="custom_start_date">
+
+    <label for="custom_end_date">Date de fin (optionnel) :</label>
+    <input type="date" id="custom_end_date">
+
+    <label for="strategy_custom">Stratégie :</label>
+    <select id="strategy_custom"></select>
+
+    <div id="paramsContainerCustom"></div>
+
+    <h4>SL / TP :</h4>
+    <label for="sl_pips_custom">Stop Loss (pips) :</label>
+    <input type="number" id="sl_pips_custom" value="100">
+
+    <label for="tp1_pips_custom">Take Profit 1 (pips) :</label>
+    <input type="number" id="tp1_pips_custom" value="100">
+
+    <label for="tp2_pips_custom">Take Profit 2 (pips) :</label>
+    <input type="number" id="tp2_pips_custom" value="200">
+
+    <button type="submit">📂 Backtester mon fichier (2 crédit)</button>
+  </form>
+
+  <h3>Résultat :</h3>
+  <pre id="result"></pre>
+  <div id="loader" style="display: none; text-align: center; margin-top: 20px;">
+  <div class="spinner"></div>
+  <p>⏳ Analyse en cours... Patiente un instant</p>
+</div>
+
+  <script src="/static/js/script_output_backtest.js"></script>
+  <script src="/static/js/global.js"></script>
+
+  </main>
+</body>
+
+</html>

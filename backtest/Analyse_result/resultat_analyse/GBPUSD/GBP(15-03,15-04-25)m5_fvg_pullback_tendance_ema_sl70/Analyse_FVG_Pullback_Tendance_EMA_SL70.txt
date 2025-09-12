@@ -1,0 +1,34 @@
+
+Analyse Stratégie : FVG Pullback Tendance EMA - SL70
+
+🏁 Total trades : 239
+🎯 TP1 atteint : 120 | ❌ SL touché : 119
+📈 Winrate TP1 global : 50.21%
+
+🕒 Répartition par session :
+- Asia : 62.7% | 32 TP1 / 19 SL
+- London : 42.6% | 49 TP1 / 66 SL
+- New York : 53.4% | 39 TP1 / 34 SL
+
+📅 Répartition par jour :
+- Friday: 74.1% winrate (40 TP1 / 14 SL)
+- Monday: 38.8% winrate (19 TP1 / 30 SL)
+- Sunday: 100.0% winrate (1 TP1 / 0 SL)
+- Thursday: 56.5% winrate (26 TP1 / 20 SL)
+- Tuesday: 39.5% winrate (17 TP1 / 26 SL)
+- Wednesday: 37.0% winrate (17 TP1 / 29 SL)
+
+🎯 TP2 (sur les 120 TP1 touchés) :
+- TP2 atteint : 93
+- SL sur tentative TP2 : 19
+- Winrate TP2 : 77.5%
+
+📌 Notes :
+- Setup très solide avec un winrate TP1 à 50.21%
+- Asia au top (62.7%), New York fiable (53.4%), London plus fragile (42.6%)
+- Vendredi 🔥 (74.1%) + jeudi (56.5%) à prioriser fort
+- Mardi, mercredi, lundi faibles (~37–39%)
+- TP2 puissant à 77.5% → excellent levier d’extension
+
+Recommandation :
+Stratégie hautement fiable. À intégrer comme pilier dans ton système. Focus Asia session + fin de semaine (jeudi/vendredi). Idéal pour stratégie semi-auto avec TP2 actif.

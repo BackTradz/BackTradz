@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>📊 Admin Stratify</title>
+  <link rel="stylesheet" type="text/css" href="/static/css/admin.css">
+  <link rel="stylesheet" href="/static/css/responsive.css" />
+
+</head>
+<body>
+      <header>
+        <div class="logo">Stratify</div>
+        <nav>
+          <ul>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="/backtest" target="_blank">Lancer un backtest</a></li>
+            <li><a href="/csv-shop" target="_blank">CSV Library</a></li>
+            <li><a href="/dashboard-user" target="_blank">Mon dashboard</a></li>
+            <li><a href="/login">Login</a></li>
+            <li><a href="/a-savoir">À savoir</a></li>
+            <li><a href="/pricing">Prix</a></li>
+            <li style="display: flex; align-items: center; gap: 4px;">
+              <a href="#" onclick="goProfile()">Mon profil</a>
+              <span id="credit-counter" class="credit-badge" style="white-space: nowrap; font-size: 0.9em;">🪙 ...</span>
+            </li>
+        </ul>
+        </nav>
+    </header>
+    <!-- ... head & nav inchangés ... -->
+  <main>
+    <h1>📊 Dashboard Admin Stratify</h1>
+      <p>Bienvenue sur le panneau d’administration complet.</p>
+
+      <!-- ✅ Bloc 1 - Résumés Backtests -->
+      <details open>
+        <summary>📈 Résumés des backtests</summary>
+        <table id="statsTable">
+          <thead>
+            <tr>
+              <th>Paire</th>
+              <th>TF</th>
+              <th>Stratégie</th>
+              <th>Période</th>
+              <th>Total</th>
+              <th>TP1</th>
+              <th>TP2</th>
+              <th>SL</th>
+              <th>Winrate TP1</th>
+              <th>Winrate TP2</th>
+              <th>Params</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </details>
+
+      <!-- ✅ Bloc 2 - Utilisateurs -->
+      <details>
+        <summary>👥 Utilisateurs & Gestion</summary>
+        <div id="usersList">
+          <p>Chargement en cours...</p>
+        </div>
+      </details>
+
+      <!-- Bloc 3 - Transactions (à venir) -->
+      <details open>
+        <summary>📘 Historique des transactions</summary>
+        <div id="globalHistoryContainer"></div>
+      </details>
+
+
+      <!-- Bloc 4 - Statistiques globales (plus tard) -->
+      <details open>
+        <summary>📊 Statistiques générales</summary>
+        <div id="statsContainer"></div>
+      </details>
+
+
+      <script src="/static/js/admin.js"></script>
+    </main>

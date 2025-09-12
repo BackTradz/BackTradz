@@ -1,0 +1,33 @@
+
+Analyse Stratégie : FVG Pullback Multi EMA - SL100
+
+🏁 Total trades : 253
+🎯 TP1 atteint : 116 | ❌ SL touché : 137
+📈 Winrate TP1 global : 45.85%
+
+🕒 Répartition par session :
+- Asia : 57.1% | 28 TP1 / 21 SL
+- London : 42.1% | 51 TP1 / 70 SL
+- New York : 44.6% | 37 TP1 / 46 SL
+
+📅 Répartition par jour :
+- Friday: 47.5% winrate (28 TP1 / 31 SL)
+- Monday: 32.1% winrate (17 TP1 / 36 SL)
+- Sunday: 66.7% winrate (4 TP1 / 2 SL)
+- Thursday: 56.4% winrate (31 TP1 / 24 SL)
+- Tuesday: 34.6% winrate (9 TP1 / 17 SL)
+- Wednesday: 50.0% winrate (27 TP1 / 27 SL)
+
+🎯 TP2 (sur les 116 TP1 touchés) :
+- TP2 atteint : 84
+- SL sur tentative TP2 : 20
+- Winrate TP2 : 72.41%
+
+📌 Notes :
+- Setup stable avec un léger gain de winrate vs SL70
+- Session Asia toujours solide (57.1%), mais jeudi devient la meilleure journée (56.4%)
+- Lundi reste faible (32.1%), Mardi aussi moyen (34.6%)
+- TP2 toujours bon avec 72.41% de réussite → moins haut que SL70 mais très rentable
+
+Recommandation :
+Setup plus tolérant au bruit que SL70. Idéal pour une utilisation avec zone large, management actif, et TP2 en ligne de mire. À combiner avec filtre H/T.

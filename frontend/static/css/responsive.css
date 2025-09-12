@@ -1,0 +1,89 @@
+@media screen and (max-width: 768px) {
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+  header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  background-color: #0f0f12;
+  padding: 1rem 1rem;
+  position: relative;
+  }
+
+
+  nav {
+    padding: 0 !important;
+  }
+
+  .logo {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  grid-column: 1;
+  }
+
+.hamburger {
+  grid-column: 3;
+  font-size: 28px;
+  background: none;
+  color: #00ffae;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+  }
+
+
+  #main-nav {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #0f0f12;
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    padding: 1rem 0;
+    z-index: 1000;
+  }
+
+  #main-nav.active {
+    display: flex;
+  }
+
+  #main-nav ul {
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+
+  #main-nav ul li {
+    text-align: center;
+    margin: 0.5rem 0;
+  }
+}
+
+
+/*destok*/
+
+@media screen and (min-width: 769px) {
+  .hamburger {
+    display: none;
+  }
+
+  #main-nav {
+    display: flex !important;
+    position: static;
+    flex-direction: row;
+    justify-content: flex-start; /* ✅ On remet à GAUCHE */
+  }
+
+  #main-nav ul {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    margin-left: 2rem; /* Optionnel pour aérer un peu */
+  }
+}

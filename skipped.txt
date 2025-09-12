@@ -1,0 +1,5 @@
+backend\data\analysis\BTC-USD_D1_englobante_entry_2025-06-10to2025-06-25_sl100\backtest_result.csv - seulement 2 lignes
+backend\data\analysis\GBPUSD_M15_ob_pullback_gap_tendance_ema_2025-06-01to2025-06-30_sl40\backtest_result.csv - seulement 1 lignes
+backend\data\analysis\EURUSD_M5_ob_pullback_gap_2025-08-29to2025-09-04_sl40\backtest_result.csv - seulement 1 lignes
+backend\data\analysis\EURUSD_M5_ob_pullback_gap_2025-08-29to2025-09-04_sl40\backtest_result.csv - seulement 1 lignes
+backend\data\analysis\EURUSD_M5_ob_pullback_gap_2025-08-20to2025-09-04_sl40\backtest_result.csv - seulement 1 lignes

@@ -1,0 +1,24 @@
+
+
+
+
+@tailwind utilities;
+
+@layer components {
+  .fondfooter {
+  @apply bg-fondfooter text-text;
+}
+
+
+  .bg-page {
+    @apply bg-fondpage text-text dark:bg-fondpage-light dark:text-text-light;
+  }
+
+  .bg-section {
+    @apply bg-fondcard dark:bg-fondcard-light;
+  }
+
+  .bg-nav {
+    @apply bg-nav text-text dark:bg-nav-light dark:text-text-light;
+  }
+}

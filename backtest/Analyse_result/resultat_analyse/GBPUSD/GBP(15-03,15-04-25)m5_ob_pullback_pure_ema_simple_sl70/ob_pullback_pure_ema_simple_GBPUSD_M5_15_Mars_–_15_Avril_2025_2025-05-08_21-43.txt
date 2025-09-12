@@ -1,0 +1,19 @@
+=== BACKTEST LOG ===
+DATE : 2025-05-08_21-43
+
+STRATEGIE : ob_pullback_pure_ema_simple
+PAIRE : GBPUSD
+TIMEFRAME : M5
+PERIODE : 15 Mars – 15 Avril 2025
+
+PARAMETRES :
+- min_wait_candles : 3
+- max_wait_candles : 20
+- allow_multiple_entries : False
+- ema : 50
+- sl : 70
+- tp1 : 70
+- tp2 : 140
+
+NOTE :
+backtest ob normal + ema simple buy si prix> ema(50) ou l'inverse. Setup détectés OK.

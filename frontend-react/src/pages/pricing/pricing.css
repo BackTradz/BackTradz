@@ -1,0 +1,511 @@
+/* =============================================================================
+   PRICING — Stratify
+   Cohérence visuelle avec Backtest/CSV Shop. Code dédoublonné et commenté.
+   Contient :
+   0) Tokens (CSS variables)
+   1) Page & header
+   2) Grille responsive
+   3) Carte (états & hover)
+   4) Titre / Badges
+   5) Prix + animation "prix barré" + tag remise
+   6) Liste d’infos
+   7) Boutons (nouveau système .btn-brand + alias legacy .pr-btn)
+   8) Overlay de succès (paiements)
+   ============================================================================= */
+
+
+/* ============================================================================
+   0) TOKENS — palette & timings
+   (adapte au besoin ; valeur par défaut = current design)
+   ========================================================================== */
+:root{
+  /* Couleurs de base */
+  --bg-page:      #1e293b;   /* fond page (un peu plus clair que les cartes) */
+  --bg-card:      #0f172a;   /* fond carte */
+  --bd-card:      #233047;   /* bord carte (one-shot) */
+  --bd-card-sub:  #294766;   /* bord carte (abonnements) */
+
+  --tx-main:      #e5edf6;
+  --tx-muted:     #94a3b8;
+  --tx-soft:      #cbd5e1;
+
+  --brand-sky:    #e5edf6;  /* bleu brand */
+  --brand-sky-2:  #22d3ee;
+
+  --shadow-card:  rgba(0,0,0,.28);
+
+  /* Durée de l’anim du prix barré (visible à l’œil) */
+  --strike-dur:   1.8s;
+}
+
+
+/* ============================================================================
+   1) PAGE & HEADER
+   ========================================================================== */
+.pr-page{
+  min-height: calc(100vh - 80px);
+  background: var(--bg-page);
+  color: var(--tx-main);
+  padding: 1.25rem 1rem 3rem;
+}
+.pr-header{
+  text-align:center;
+  margin: 0 auto 1rem;
+}
+.pr-header h1{
+  margin:0;
+  font-size:2rem;
+  font-weight:800;
+  color: var(--brand-sky);
+}
+.pr-muted{ color: var(--tx-muted); margin-top:.25rem; }
+
+
+/* ============================================================================
+   2) GRILLE
+   ========================================================================== */
+.pr-grid{
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+/* très grands écrans */
+@media (min-width:1536px){
+  .pr-grid{ max-width:1440px; grid-template-columns: repeat(4,1fr); }
+}
+
+
+/* ============================================================================
+   3) CARTE
+   - .is-sub      : abonnement (bord spécifique)
+   - .is-credit   : one-shot (défaut)
+   - .is-highlight: mise en avant
+   ========================================================================== */
+.pr-card{
+  background: var(--bg-card);
+  border: 1px solid var(--bd-card);
+  border-radius: 16px;
+  padding: 18px;
+  min-height: 240px;
+  display: grid;
+  gap: 10px;
+  box-shadow: 0 14px 28px var(--shadow-card);
+  transition: transform .18s ease, box-shadow .18s ease, outline-color .18s ease;
+}
+.pr-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(0,0,0,.35);
+}
+.pr-card.is-sub{
+  border-color: var(--bd-card-sub);
+  box-shadow: 0 16px 28px rgba(0,0,0,.28), 0 0 0 1px rgba(56,189,248,.08) inset;
+}
+.pr-card.is-credit{ border-color: var(--bd-card); }
+.pr-card.is-highlight{
+  outline: 2px solid rgba(56,189,248,.55);
+  box-shadow: 0 18px 36px rgba(0,0,0,.35);
+}
+.pr-card.is-highlight:hover{ outline-color: rgba(56,189,248,.75); }
+
+/* Note sous la liste (abonnements uniquement) */
+.pr-note-cancel {
+  margin-top: 4px;
+  font-size: .85rem;
+  font-weight: 600;
+  color: #86efac; /* vert doux rassurant */
+  text-align: left;
+}
+
+/* ============================================================================
+   4) TITRE / BADGES
+   - .pr-badge            : chip bleuté
+   - .pr-badge-muted      : version plus discrète
+   - .pr-badge-green      : "Abonné"
+   ========================================================================== */
+.pr-card-head{ display:grid; gap:4px; }
+
+.pr-card-title{
+  font-weight:700;
+  font-size:1rem;
+  display:flex;
+  gap:.5rem;
+  align-items:center;
+}
+
+.pr-badge{
+  padding: 2px 6px;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:700;
+  background: rgba(56,189,248,.15);
+  color:#7dd3fc;
+  border:1px solid var(--brand-sky);
+}
+.pr-badge.pr-badge-muted{
+  background: rgba(56,189,248,.10);
+  color:#93c5fd;
+  border-color: rgba(56,189,248,.35);
+}
+.pr-badge.pr-badge-green{
+  background: rgba(16,185,129,.14);
+  color: #86efac;
+  border-color: rgba(16,185,129,.45);
+}
+
+
+/* ============================================================================
+   5) PRIX & REMISE
+   - .pr-price-old : ancien prix (trait animé via ::after)
+   - .with-discount : déclenche l’animation + fait apparaître .pr-discount-tag
+   ========================================================================== */
+.pr-price-row{ display:flex; align-items:baseline; gap:8px; }
+.pr-price{
+  display:flex; align-items:baseline; gap:.5rem; flex-wrap:wrap;
+  font-size:1.6rem; font-weight:800;
+}
+
+/* ancien prix (pas de text-decoration pour gérer l’anim finement) */
+.pr-price-old{
+  position:relative;
+  color:#93a0b3; opacity:.85; font-weight:700;
+  text-decoration:none;
+}
+
+/* Trait de barre animé */
+.with-discount .pr-price-old::after{
+  content:"";
+  position:absolute; left:0; right:0; top:50%;
+  height:2px; background:#a9b7cd;
+  transform-origin:left; transform: scaleX(0);
+  animation: strike var(--strike-dur) cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes strike{
+  0%   { transform: scaleX(0);    opacity:.85; }
+  78%  { transform: scaleX(1.05); opacity:1; }  /* léger overshoot */
+  100% { transform: scaleX(1);    opacity:1; }
+}
+
+/* Tag “–10% abonné” — version inline (pas de bulle) */
+.pr-discount-tag{
+  margin-left: .35rem;
+  font-size: .85rem;
+  font-weight: 700;
+  color: #93c5fd;
+  letter-spacing: .02em;
+
+  /* apparition synchronisée après le trait */
+  opacity: 0;
+  transform: translateY(-2px);
+  animation: tagIn .34s calc(var(--strike-dur) * 0.35) ease-out forwards;
+}
+@keyframes tagIn{
+  to { opacity:1; transform: translateY(0); }
+}
+
+
+/* ============================================================================
+   6) LISTE D’INFOS (verticale)
+   ========================================================================== */
+.pr-list{
+  list-style:none; margin:6px 0 0; padding:0;
+  display:grid; gap:4px;
+}
+.pr-list li{
+  position:relative; padding-left:18px; color:var(--tx-soft);
+  font-size:.9rem; line-height:1.2;
+}
+.pr-list li::before{
+  content:""; position:absolute; left:0; top:7px;
+  width:8px; height:8px; border-radius:50%;
+  background: linear-gradient(90deg,var(--brand-sky-2),#60a5fa);
+  box-shadow:0 0 6px rgba(56,189,248,.5);
+}
+
+
+/* ============================================================================
+   7) BOUTONS
+   Nouveau système .btn-brand (utilisé par les BrandButtons React).
+   On conserve un “bloc legacy” d’alias .pr-btn* pour éviter toute régression.
+   ========================================================================== */
+
+/* ---------- 7.1 Base .btn-brand ---------- */
+.btn-brand{
+  width:100%;
+  height:46px;
+  border-radius:12px;
+  border:1px solid transparent;
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:10px;
+  font-weight:800; font-size:.95rem; letter-spacing:.01em;
+  cursor:pointer;
+  transition: box-shadow .18s ease, transform .06s ease, border-color .18s ease, opacity .12s ease;
+}
+.btn-brand:active{ transform: translateY(1px); }
+.btn-brand:disabled{ opacity:.6; cursor:not-allowed; }
+.btn-brand:focus-visible{ outline:2px solid rgba(148,163,184,.35); outline-offset:2px; }
+.btn-logo{ width:28px; height:28px; flex:0 0 28px; }  /* icône/wordmark */
+
+/* ---------- 7.2 Variantes marque ---------- */
+/* Stripe */
+.btn-stripe{
+  color:#fff;
+  background: linear-gradient(90deg,#635bff 0%, #5451ff 60%, #4c47db 100%);
+  border-color: rgba(99,91,255,.32);
+  box-shadow: 0 8px 24px rgba(99,91,255,.24), 0 0 0 1px rgba(99,91,255,.14) inset;
+}
+.btn-stripe:hover{
+  box-shadow: 0 12px 28px rgba(99,91,255,.32), 0 0 0 2px rgba(99,91,255,.24) inset;
+}
+
+/* PayPal */
+.btn-paypal{
+  color:#fff;
+  background: linear-gradient(0deg,#0070ba 0%, #003087 100%);
+  border-color:#003087;
+  box-shadow: 0 8px 24px rgba(0,112,186,.22);
+}
+.btn-paypal:hover{
+  background: linear-gradient(0deg,#1188d7 0%, #06479f 100%);
+  box-shadow: 0 12px 28px rgba(0,112,186,.30);
+}
+
+/* Crypto (TRX-like) */
+.btn-crypto-trx{
+  color:#ffe6ea;
+  background:#14141c;
+  border-color: rgba(239,0,39,.36);
+  box-shadow: 0 6px 18px rgba(239,0,39,.12) inset, 0 10px 28px rgba(239,0,39,.10);
+}
+.btn-crypto-trx:hover{
+  box-shadow: 0 0 0 2px rgba(239,0,39,.48) inset, 0 14px 34px rgba(239,0,39,.16);
+}
+
+/* Neutres */
+.btn-current{  /* “Déjà abonné” */
+  color:#d1d9e6;
+  background:#0f172a;
+  border:1px solid #26344d;
+}
+.btn-ghost{    /* lien secondaire (ex: Gérer mon abonnement) */
+  color:#c6d0e3;
+  background:transparent;
+  border:1px dashed #37507b;
+}
+.btn-ghost:hover{ box-shadow:0 0 0 2px rgba(55,80,123,.4) inset; }
+
+/* ---------- 7.3 Layout des actions dans la carte ---------- */
+.pr-actions{ gap:10px; }
+.pr-actions.pr-actions-col{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+  margin-top:8px;
+}
+
+/* ---------- 7.4 ALIAS LEGACY (pour compat) ----------
+   Si des anciens composants utilisent encore .pr-btn*, on les mappe
+   vers .btn-brand pour éviter les régressions immédiates.
+   Tu pourras supprimer ce bloc quand tout est migré.
+------------------------------------------------------- */
+/* =========================================================
+   BRAND BUTTONS — rendu officiel, centré, accessible
+   ========================================================= */
+.btn-brand {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;       /* libellé vraiment centré */
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2), 0 8px 16px rgba(0,0,0,.25);
+  transition: transform .15s ease, box-shadow .2s ease, filter .2s ease, border-color .2s ease;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.btn-brand .brand-ico {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+}
+.btn-brand .brand-ico svg { width: 22px; height: 22px; display: block; }
+.btn-brand .brand-label { line-height: 1; }
+
+/* — Stripe */
+.btn-stripe {
+  color: #fff;
+  background: linear-gradient(180deg, #6c5ce7 0%, #635bff 100%);
+  border-color: rgba(255,255,255,.08);
+}
+.btn-stripe:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.btn-stripe:active { transform: translateY(0); }
+.btn-stripe[disabled] { opacity: .6; cursor: not-allowed; }
+
+/* — PayPal */
+.btn-paypal {
+  color: #fff;
+  background: linear-gradient(180deg, #0070ba 0%, #003087 100%);
+  border-color: rgba(255,255,255,.08);
+}
+.btn-paypal .brand-ico svg path:first-child { fill: #003087; }
+.btn-paypal .brand-ico svg path:last-child  { fill: #009cde; }
+.btn-paypal:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.btn-paypal:active { transform: translateY(0); }
+.btn-paypal[disabled] { opacity: .6; cursor: not-allowed; }
+
+/* — Crypto TRX */
+.btn-crypto-trx {
+  color: #fff;
+  background: radial-gradient(120% 120% at 50% -10%, rgba(255,0,0,.25) 0%, rgba(0,0,0,.0) 60%), #13151a;
+  border-color: rgba(255,0,0,.25);
+  box-shadow: 0 0 0 1px rgba(255,0,0,.08) inset, 0 8px 16px rgba(255,0,0,.1);
+}
+.btn-crypto-trx .brand-ico svg { color: #ff2d2e; } /* TRX rouge */
+.btn-crypto-trx:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.btn-crypto-trx:active { transform: translateY(0); }
+.btn-crypto-trx[disabled] { opacity: .6; cursor: not-allowed; }
+
+/* Focus visible pour A11y */
+.btn-brand:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.2), 0 0 0 6px rgba(99,91,255,.35);
+}
+/* Ajuste la taille perçue des icônes pour un rendu plus “officiel” */
+.btn-brand .brand-ico { left: 18px; }
+.btn-brand .brand-ico svg { width: 24px; height: 24px; }
+
+/* PayPal : conserve les vraies teintes */
+.btn-paypal { background: linear-gradient(180deg, #009cde 0%, #003087 100%); }
+.btn-paypal .brand-ico svg path:first-child { fill: #003087; }
+.btn-paypal .brand-ico svg path:last-child  { fill: #009cde; }
+
+/* Stripe : gradient signature un peu plus “violet Stripe” */
+.btn-stripe { background: linear-gradient(180deg, #7a6cff 0%, #635bff 100%); }
+/* --- Fix artefact 1px sous le bouton PayPal --- */
+.btn-brand {
+  /* évite que le gradient déborde dans la bordure arrondie */
+  overflow: hidden;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  -webkit-background-clip: padding-box;
+}
+
+/* PayPal : pas de vraie bordure, on simule le liseré via inset shadow */
+.btn-paypal {
+  border: 0; /* ← supprime la bordure qui crée la ligne */
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.2),
+    0 8px 16px rgba(0,0,0,.25),
+    inset 0 0 0 1px rgba(255,255,255,.06); /* liseré doux */
+}
+
+/* Si tu veux le même rendu “sans bordure physique” pour Stripe/Crypto : (optionnel)
+.btn-stripe,
+.btn-crypto-trx { border: 0; }
+*/
+
+/* ============================================================================
+   8) OVERLAY DE SUCCÈS — “Merci pour votre achat”
+   (utilisé par SuccessOverlay.jsx)
+   ========================================================================== */
+.prsucc-backdrop{
+  position:fixed; inset:0; z-index:10000;
+  background: radial-gradient(1000px 500px at 50% -10%, rgba(56,189,248,.15), transparent 60%),
+              rgba(2,6,23,.72);
+  display:grid; place-items:center;
+}
+.prsucc-card{
+  width:min(720px, 92vw);
+  background:#0b1220;
+  border:1px solid #223049;
+  border-radius:16px;
+  box-shadow:0 32px 80px rgba(0,0,0,.45);
+  padding:18px;
+  animation: prsuccIn .24s ease-out;
+}
+@keyframes prsuccIn{ from{ transform: translateY(8px); opacity:0; } }
+
+.prsucc-hero{ text-align:center; }
+.prsucc-check{
+  width:56px; height:56px; margin:0 auto 8px; color:#22d3ee;
+  background: rgba(34,211,238,.12);
+  border:1px solid rgba(34,211,238,.35); border-radius:999px;
+  display:grid; place-items:center;
+  box-shadow:0 0 0 8px rgba(34,211,238,.06);
+  animation: prsuccPulse 1.6s ease-out infinite;
+}
+.prsucc-check svg{ width:28px; height:28px; }
+@keyframes prsuccPulse{
+  0%{ box-shadow:0 0 0 8px rgba(34,211,238,.06); }
+  70%{ box-shadow:0 0 0 16px rgba(34,211,238,0); }
+  100%{ box-shadow:0 0 0 8px rgba(34,211,238,.06); }
+}
+
+.prsucc-hero h2{ margin:8px 0 4px; font-size:1.5rem; font-weight:800; color:#7dd3fc; }
+.prsucc-hero p{ margin:0 0 6px; color:#a8b4c8; }
+
+.prsucc-list{ margin:10px 0 8px; border-top:1px dashed #2b3a55; padding-top:10px; }
+.prsucc-list .row{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:6px 2px;
+}
+.prsucc-list dt{ color:#97a6bf; }
+.prsucc-list dd{ margin:0; color:#e7f1ff; text-align:right; }
+.prsucc-list .strong{ font-weight:800; }
+
+.prsucc-actions{
+  margin-top:12px;
+  display:grid; gap:8px;
+  grid-template-columns:1fr 1fr 1fr;
+}
+.btn{ display:inline-flex; align-items:center; justify-content:center; padding:.6rem .8rem; border-radius:10px; font-weight:800; border:0; text-decoration:none; transition: transform .08s ease, box-shadow .12s ease; }
+.btn:active{ transform: translateY(1px); }
+.btn.primary{ background:var(--brand-sky); color:#0b1220; box-shadow:0 6px 20px rgba(56,189,248,.22); }
+.btn.secondary{ background:#122036; color:#e2e8f0; border:1px solid #26344d; }
+.btn.ghost{ background:transparent; color:#9fb1ca; border:1px dashed #35507b; }
+.btn.primary:hover{ box-shadow:0 0 0 3px rgba(56,189,248,.18) inset; }
+.btn.secondary:hover,.btn.ghost:hover{ box-shadow:0 0 0 2px rgba(148,163,184,.25) inset; }
+
+/* Responsive overlay */
+@media (max-width:720px){
+  .prsucc-card{ width:92vw; }
+  .prsucc-actions{ grid-template-columns:1fr; }
+  .prsucc-list .row{ grid-template-columns:1fr; }
+  .prsucc-list dd{ text-align:left; }
+}
+
+/* =========================================================
+   📱 PRICING — Hotfix mobile très étroit (≤360px)
+   - Empêche le dépassement horizontal des cartes (grille 1 colonne)
+   - Confort boutons / prix sans impacter le desktop
+   ========================================================= */
+@media (max-width: 360px) {
+  /* 1) Grille : 1 seule colonne → pas d'overflow à 300–360px */
+  .pr-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  /* 2) Cartes : padding un poil plus compact (même look) */
+  .pr-card {
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+
+  /* 3) Ligne de prix : autoriser le wrap si le libellé est long */
+  .pr-price-row { flex-wrap: wrap; }
+  .pr-price { font-size: 1.45rem; }
+
+  /* 4) Actions : une colonne sûre + boutons confortables */
+  .pr-actions { grid-template-columns: 1fr !important; }
+  .btn-brand { min-height: 48px; }
+
+  /* 5) Sécurité anti-scroll horizontal (au cas où) */
+  .pr-page { overflow-x: clip; }
+}

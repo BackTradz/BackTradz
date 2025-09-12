@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/dash_user.css">
+    <link rel="stylesheet" href="/static/css/responsive.css" />
+
+
+</head>
+<body>
+    <header>
+        <div class="logo">Stratify</div>
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        <nav id="main-nav">
+            <ul>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="/backtest">Lancer un backtest</a></li>
+            <li><a href="/csv-shop">CSV Library</a></li>
+            <li><a href="/dashboard-user">Mon dashboard</a></li>
+            <li><a href="/a-savoir">À savoir</a></li>
+            <li><a href="/pricing">Prix</a></li>
+            <li style="display: flex; align-items: center; gap: 4px;">
+              <a href="#" onclick="goProfile()">Mon profil</a>
+              <span id="credit-counter" class="credit-badge" style="white-space: nowrap; font-size: 0.9em;">🪙 ...</span>
+            </li>
+            <li id="admin-link" style="display: none;"><a href="/admin">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+    <h1>📊 Mes Backtests</h1>
+
+    <!-- 🔐 Section Crédits -->
+    <div id="account-box" class="account-box">
+        <p><strong>Crédits restants :</strong> <span id="credit-count">...</span></p>
+        <button onclick="window.location.href='/pricing'">💳 Acheter des crédits</button>
+    </div>
+
+
+    <div id="backtest-list" class="backtest-grid"></div>
+    </main>
+    <script src="/static/js/dashboard_user.js" defer></script>
+    <script src="/static/js/global.js"></script>
+
+
+</body>
+</html>

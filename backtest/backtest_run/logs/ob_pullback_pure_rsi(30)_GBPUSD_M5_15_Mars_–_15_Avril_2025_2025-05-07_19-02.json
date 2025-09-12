@@ -1,0 +1,17 @@
+{
+    "date": "2025-05-07_19-02",
+    "strategy": "ob_pullback_pure_rsi(30)",
+    "pair": "GBPUSD",
+    "timeframe": "M5",
+    "period": "15 Mars \u2013 15 Avril 2025",
+    "params": {
+        "min_wait_candles": 3,
+        "max_wait_candles": 20,
+        "allow_multiple_entries": false,
+        "rsi": 30,
+        "sl": 100,
+        "tp1": 100,
+        "tp2": 200
+    },
+    "note": "backtest ob normal + rsi(30) . Setup d\u00e9tect\u00e9s OK."
+}

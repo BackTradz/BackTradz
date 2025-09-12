@@ -1,0 +1,730 @@
+/* ==========================================================================
+   BACKTRADZ — DASHBOARD (Backtests + Mes CSV)
+   Night theme • Variables centralisées • Aucune régression
+   - Tokens : layout, grilles, cartes, couleurs, anim
+   - Tabs, Panel title (sans séparateur), Toolbar (Select + Search)
+   - Grilles & cartes (dbt & csv), Modales, Responsive
+   - Animations : Backtests + CSV du dashboard uniquement (pas le CSV Shop)
+   ========================================================================== */
+
+
+/* =========================
+   1) DESIGN TOKENS / :root
+   ========================= */
+:root {
+  /* Layout */
+  --page-max: 1480px;
+  --page-pad-x: clamp(12px, 3vw, 24px);
+  --page-pad-top: 8px;                  /* espace sous navbar */
+
+  /* Flow vertical */
+  --stack-gap: clamp(14px, 2vw, 22px);  /* espace Toolbar ↔ Grilles */
+
+  /* Grilles */
+  --grid-gap: clamp(14px, 2vw, 22px);
+  --grid-min: 320px;
+
+  /* Cartes */
+  --radius: 16px;
+  --card-bg: #0f1627;
+  --card-bd: rgba(255,255,255,0.06);
+  --card-shadow: 0 10px 28px rgba(0,0,0,.25);
+  --card-shadow-hover: 0 14px 36px rgba(0,0,0,.30);
+  --hover-raise: 4px;
+
+  /* Typo / Couleurs */
+  --text-main: #eaf2ff;
+  --text-soft: #9fb2d6;
+  --text-muted: #93a1b7;
+
+  /* Boutons / CTA */
+  --cta-inset: 12px;
+
+  /* Tabs */
+  --tab-bd: rgba(91,141,255,.25);
+  --tab-bg: rgba(18,25,40,.85);
+  --tab-active: linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);
+
+  /* Animations */
+  --anim-ease: cubic-bezier(.22,.61,.36,1);
+  --anim-in: 520ms var(--anim-ease) both;
+
+  /* Titres */
+  --title-pad-left: 2px;
+  --title-accent: linear-gradient(180deg,#22d3ee 0%,#2563eb 100%);
+
+  /* Alignement visuel inputs/labels (si besoin) */
+  --field-pad-x: 10px;
+}
+
+
+/* =========================
+   2) CONTAINER / ROOT
+   ========================= */
+.dash-container {
+  width: min(94vw, var(--page-max));
+  margin: 0 auto;
+  padding-inline: var(--page-pad-x);
+  padding-top: var(--page-pad-top);
+  padding-bottom: 70px;
+  color: var(--text-main);
+}
+.dash-container.dash-wide { --page-max: 1580px; }
+
+/* Wrapper logique (si tu veux piloter l’espacement global par tokens) */
+.root { display: flex; flex-direction: column; gap: var(--stack-gap); }
+
+
+/* =========================
+   3) PILL TABS (onglets)
+   ========================= */
+.row-center.row-top {
+  display:flex; justify-content:center;
+  margin: 12px auto 1px;
+  padding-inline: var(--page-pad-x);
+  flex-wrap: wrap;
+}
+.pill-tabs, .tabs {
+  display:inline-flex; gap:6px; padding:6px;
+  background: var(--tab-bg);
+  border: 1px solid var(--tab-bd);
+  border-radius: 16px;
+}
+.tab-btn {
+  padding: 10px 18px; border: 0; border-radius: 12px;
+  background: transparent; color: #b9c6dc; cursor: pointer; transition: .2s;
+}
+.tab-btn:hover { color: #e7f0ff; }
+.tab-btn.active {
+  background: var(--tab-active); color: #fff;
+  box-shadow: 0 6px 22px rgba(37,99,235,.25);
+}
+
+
+/* =========================
+   4) PANEL / TITRE
+   ========================= */
+.panel { background: transparent; border: 0; box-shadow: none; margin: 0; padding: 0; }
+
+.panel .panel-title {
+  margin: 0 0 22px 0; /* <-- anti-saccade: spacing stable */
+  padding-left: var(--title-pad-left);
+  font-size: clamp(22px, 2.6vw, 28px);
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: .2px;
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text-main);
+  position: relative;
+}
+
+.panel .panel-title::before {
+  content: "";
+  width: 6px; height: 1.1em; border-radius: 999px;
+  background: var(--title-accent);
+  box-shadow: 0 0 16px rgba(37,99,235,.35);
+}
+
+
+/* =========================
+   5) TOOLBAR (filters / search / sort)
+   ========================= */
+.bt-toolbar {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto; /* filtre | recherche | tri */
+  gap: var(--grid-gap);
+  position: relative; z-index: 50;   /* menus au-dessus des cartes */
+  overflow: visible;
+}
+.bt-ctrl { display: grid; grid-template-rows: auto 1fr; align-items: start; min-width: 220px; }
+.bt-label { margin: 0 0 6px; font-size: 13px; color: var(--text-soft); }
+.bt-select, .bt-input {
+  height: 44px; border-radius: 10px;
+  background: #0f1627; color: #cfe1ff;
+  border: 1px solid rgba(91,141,255,.25);
+  padding: 0 12px; outline: none;
+}
+.bt-select:focus, .bt-input:focus { box-shadow: 0 0 0 3px rgba(96,165,250,.25); }
+.bt-input-wrap { position: relative; }
+.bt-input-ico {
+  position: absolute; left: 10px; top: 50%;
+  transform: translateY(-50%); opacity: .7; pointer-events: none;
+}
+.bt-input { padding-left: 34px; }
+
+/* menus des Select au premier plan */
+.bt-toolbar .strt-select { width: 100%; }
+.bt-toolbar .strt-panel { z-index: 1000; }
+
+/* Toolbar spécifique “Mes CSV” (si utilisée) */
+.csv-toolbar {
+  display:grid; grid-template-columns: minmax(240px, 360px);
+  gap:16px; align-items:end;
+  margin:14px 0 8px; position:relative; z-index:50; overflow:visible;
+}
+.csv-toolbar .strt-panel { z-index: 1000; }
+
+
+/* =========================
+   6) GRILLES
+   ========================= */
+/* Grille backtests “classique” */
+.cards, .cards-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
+  gap: var(--grid-gap);
+}
+
+/* Grille Mes CSV (dashboard) : grille 12 colonnes → cartes 3/4/6/12 */
+.csv-page .csv-grid {
+  display:grid; grid-template-columns: repeat(12, 1fr); gap: 24px;
+}
+.csv-page .csv-grid > .csv-card { grid-column: span 3; }
+@media (max-width: 1200px){ .csv-page .csv-grid > .csv-card { grid-column: span 4; } }
+@media (max-width: 900px) { .csv-page .csv-grid > .csv-card { grid-column: span 6; } }
+@media (max-width: 640px) { .csv-page .csv-grid > .csv-card { grid-column: span 12; } }
+
+/* marge de respiration (au cas où la grille ne soit pas dans .root) */
+.cards, .cards-grid, .csv-page .csv-grid { margin-top: var(--stack-gap); }
+
+
+/* =========================
+   7) ANIMATIONS (entrée)
+   ========================= */
+/* Keyframes unique */
+/* Keyframes unique — inchangé */
+@keyframes cardIn {
+  from { opacity:0; transform: translateY(12px) scale(.98); }
+  to   { opacity:1; transform: translateY(0)    scale(1); }
+}
+
+/* ✅ Backtests : joue l'anim (nom + durée définie via --anim-in) */
+.cards-grid > .dbt-card {
+  animation: cardIn var(--anim-in);
+  will-change: opacity, transform;
+}
+
+/* ✅ Mes CSV (DASHBOARD UNIQUEMENT) — n'affecte PAS le CSV Shop */
+.dash-container .csv-page .csv-grid > .csv-card {
+  animation: cardIn var(--anim-in);
+  will-change: opacity, transform;
+}
+
+/* Stagger léger — inchangé (les delays restent valables) */
+
+
+/* Stagger léger */
+.cards-grid > *:nth-child(1),
+.dash-container .csv-page .csv-grid > *:nth-child(1) { animation-delay: 0ms; }
+.cards-grid > *:nth-child(2),
+.dash-container .csv-page .csv-grid > *:nth-child(2) { animation-delay: 40ms; }
+.cards-grid > *:nth-child(3),
+.dash-container .csv-page .csv-grid > *:nth-child(3) { animation-delay: 80ms; }
+.cards-grid > *:nth-child(4),
+.dash-container .csv-page .csv-grid > *:nth-child(4) { animation-delay: 120ms; }
+.cards-grid > *:nth-child(5),
+.dash-container .csv-page .csv-grid > *:nth-child(5) { animation-delay: 160ms; }
+
+/* Accessibilité : désactive anim sans rendre les cartes invisibles */
+@media (prefers-reduced-motion: reduce){
+  .cards-grid > .dbt-card,
+  .dash-container .csv-page .csv-grid > .csv-card {
+    animation: none;
+  }
+}
+
+
+/* =========================
+   8) CARTES BACKTESTS (.dbt-*)
+   ========================= */
+.dbt-card{
+  position: relative;
+  background: var(--card-bg);
+  border:1px solid var(--card-bd);
+  border-radius: var(--radius);
+  padding:14px;
+  display:flex; flex-direction:column; gap:12px;
+  box-shadow: var(--card-shadow);
+  transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
+  overflow:hidden;
+}
+.dbt-card:hover{
+  transform: translateY(calc(-1 * var(--hover-raise)));
+  box-shadow: var(--card-shadow-hover);
+  border-color: rgba(255,255,255,.10);
+}
+.dbt-card:focus-within{
+  border-color: rgba(120,170,255,.45);
+  box-shadow: 0 0 0 2px rgba(15,110,255,.25), var(--card-shadow);
+}
+
+/* Le header n’utilise plus space-between pour éviter le “flottement”
+  quand la date passe sur 2 lignes. On pousse la date à droite avec
+    margin-left:auto et on l’aligne visuellement à droite. */
+.dbt-header{
+   display:flex;
+   align-items:center;
+   justify-content:flex-start; /* la date sera poussée par margin-left:auto */
+   gap: 10px;
+}
+
+ /* La date occupe l’espace restant et s’aligne bien sur le bord droit
+    de la carte même si elle wrappe sur 2 lignes. */
+.dbt-period{
+   margin-left:auto;     /* pousse complètement à droite */
+   text-align:right;     /* texte aligné à droite */
+   max-width: 50%;       /* limite la largeur pour éviter d’écraser le titre */
+ }
+.dbt-title{ display:flex; align-items:center; gap:10px; font-weight:700; color: var(--text-main); }
+.dbt-pair{ font-size:16px; letter-spacing:.3px; }
+.dbt-badge{
+  font-size:12px; padding:4px 8px; border-radius:999px;
+  background: rgba(37,99,235,.15);
+  border: 1px solid rgba(37,99,235,.35);
+  color:#9fc1ff;
+}
+.dbt-period{ color: var(--text-soft); font-size: 13px; }
+
+.dbt-meta{ display:flex; flex-direction:column; gap:6px; }
+.dbt-row{ display:flex; align-items:center; justify-content:space-between; }
+.dbt-label{ color: var(--text-soft); font-size: 13px; }
+.dbt-val{ color: var(--text-main); font-weight: 600; }
+.num{ font-variant-numeric: tabular-nums; }
+.dbt-card .strategy{
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.dbt-actions-primary{
+  margin-top: 8px; padding: 0 var(--cta-inset);
+  display:flex; justify-content:center;
+}
+.dbt-actions-primary .dbt-btn{
+  width: min(100%, 420px); box-sizing: border-box;
+}
+.dbt-actions-secondary{
+  display:grid; grid-template-columns: 1fr 1fr; gap:10px;
+  margin-top:10px; padding:0 var(--cta-inset);
+}
+@media (max-width:520px){ .dbt-actions-secondary{ grid-template-columns:1fr; } }
+
+/* Les boutons remplissent leur colonne (100% largeur) */
+.dbt-actions-secondary .col{ display:flex; }
+.dbt-actions-secondary .col > *{ width:100%; }
+.dbt-actions-secondary .dbt-btn,
+.dbt-actions-secondary button,
+.dbt-actions-secondary a{ width:100%; }
+
+.dbt-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:10px 14px; border-radius:12px; font-weight:600;
+  text-decoration:none; border:0;
+  transition: filter .15s ease, transform .06s ease;
+}
+.dbt-btn:hover{ filter: brightness(1.06); }
+.dbt-btn:active{ transform: translateY(1px); }
+
+.dbt-primary{
+  background: linear-gradient(135deg,#0ea5e9 0%, #2563eb 100%);
+  color:#fff;
+}
+.dbt-neutral{
+  background: linear-gradient(180deg, #2a3446 0%, #1f2937 100%);
+  color:#e8effa; border:1px solid rgba(255,255,255,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 20px rgba(0,0,0,.25);
+}
+.dbt-neutral:hover{
+  background: linear-gradient(180deg, #334155 0%, #1f2937 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 22px rgba(0,0,0,.28);
+}
+.dbt-danger{
+  background: rgba(255,87,87,.12);
+  color:#ffb3b3; border:1px solid rgba(255,87,87,.35);
+}
+.dbt-danger:hover{ filter: brightness(1.08); }
+.dbt-danger:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(239,68,68,.35); }
+
+
+/* =========================
+   9) CARTES CSV (dashboard)
+   ========================= */
+/* scope .csv-page pour ne pas toucher le CSV Shop */
+.csv-page .csv-card{
+  background: #0e1a2b;
+  border: 1px solid var(--card-bd);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+  transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.csv-page .csv-card:hover{
+  transform: translateY(calc(-1 * var(--hover-raise)));
+  box-shadow: var(--card-shadow-hover);
+  border-color: rgba(255,255,255,.10);
+}
+.csv-page .csv-card .csv-meta{
+  margin-top:14px;
+  display:grid; grid-template-columns:1fr 1fr; gap:10px 18px;
+}
+.csv-card .csv-source.library{ color:#a8c5ff; }
+.csv-card .csv-source.live   { color:#fca5a5; }
+.csv-page .csv-card .csv-actions{
+  margin-top:16px; display:flex; gap:12px; width:100%;
+}
+.csv-page .csv-card .csv-actions > *{ flex:1 1 0; min-width:0; }
+.csv-page .csv-card .dbt-btn,
+.csv-page .csv-card .cta-btn{
+  width:100%; height:48px; display:flex; align-items:center; justify-content:center;
+  box-sizing:border-box;
+}
+
+/* neutraliser tout vieux suffixe “-1 crédit” sur CTA */
+.csv-page .csv-card .dbt-btn::after { content: none !important; }
+
+
+/* =========================
+   10) MODALES
+   ========================= */
+.modal-backdrop{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  display:flex; align-items:center; justify-content:center;
+  z-index: 9999; padding: 16px;
+}
+.modal{
+  width: min(520px, 95vw);
+  background: rgba(16,22,35,.98);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  padding: 20px; color:#e8eefc;
+}
+.modal-actions{ margin-top: 16px; display:flex; gap:12px; justify-content:flex-end; }
+
+/* (Backtests) */
+.dbt-modal-overlay{
+  position: fixed; inset:0; background: rgba(5,13,28,.55);
+  backdrop-filter: blur(2px); z-index: 1000;
+  display:grid; place-items:center; padding:16px;
+}
+.dbt-modal{
+  width:min(880px,92vw); max-height:min(80vh,900px); overflow:auto;
+  background:#121a2a; border:1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius); box-shadow: 0 20px 70px rgba(0,0,0,.45);
+  padding:18px; color: var(--text-main);
+}
+.dbt-modal-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.dbt-modal-title{ display:flex; align-items:center; gap:8px; font-weight:600; }
+.dbt-title-strategy{ opacity:.9; font-weight:600; }
+.dbt-tag{
+  font-size:12px; padding:4px 8px; border-radius:999px;
+  background: rgba(59,130,246,.12); border:1px solid rgba(59,130,246,.25);
+}
+.dbt-modal-close{ background:transparent; border:0; color:#cbd5e1; font-size:18px; line-height:1; cursor:pointer; }
+.dbt-modal-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media (max-width:1024px){ .dbt-modal-grid{ grid-template-columns:repeat(3,1fr); } }
+@media (max-width: 720px){ .dbt-modal-grid{ grid-template-columns:repeat(2,1fr); } }
+.dbt-kpi{
+  border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);
+  border-radius:10px; padding:10px 12px;
+}
+.dbt-kpi-label{ font-size:12px; color:#9aa5b1; margin-bottom:4px; }
+.dbt-kpi-value{ font-size:16px; font-weight:600; color:#e7eef7; }
+
+
+/* =========================
+   11) RESPONSIVE
+   ========================= */
+@media (max-width: 1200px){
+  .bt-toolbar{ grid-template-columns: 1fr 1fr; }
+  .bt-ctrl:last-child{ justify-self:start; }
+}
+@media (max-width: 900px){
+  .dash-container{ width: 98vw; }
+  .bt-toolbar{ grid-template-columns: 1fr; }
+  .bt-ctrl{ min-width: 0; }
+}
+@media (max-width: 640px){
+  .bt-select, .bt-input{ height: 42px; }
+  .cards, .cards-grid{ grid-template-columns: 1fr; } /* 1 carte / ligne */
+}
+
+
+/* =========================
+   12) UTILITAIRES
+   ========================= */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+
+/* Bouton "Afficher plus" */
+.list-more{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top:16px; }
+.list-more .dbt-btn{ min-width: 180px; }
+.list-more-meta{ font-size:.9rem; color: var(--text-soft); }
+
+/* dashboard.css */
+.pins-section { margin-top: 24px; }
+.pins-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 8px 4px; border-top: 1px solid rgba(255,255,255,.06);
+}
+.pins-header .title { font-size: 20px; font-weight: 700; }
+.btn-toggle {
+  padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04); color: #fff;
+}
+.btn-toggle:hover { background: rgba(255,255,255,.08); }
+
+/* Section titres */
+.db-title {
+  margin: 32px 0 16px;
+}
+
+/* Conteneur du mur d’épingles */
+.pins-panel {
+  margin-top: 12px;
+}
+
+/* Carte épingle */
+.pin-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  /* ✅ même look que .dbt-card */
+  background: #0f172a;
+  border: 1px solid var(--card-bd);
+  border-radius: var(--radius);
+}
+
+/* Colonne gauche */
+.pin-left { min-width: 0; }
+.pin-line {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 600;
+}
+.pin-type   { opacity: .9; }
+.pin-dot    { opacity: .4; }
+.pin-key    { opacity: .95; }
+.pin-folder { margin-top: 6px; opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pin-folder code { opacity: .9; }
+
+/* Colonne droite (valeur + bouton) */
+.pin-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pin-value {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  min-width: 64px;
+  text-align: right;     /* valeur bien alignée à droite */
+}
+.pin-remove {
+  border: 1px solid rgba(255,0,64,.25);
+  background: rgba(255,0,64,.08);
+  color: #ff839a;
+  padding: 6px 12px;
+  border-radius: 10px;
+  transition: .15s ease;
+}
+.pin-remove:hover {
+  background: rgba(255,0,64,.14);
+  border-color: rgba(255,0,64,.35);
+}
+
+/* Barre unique “Mes épingles” : 5 colonnes sur grand écran, wrap sinon */
+.bt-toolbar--pins {
+  grid-template-columns: repeat(5, minmax(200px, 1fr));
+}
+@media (max-width: 1200px){
+  .bt-toolbar--pins { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px){
+  .bt-toolbar--pins { grid-template-columns: 1fr; }
+}
+
+/* Aligner la carte (valeur + Retirer) dans le header */
+.pin-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.pin-right{ display:flex; align-items:center; gap:12px; }
+
+/* Scope: seulement dans la section "Mes épingles" */
+.pins-wall .bt-toolbar { 
+  overflow: visible;                 /* évite que le menu soit coupé */
+}
+
+/* Quand un Select est ouvert, on le met au-dessus des autres champs */
+.pins-wall .strt-select[data-open="true"] {
+  z-index: 5000;                     /* > cartes / autres inputs */
+}
+
+/* Le panneau du menu doit flotter au-dessus de tout dans la section */
+.pins-wall .strt-panel {
+  z-index: 10000;                    /* > z-index locaux */
+}
+
+/* Scope strict : section "Mes épingles" seulement */
+.pins-wall .bt-toolbar { overflow: visible; }
+
+/* le Select ouvert passe au-dessus des autres champs */
+.pins-wall .bt-toolbar .strt-select[data-open="true"] {
+  position: relative;
+  z-index: 11000 !important;  /* priorité > règle globale */
+}
+
+/* le panel du menu tout en haut de la pile dans cette section */
+.pins-wall .bt-toolbar .strt-panel {
+  z-index: 12000 !important;  /* priorité > .bt-toolbar .strt-panel */
+}
+
+.pins-wall .bt-toolbar { overflow: visible; }
+
+/* Section Mes épingles */
+.pins-wall .pins-adv-summary{
+  display:flex;
+  align-items:center;
+  height:42px;        /* même hauteur visuelle que les Selects */
+  margin:0 0 8px;     /* petit espace sous le summary */
+  line-height:1;
+}
+.pins-wall .pins-adv-grid{
+  align-items:center; /* aligne tous les éléments de la grille */
+  margin-top:0;
+}
+.pins-wall .pins-search .bt-input-wrap{
+  height:42px;        /* même hauteur que les Selects */
+}
+
+/* Mes épingles — largeur et alignement de la recherche */
+.pins-wall .pins-adv-grid { align-items: center; }
+.pins-wall .pins-search,
+.pins-wall .pins-search .bt-input-wrap,
+.pins-wall .pins-search .bt-input {
+  width: 100%;           /* même largeur que les Selects */
+  box-sizing: border-box;
+  height: 42px;          /* même hauteur visuelle qu’un Select */
+}
+
+/* Mes épingles — liste sans retrait à gauche */
+.pins-wall .pins-list {
+  list-style: none;
+  padding: 0;            /* supprime le padding-left du <ul> */
+  margin: 12px 0 0;
+}
+
+/* Section "Mes épingles" */
+.pins-wall { 
+  border-top: none !important;     /* si la ligne est appliquée en border */
+  box-shadow: none !important;     /* au cas où un shadow simule la ligne */
+  margin-top: 0;                   /* resserre l’espacement avec le titre au-dessus */
+}
+
+hr + .pins-wall { /* fallback CSS-only pour masquer l’hr précédent */
+  position: relative;
+}
+hr + .pins-wall::before {
+  content: none;                    /* neutralise toute pseudo-ligne éventuelle */
+}
+
+.pins-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  /* avant : padding: 8px 4px; border-top: 1px solid ... */
+  padding: 0;          /* aligne le titre exactement comme “Mes backtests” */
+  margin: 0 0 14px;    /* espace dessous */
+  border: 0;           /* supprime le séparateur */
+}
+
+/* pas de marge parasite sur le titre à l’intérieur de la barre */
+.pins-header .panel-title { margin: 0; }
+
+/* ------- Mes épingles: header "Filtres avancés" ------- */
+.pins-wall .pins-adv { margin-top: 8px; }
+
+/* Summary stylé comme un champ: même padding/hauteur que les Select */
+.pins-wall .pins-adv-summary{
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 42px;                     /* même hauteur visuelle qu’un Select */
+  padding: 0 12px;                  /* même padding gauche -> plus de décalage */
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  background: rgba(255,255,255,.02);
+  line-height: 1;
+  margin: 0 0 8px;                  /* petit espace sous le summary */
+}
+
+/* On masque le marqueur natif du <summary> pour éviter le décalage */
+.pins-wall .pins-adv-summary::-webkit-details-marker { display: none; }
+.pins-wall .pins-adv-summary::marker { content: ""; }
+
+/* Chevron à droite (indicateur de déroulé) */
+.pins-wall .pins-adv-summary::after{
+  content: "▾";
+  margin-left: auto;
+  opacity: .7;
+  transform: translateY(1px);
+  transition: transform .18s ease;
+}
+.pins-wall details[open] .pins-adv-summary::after{
+  transform: rotate(180deg) translateY(-1px);
+}
+
+/* Grille des filtres avancés bien alignée avec les champs */
+.pins-wall .pins-adv-grid{
+  align-items: center;
+  margin-top: 0;
+}
+
+/* Harmonise l’espacement entre les sections */
+.db-title {           /* "Mes backtests" */
+  margin-top: 30px;   /* ↑ ajuste à ton goût (20–28px) */
+}
+
+/* ✅ Scroll horizontal pour les cartes épinglées uniquement sur mobile */
+@media (max-width: 768px) {
+  .pin-card {
+    display: flex;               /* au lieu du grid rigide */
+    flex-wrap: nowrap;
+    overflow-x: auto;            /* active la scroll bar horizontale */
+    -webkit-overflow-scrolling: touch; /* scroll fluide iOS */
+    scrollbar-width: thin;       /* scroll fin Firefox */
+  }
+
+  .pin-card::-webkit-scrollbar {
+    height: 6px;                 /* petite barre discrète */
+  }
+}
+
+/* ------ Pinned toolbar (force 4 colonnes en desktop, stack en responsive) ------ */
+.pins-wall .pins-toolbar { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.pins-wall .pins-adv-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+
+/* hérite déjà de .bt-toolbar → passe à 1 colonne sous 900px, mais on renforce au besoin */
+@media (max-width: 900px){
+  .pins-wall .pins-toolbar,
+  .pins-wall .pins-adv-grid { grid-template-columns: 1fr; }
+}
+
+/* Harmoniser tailles dans la section Mes épingles */
+.pins-wall .pin-right .detail-btn,
+.pins-wall .pin-right .pin-remove {
+  padding: 6px 12px;          /* même padding */
+  font-size: 14px;            /* taille cohérente */
+  height: auto;               /* pas de hauteur forcée différente */
+  min-width: 72px;            /* largeur mini uniforme */
+}
+

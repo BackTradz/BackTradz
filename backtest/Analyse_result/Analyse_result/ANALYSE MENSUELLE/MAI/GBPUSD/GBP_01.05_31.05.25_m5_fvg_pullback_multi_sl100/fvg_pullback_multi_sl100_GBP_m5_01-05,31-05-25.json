@@ -1,0 +1,17 @@
+{
+    "date": "2025-06-03 21:57:36",
+    "strategy": "fvg_pullback_multi_sl100",
+    "pair": "GBP",
+    "timeframe": "m5",
+    "period": "01-05,31-05-25",
+    "params": {
+        "min_pips": 5.0,
+        "min_wait_candles": 1,
+        "max_wait_candles": 20,
+        "max_touch": 4,
+        "sl_pips": 100,
+        "tp1_pips": 100,
+        "tp2": 200
+    },
+    "note": "R\u00e9sultat runner V5 - fvg_pullback_multi_sl100"
+}

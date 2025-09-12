@@ -1,0 +1,66 @@
+.legal-hero {
+  padding: 26px 0 16px;
+}
+.legal-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 6px 0 8px;
+}
+.legal-subtitle { color: #9aa3b2; }
+
+.legal-tabs {
+  margin-top: 14px;
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.legal-tab {
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  border-radius: 999px;
+  text-decoration: none;
+  color: #dbe3f0; font-weight: 700;
+}
+.legal-tab.is-active {
+  background: #3b82f6; color: #0b1220; border-color: transparent;
+  box-shadow: 0 8px 22px rgba(59,130,246,.25);
+}
+
+/* mini-nav */
+.mini-nav { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.mn-link { color:#60a5fa; text-decoration:none; font-weight:700; }
+.mn-link:hover { text-decoration: underline; }
+.mn-sep { color:#7b8794; }
+
+/* card */
+.legal-card{
+  margin: 14px auto 40px;
+  padding: 20px 22px;
+  border-radius: 14px;
+  background: #0b1220;
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow:
+    0 30px 70px rgba(2,8,23,.55),
+    0 0 0 1px rgba(255,255,255,.04) inset,
+    0 20px 40px rgba(2,8,23,.25);
+  max-width: 1000px;
+}
+
+/* content */
+.legal-card h2{ font-weight:800; font-size:1.1rem; margin:22px 0 6px; }
+.legal-card p{ color:#dbe3f0; line-height:1.65; margin:6px 0; }
+.legal-card ul{ margin:8px 0 8px 16px; }
+.legal-meta { color:#9aa3b2; font-size:.9rem; margin-top:12px; }
+hr.legal-sep{ border:0; height:1px; background: rgba(255,255,255,.06); margin:16px 0; }
+.badge { display:inline-block; padding:2px 8px; border-radius:999px;
+  background: rgba(34,197,94,.15); color:#34d399; font-weight:700; font-size:.8rem; }
+
+  /* élargir la carte pour l’aligner avec la nav */
+.legal-card{
+  max-width: 1200px;          /* avant: 1000px */
+  padding: 24px 26px;         /* un peu plus d'air */
+}
+
+/* sur très grands écrans on peut encore l’élargir légèrement */
+@media (min-width: 1400px){
+  .legal-card{ max-width: 1280px; }
+}

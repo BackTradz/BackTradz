@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stratify — Tarifs</title>
+  <script src="https://www.paypal.com/sdk/js?client-id=ARcrl0KKMlIHKr7LDS-0TUD_5vGvt_0yQzj3_yLu-6LxKfHy6OhIRrQ8VTVaGNin7gu1rwNpDAliBUc_&currency=EUR"></script>
+
+  <link rel="stylesheet" href="/static/css/pricing.css" />
+  <link rel="stylesheet" href="/static/css/responsive.css" />
+
+</head>
+<body>
+    <header>
+        <div class="logo">Stratify</div>
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        <nav id="main-nav">
+            <ul>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="/backtest">Lancer un backtest</a></li>
+            <li><a href="/csv-shop">CSV Library</a></li>
+            <li><a href="/dashboard-user">Mon dashboard</a></li>
+            <li><a href="/a-savoir">À savoir</a></li>
+            <li><a href="/pricing">Prix</a></li>
+            <li style="display: flex; align-items: center; gap: 4px;">
+              <a href="#" onclick="goProfile()">Mon profil</a>
+              <span id="credit-counter" class="credit-badge" style="white-space: nowrap; font-size: 0.9em;">🪙 ...</span>
+            </li>
+            <li id="admin-link" style="display: none;"><a href="/admin">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+      <main>
+        <h1>💰 Choisissez votre offre</h1>
+
+        <div class="pricing-grid">
+          {% for plan in plans %}            
+            <div class="plan-card">
+              <h2>
+                {% if plan.type == "monthly" %}
+                  {{ plan.credits }} crédits / mois
+                {% else %}
+                  {{ plan.name }}
+                {% endif %}
+              </h2>
+
+              {% if has_discount and plan.type in ["one_shot", "credit"] %}
+                <div class="price-line">
+                  <del class="old-price">{{ '%.2f' % plan.price }} €</del>
+                  <strong class="new-price">{{ '%.2f' % (plan.price * 0.9) }} €</strong>
+                  <span class="discount-badge">-10%</span>
+                </div>
+              {% else %}
+                <strong class="standard-price">{{ '%.2f' % plan.price }} €</strong>
+              {% endif %}
+
+              <p>{{ plan.credits }} crédits</p>
+              <p>{{ "Abonnement" if plan.type == "monthly" else "Achat unique" }}</p>
+
+              <div class="buttons">
+                <div class="paypal-button" id="paypal-button-container-{{ plan.offer_id }}"></div>
+
+                {% if plan.type == "monthly" or plan.offer_id == "SUB_9" %}
+                  <button class="stripe-btn" data-offer-id="{{ plan.offer_id }}">
+                    💳 S'abonner par carte (Stripe)
+                  </button>
+                {% elif plan.price|float >= 10 %}
+                  <button class="stripe-btn" data-offer-id="{{ plan.offer_id }}">
+                    💳 Acheter par carte (Stripe)
+                  </button>
+
+                  <button class="crypto-btn" data-offer-id="{{ plan.offer_id }}">
+                    🪙 Payer en Crypto (USDT, BTC…)
+                  </button>
+                {% endif %}
+              </div>
+            </div>         
+          {% endfor %}
+        </div>
+      </main>
+
+    <script src="/static/js/pricing.js" defer></script>
+    <script src="/static/js/global.js"></script>
+
+
+
+</body>
+</html>

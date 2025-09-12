@@ -1,0 +1,200 @@
+/* ============================================================================
+   FOOTER — Stradex
+   - 0 régression : mêmes classes, mêmes valeurs, même ordre visuel
+   - :root = variables pour couleurs, espaces, largeur & breakpoint
+   - Desktop : grille 3 zones (gauche | centre | droite)
+   - Mobile ≤640px : on empile, tout centré, petit padding latéral
+   ============================================================================ */
+
+/* 🎛️ THEME / TOKENS (reprend les valeurs de l’existant) */
+:root{
+  --ft-bg:           #0f172a;       /* fond footer */
+  --ft-text:         #ffffff;       /* couleur du texte */
+  --ft-muted:        #cbd5e1;       /* texte atténué (gauche/droite) */
+  --ft-link:         #a855f7;       /* couleur des liens */
+  --ft-link-hover:   #ffffff;       /* couleur des liens au survol */
+
+  --ft-font-size:    13px;          /* taille du texte */
+  --ft-pad-y:        12px;          /* padding vertical du footer */
+  --ft-inner-pad-x:   8px;          /* gutter horizontal interne */
+  --ft-gap:          24px;          /* espacement entre liens centrés */
+
+  --ft-maxw:         none;          /* largeur max du conteneur (none = 100%) */
+  --ft-break:        640px;         /* breakpoint mobile */
+}
+
+/* 🧱 Bloc principal du footer */
+.footer {
+  background-color: var(--ft-bg);
+  color: var(--ft-text);
+  padding: var(--ft-pad-y) 0;       /* vertical only (pas de marge latérale ici) */
+  font-size: var(--ft-font-size);
+}
+
+/* 📦 Conteneur interne : grille 3 colonnes, full width */
+.footer-inner {
+  max-width: var(--ft-maxw);        /* none -> s’étire sur 100% */
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--ft-inner-pad-x); /* léger “air” à gauche/droite */
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* gauche | centre | droite */
+  align-items: center;
+}
+
+/* ◀️ Zone gauche */
+.footer-left {
+  justify-self: start;              /* collé à gauche */
+  color: var(--ft-muted);
+  white-space: nowrap;              /* pas de retour à la ligne ici */
+}
+
+/* ⏺ Zone centrale : liens */
+.footer-center {
+  display: flex;
+  gap: var(--ft-gap);
+  justify-content: center;          /* parfaitement centré */
+  text-align: center;
+}
+.footer-link {
+  color: var(--ft-link);
+  text-decoration: none;
+  transition: color .2s ease;
+}
+.footer-link:hover {
+  color: var(--ft-link-hover);
+}
+
+/* ▶️ Zone droite */
+.footer-right {
+  justify-self: end;                /* collé à droite */
+  color: var(--ft-muted);
+  white-space: nowrap;
+}
+
+/* 📱 Responsive : on empile et on centre tout */
+@media (max-width: 640px) {
+  .footer-inner {
+    grid-template-columns: 1fr;     /* 1 seule colonne */
+    gap: 6px;
+    padding: 0 12px;                /* un peu plus d’air en mobile */
+    text-align: center;
+  }
+  .footer-left,
+  .footer-right {
+    justify-self: center;           /* tout centré */
+  }
+}
+
+/* =========================================================
+   FOOTER — Mobile fixes (wrap + éventuelles abréviations)
+   ========================================================= */
+
+/* 1) ≤640px : on autorise le retour à la ligne des liens centraux */
+@media (max-width: 640px) {
+  .footer-center{
+    flex-wrap: wrap;                 /* ✅ passe à la ligne si ça ne tient pas */
+    gap: 8px 14px;                   /* espace vertical/horizontal */
+    justify-content: center;
+  }
+  .footer-inner{ padding: 0 12px; }  /* petit gutter pour ne jamais coller les bords */
+}
+
+/* 2) ≤360px : texte un poil plus compact */
+@media (max-width: 360px) {
+  .footer-link{ font-size: 12.5px; }
+}
+
+/* 3) (Option PRO) ≤320px : abréviations automatiques des 3 libellés longs
+      -> ML / PC / CG ; Support & Contact restent en toutes lettres.
+      Si l’ordre diffère chez toi, ajuste les nth-child.
+*/
+@media (max-width: 320px) {
+  .footer-center .footer-link{ position: relative; }
+
+  /* on masque visuellement le texte d’origine pour ces 3 là uniquement */
+  .footer-center .footer-link:nth-child(1),
+  .footer-center .footer-link:nth-child(2),
+  .footer-center .footer-link:nth-child(3){
+    font-size: 0;                    /* masque le texte, garde le lien cliquable */
+  }
+  .footer-center .footer-link:nth-child(1)::after{ content: "ML";  font-size: 13px; }
+  .footer-center .footer-link:nth-child(2)::after{ content: "PC";  font-size: 13px; }
+  .footer-center .footer-link:nth-child(3)::after{ content: "CG";  font-size: 13px; }
+
+  /* Support & Contact visibles en clair */
+  .footer-center .footer-link:nth-child(4),
+  .footer-center .footer-link:nth-child(5){
+    font-size: 13px;
+  }
+}
+
+/* =========================================================
+   FOOTER — Mobile: réduire à 2 liens (Légal + Support/Contact)
+   - 0 régression desktop
+   - Suppose l’ordre actuel des liens centraux :
+     1) Mentions légales  2) Politique  3) CG  4) Support  5) Contact
+   - Ajuste les :nth-child(...) si ton ordre diffère.
+   ========================================================= */
+@media (max-width: 420px) {
+  .footer-center{
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    justify-content: center;
+  }
+
+  /* On masque tout sauf 1 et 4 */
+  .footer-center .footer-link:nth-child(2),
+  .footer-center .footer-link:nth-child(3),
+  .footer-center .footer-link:nth-child(5){
+    display: none !important;
+  }
+
+  /* On remplace le libellé du 1er et du 4e via ::after */
+  .footer-center .footer-link{
+    font-size: 0;                 /* masque le texte original */
+    display: inline-block;
+  }
+  .footer-center .footer-link:nth-child(1)::after{
+    content: "Légal";
+    font-size: 13px;
+  }
+  .footer-center .footer-link:nth-child(4)::after{
+    content: "Support / Contact";
+    font-size: 13px;
+  }
+}
+
+/* =========================================================
+   FOOTER — Mobile strict : 2 liens (Légal + Support/Contact)
+   - Cache tous les liens centraux
+   - N’affiche que le 1er (legal) et le dernier (support/contact)
+   - Remplace proprement les libellés via ::after
+   ========================================================= */
+@media (max-width: 420px) {
+  /* Cache tout par défaut */
+  .footer-center .footer-link{
+    display: none !important;
+  }
+
+  /* Garde seulement le premier et le dernier */
+  .footer-center .footer-link:first-child,
+  .footer-center .footer-link:last-child{
+    display: inline-block !important;
+    font-size: 0 !important;     /* masque le texte d’origine */
+  }
+
+  /* Libellés mobiles */
+  .footer-center .footer-link:first-child::after{
+    content: "Légal";
+    font-size: 13px;
+  }
+  .footer-center .footer-link:last-child::after{
+    content: "Support / Contact";
+    font-size: 13px;
+  }
+
+  /* Espacement & wrap propre */
+  .footer-center{ gap: 8px 16px; flex-wrap: wrap; }
+}

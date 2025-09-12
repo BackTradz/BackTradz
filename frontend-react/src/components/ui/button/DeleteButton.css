@@ -1,0 +1,25 @@
+/* DeleteButton — danger doux, cohérent avec ta DA */
+.delete-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:10px 14px;border-radius:12px;font-weight:600;
+  color:#ffc5c5; text-decoration:none; border:1px solid rgba(255,87,87,.28);
+  background: linear-gradient(180deg, #2b171a 0%, #1e1416 100%);
+  box-shadow: 0 6px 16px rgba(0,0,0,.22);
+  transition: filter .15s, transform .06s, box-shadow .15s, background .2s, border-color .2s;
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.delete-btn:hover{
+  filter:brightness(1.06);
+  border-color: rgba(255,87,87,.36);
+  background: linear-gradient(180deg, #311a1e 0%, #211619 100%);
+}
+.delete-btn:active{ transform:translateY(1px); }
+
+.delete-btn:focus-visible{
+  outline:none; box-shadow: 0 0 0 3px rgba(239,68,68,.35);
+}
+.delete-btn:active{ transform: translateY(1px); }
+.delete-btn:disabled,
+.delete-btn[aria-disabled="true"]{ opacity:.6; cursor:not-allowed; }
+.delete-btn--block{ width:100%; }
+.delete-btn__icon{ display:inline-grid; place-items:center; margin-right:8px; line-height:0; }

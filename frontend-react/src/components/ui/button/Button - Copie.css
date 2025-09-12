@@ -1,0 +1,13 @@
+/* Reusable CTA button (.dbt-*) */
+.dbt-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:10px 14px;border-radius:12px;font-weight:600;text-decoration:none;border:0;
+  transition:filter .15s ease, transform .06s ease;
+}
+.dbt-primary{background:linear-gradient(135deg,#0ea5e9 0%, #2563eb 100%);color:#fff}
+.dbt-primary:hover{filter:brightness(1.06)}
+.dbt-secondary{background:rgba(255,255,255,.06);color:#eaf2ff;border:1px solid rgba(255,255,255,.12)}
+.dbt-secondary:hover{filter:brightness(1.05)}
+.dbt-disabled{background:rgba(255,255,255,.04);color:#9fb2d6;cursor:not-allowed}
+.dbt-btn-block{width:100%}
+.dbt-ic{display:inline-flex;align-items:center;margin-right:8px}

@@ -1,0 +1,15 @@
+{
+    "date": "2025-05-07_14-46",
+    "strategy": "fvg_pullback_multi",
+    "pair": "GBPUSD",
+    "timeframe": "M5",
+    "period": "15Mars\u201315Avril2025",
+    "params": {
+        "min_pips": 5,
+        "min_wait_candles": 3,
+        "max_wait_candles": 20,
+        "max_touch": 1,
+        "sl": 100
+    },
+    "note": "Test initial sans filtre juste fvg. Setup d\u00e9tect\u00e9s OK."
+}

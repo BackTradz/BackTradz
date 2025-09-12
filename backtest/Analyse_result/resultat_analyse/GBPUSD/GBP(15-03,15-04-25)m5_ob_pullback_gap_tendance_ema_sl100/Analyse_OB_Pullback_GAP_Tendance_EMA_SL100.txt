@@ -1,0 +1,32 @@
+
+Analyse Stratégie : OB Pullback GAP + Tendance EMA - SL100
+
+🏁 Total trades : 26
+🎯 TP1 atteint : 9 | ❌ SL touché : 17
+📈 Winrate TP1 global : 34.62%
+
+🕒 Répartition par session :
+- Asia : 30.0% | 3 TP1 / 7 SL
+- London : 46.2% | 6 TP1 / 7 SL
+- New York : 0.0% | 0 TP1 / 3 SL
+
+📅 Répartition par jour :
+- Friday: 40.0% winrate (2 TP1 / 3 SL)
+- Monday: 16.7% winrate (1 TP1 / 5 SL)
+- Thursday: 50.0% winrate (1 TP1 / 1 SL)
+- Tuesday: 28.6% winrate (2 TP1 / 5 SL)
+- Wednesday: 50.0% winrate (3 TP1 / 3 SL)
+
+🎯 TP2 (sur les 9 TP1 touchés) :
+- TP2 atteint : 7
+- SL sur tentative TP2 : 2
+- Winrate TP2 : 77.78%
+
+📌 Notes :
+- Légère amélioration par rapport au SL70 → TP1 à 48.6%
+- Sessions très proches : London (53.8%), NY (46.7%), Asia (45.5%)
+- Mardi 🔥 (66.7%) + jeudi et vendredi autour des 50%
+- TP2 correct à 66.67%, structure exploitable
+
+Recommandation :
+Setup équilibré, plus stable qu’en SL70. À privilégier sur London et mardi. Bon ratio TP2. Peut intégrer un plan semi-auto avec filtre session/jour.

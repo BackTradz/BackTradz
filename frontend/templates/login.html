@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Connexion – Stratify</title>
+  <link rel="stylesheet" href="/static/css/login.css">
+  <link rel="stylesheet" href="/static/css/responsive.css" />
+
+</head>
+<body>
+  <main class="login-container">
+    <h1>Connexion à Stratify</h1>
+    <form id="loginForm">
+
+      <label for="identifier">Adresse mail ou nom d’utilisateur :</label>
+      <input type="text" id="identifier" name="identifier" required>
+
+      <label for="password">Mot de passe :</label>
+      <input type="password" id="password" name="password" required>
+
+      <button type="submit">Se connecter</button>
+
+      <div class="oauth-login">
+        <p>Ou connecte-toi via :</p>
+        <a href="/api/auth/google" class="google-signin-btn">
+          <img src="/static/img/google-icon.svg" alt="Google">
+          <span>Continuer avec Google</span>
+        </a>
+      </div>
+
+    </form>
+
+    <div class="login-links">
+      <a href="#">🔐 Mot de passe ou identifiant oublié ?</a><br>
+      <a href="/register">🆕 Pas encore inscrit ?</a>
+    </div>
+  </main>
+
+  <script src="/static/js/login.js"></script>
+</body>
+</html>

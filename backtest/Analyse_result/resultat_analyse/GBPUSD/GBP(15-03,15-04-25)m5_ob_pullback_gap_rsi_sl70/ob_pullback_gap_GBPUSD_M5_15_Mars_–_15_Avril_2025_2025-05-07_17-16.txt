@@ -1,0 +1,19 @@
+=== BACKTEST LOG ===
+DATE : 2025-05-07_17-16
+
+STRATEGIE : ob_pullback_gap_rsi
+PAIRE : GBPUSD
+TIMEFRAME : M5
+PERIODE : 15 Mars – 15 Avril 2025
+
+PARAMETRES :
+- min_wait_candles : 3
+- max_wait_candles : 20
+- allow_multiple_entries : False
+- rsi : 40
+- sl : 70
+- tp1 : 70
+- tp20 : 140
+
+NOTE :
+backtest ob*(gap)+ rsi (40). Setup détectés OK.

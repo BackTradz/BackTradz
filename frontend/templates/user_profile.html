@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Profil - Stratify</title>
+    <link rel="stylesheet" href="/static/css/user_profile.css">
+    <link rel="stylesheet" href="/static/css/responsive.css" />
+
+</head>
+<body>
+    <header>
+        <div class="logo">Stratify</div>
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        <nav id="main-nav">
+            <ul>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="/backtest">Lancer un backtest</a></li>
+            <li><a href="/csv-shop">CSV Library</a></li>
+            <li><a href="/dashboard-user">Mon dashboard</a></li>
+            <li><a href="/a-savoir">À savoir</a></li>
+            <li><a href="/pricing">Prix</a></li>
+            <li style="display: flex; align-items: center; gap: 4px;">
+              <a href="#" onclick="goProfile()">Mon profil</a>
+              <span id="credit-counter" class="credit-badge" style="white-space: nowrap; font-size: 0.9em;">🪙 ...</span>
+            </li>
+            <li id="admin-link" style="display: none;"><a href="/admin">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>🎯 Profil utilisateur</h1>
+        <p id="welcomeMessage">Bienvenue <strong id="usernameDisplay"></strong> 👋</p>
+
+        <form id="profileForm">
+            <label for="first_name">Nom</label>
+            <input type="text" id="first_name" name="first_name" placeholder="Ton prénom">
+
+            <label for="last_name">Prénom</label>
+            <input type="text" id="last_name" name="last_name" placeholder="Ton nom">
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Ton adresse mail">
+
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" id="username" name="username" placeholder="Ton pseudo unique" disabled>
+
+            <button type="submit">💾 Sauvegarder les modifications</button>
+        </form>
+
+        <div id="paymentInfo" style="margin-top: 3rem;">
+            <h3>💳 Informations de paiement</h3>
+            <p>Type d'abonnement : <span id="planType">Chargement...</span></p>
+            <p id="discountLabel" style="color: #00ffaa; font-weight: bold; display: none;">
+            ✅ -10% sur tous les achats de crédits !
+            </p>
+            <p>Crédits restants : <span id="credits">Chargement...</span></p>
+        </div>
+
+        <button id="toggleHistoryBtn" class="toggle-history-btn">📁 Afficher l’historique des achats</button>
+        <div id="purchaseContainer" class="purchase-container">
+            <ul id="purchaseList" ></ul>
+        </div>
+
+
+
+
+        <p id="responseMessage"></p>
+
+        <hr style="margin-top: 3rem; border-color: #333;">
+
+        <button id="logoutBtn" class="danger-btn">🚪 Se déconnecter</button>
+
+        {% if user.plan != "free" %}
+            <button id="unsubscribeBtn" class="danger-btn">Se désabonner</button>
+        {% endif %}
+
+        <button id="deleteAccountBtn" style="background-color: #ff3c3c; color: white;">🗑️ Supprimer mon compte</button>
+    </main>
+
+
+    <script src="/static/js/user_profile.js"></script>
+    <script src="/static/js/global.js"></script>
+</body>
+</html>

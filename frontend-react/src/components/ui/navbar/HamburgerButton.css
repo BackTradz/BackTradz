@@ -1,0 +1,44 @@
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 28px;
+  height: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 60;
+}
+
+.bar {
+  height: 3px;
+  background-color: #e5e7eb;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Animation en mode ouvert */
+.hamburger-btn.open .top {
+  transform: translateY(9px) rotate(45deg);
+}
+.hamburger-btn.open .middle {
+  opacity: 0;
+}
+.hamburger-btn.open .bottom {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Quand le menu hamburger est ouvert → centrer les liens */
+.mobile-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* ✅ centre horizontalement */
+  text-align: center;    /* ✅ centre le texte */
+}
+
+.mobile-menu a,
+.mobile-menu button {
+  width: 100%;
+  text-align: center;
+}

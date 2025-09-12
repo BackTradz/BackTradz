@@ -1,0 +1,33 @@
+
+Analyse Stratégie : OB Pullback Pure + Tendance EMA - SL70
+
+🏁 Total trades : 50
+🎯 TP1 atteint : 23 | ❌ SL touché : 27
+📈 Winrate TP1 global : 46.0%
+
+🕒 Répartition par session :
+- Asia : 31.6% | 6 TP1 / 13 SL
+- London : 62.5% | 10 TP1 / 6 SL
+- New York : 46.7% | 7 TP1 / 8 SL
+
+📅 Répartition par jour :
+- Friday: 75.0% winrate (6 TP1 / 2 SL)
+- Monday: 20.0% winrate (2 TP1 / 8 SL)
+- Sunday: 100.0% winrate (1 TP1 / 0 SL)
+- Thursday: 81.8% winrate (9 TP1 / 2 SL)
+- Tuesday: 40.0% winrate (4 TP1 / 6 SL)
+- Wednesday: 10.0% winrate (1 TP1 / 9 SL)
+
+🎯 TP2 (sur les 23 TP1 touchés) :
+- TP2 atteint : 14
+- SL sur tentative TP2 : 7
+- Winrate TP2 : 60.87%
+
+📌 Notes :
+- Setup solide à 53.7% de winrate TP1 ✅
+- NY session en tête (60%), London et Asia à 50%
+- Jeudi (66.7%), mercredi (63.6%) et mardi (60%) = top jours
+- TP2 à 75.47% → extension fiable
+
+Recommandation :
+Setup très propre à jouer sur NY et mid-week. À intégrer dans le plan semi-auto avec TP2 actif. Cohérent sur tous les axes.

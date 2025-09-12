@@ -1,0 +1,247 @@
+/* On force la modale au-dessus de toutes les cartes/menus */
+.ins-root {
+   position: fixed;
+   inset: 0;
+   z-index: 12000; /* priorité haute pour ne plus être caché */
+}
+.ins-backdrop{position:absolute;inset:0;background:rgba(60, 62, 67, 0.6);backdrop-filter:blur(2px)}
+.ins-panel{position:absolute;inset:0;background:#1e293b;display:flex;flex-direction:column}
+.ins-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.ins-header .title{font-weight:800}
+.ins-header .sub{color:#9aa3b2}
+.ins-header .x{background:transparent;border:0;color:#e6ecff;font-size:18px;cursor:pointer}
+
+.ins-tabs{padding:10px 16px}
+.ins-body{padding:10px 16px;overflow:auto}
+
+.ins-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.ins-kpi{background:#0c0f14;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px}
+.ins-kpi .k{color:#9aa3b2;font-size:.9rem}
+.ins-kpi .v{font-weight:800;font-size:1.1rem}
+
+.ins-table{display:block}
+.ins-table-head,.ins-table-row{display:grid;grid-template-columns:1fr .8fr .9fr .8fr auto;gap:8px;padding:10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.ins-table-head{background:#0f172a;border-radius:10px 10px 0 0}
+.ins-table .right{display:flex;justify-content:flex-end}
+.ins-table .pin{background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:4px 8px;color:#e6ecff;cursor:pointer}
+
+.ins-data .toolbar{display:flex;gap:10px;margin-bottom:8px}
+.ins-data .table-wrap{overflow:auto;border:1px solid rgba(255,255,255,.06);border-radius:10px}
+.ins-data table{width:max-content;min-width:100%;border-collapse:collapse}
+.ins-data th,.ins-data td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.more{margin-top:10px}
+.pins{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.pin-card{
+  /* ✅ tokens global du dashboard */
+  background: #0f172a;
+  border: 1px solid var(--card-bd);
+  border-radius: 12px;
+  padding: 10px;
+}
+.muted{color:#9aa3b2}
+.skeleton{opacity:.75}
+.error{color:#fecaca}
+.ins-data .toolbar {
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px;
+}
+.ins-data .table-wrap { overflow:auto; border:1px solid rgba(255,255,255,.06); border-radius:10px; }
+.ins-data table { width:max-content; min-width:100%; border-collapse:collapse; }
+.ins-data th, .ins-data td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,.06); white-space:nowrap; }
+
+/* Actions / Pin & accessibilité */
+.ins-data .right { text-align: right; }
+.ins-data .pin{
+  background:#0f172a;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:8px;
+  padding:6px 10px;
+  color:#e6ecff;
+  cursor:pointer;
+}
+.ins-data .pin:focus-visible{
+  outline:3px solid rgba(96,165,250,.45);
+  outline-offset:2px;
+}
+
+/* Masquer l’ancien bouton "Charger plus" sans toucher à la logique */
+.ins-data .more{ display:none !important; }
+
+/* ➕ le panel peut scroller : seconde scrollbar indépendante du contenu */
+.ins-panel{overflow:auto;}
+
+
+/* ➕ onglets pleine largeur + scroll horizontal si trop d’onglets */
+.ins-tabs{padding:0;}
+.ins-tabs .pill-tabs{
+  display:flex;
+  gap:12px;
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:10px 16px;           /* garde le même “air” que le body */
+}
+/* scrollbar horizontale visible sous la barre d’onglets */
+.ins-tabs .pill-tabs::-webkit-scrollbar{height:8px}
+.ins-tabs .pill-tabs::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.18);
+  border-radius:8px;
+}
+
+/* --- Scrollbars internes (body + table-wrap) --- */
+.ins-body,
+.ins-data .table-wrap {
+  scrollbar-width: thin;                  /* Firefox */
+  scrollbar-color: rgba(255,255,255,.25) transparent;
+}
+
+.ins-body::-webkit-scrollbar,
+.ins-data .table-wrap::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.ins-body::-webkit-scrollbar-thumb,
+.ins-data .table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(53, 43, 43, 0.25);
+  border-radius: 8px;
+}
+
+.ins-body::-webkit-scrollbar-thumb:hover,
+.ins-data .table-wrap::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,.4);
+}
+
+.ins-body::-webkit-scrollbar-track,
+.ins-data .table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+/* Centrage horizontal des onglets */
+.ins-tabs .pill-tabs {
+  display: flex;
+  justify-content: center;   /* centre si ça tient dans la largeur */
+  gap: 12px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 10px 30px;           /* ⇐ un peu plus d’air sur les côtés */
+  scroll-padding: 24px;     
+}
+
+.ins-tabs .pill-tabs > * {
+  flex: 0 0 auto; /* les onglets gardent leur taille auto */
+}
+
+.ins-tabs{padding:10px 16px;}  /* marge intérieure du cadre arrondi */
+.int-tabs .pill-tabs{
+ display:flex;
+  justify-content:center;     /* centrés si ça tient */
+  gap:14px;                   /* espace entre onglets */
+  width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:0;                  /* pas de padding ici, on gère aux bords via ::before/::after */
+  scroll-padding:24px;        /* snap visuel → évite que l’extrémité colle */
+}
+
+.tz-switch { display:flex; align-items:center; gap:6px; }
+.tz-label  { color:#9aa3b2; font-size:.9rem; }
+/* En-tête d'une carte pin : méta + bouton retirer */
+.pin-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:6px;
+}
+.pin-meta{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#cbd5e1;
+}
+.pin-sep{
+  width:6px;
+  height:6px;
+  border-radius:9999px;
+  background:rgba(255,255,255,.35); /* pipe visuel plus propre que "•" */
+  display:inline-block;
+}
+.pin-value{
+  font-weight:800;
+  font-size:16px;
+  margin:4px 0 6px;
+}
+
+/* Bouton Retirer (discret mais clair) */
+.pin-remove{
+  background:transparent;
+  border:1px solid rgba(248,113,113,.35); /* rouge clair */
+  color:#fecaca;
+  padding:4px 10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.pin-remove:hover{
+  background:rgba(248,113,113,.08);
+  border-color:rgba(248,113,113,.6);
+}
+
+.pin-tz {
+  color: #9aa3b2;
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+/* alignements colonnes num / winrate */
+.ins-data table th.right,
+.ins-data table td.right { text-align: right; }
+.table-wrap{background-color: #0f172a;}
+
+/* regroupe valeur + bouton dans le header */
+.pin-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* ====== Select (UTC) — skin dark + scrollbar ====== */
+.bt-select{
+  background:#0f172a;
+  color:#e6ecff;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  padding:6px 10px;
+  line-height:1.2;
+}
+
+/* focus visible accessible */
+.bt-select:focus{
+  outline:3px solid rgba(96,165,250,.45);
+  outline-offset:2px;
+}
+
+/* Liste déroulante (Chrome/Edge/Blink) */
+.bt-select option,
+.bt-select optgroup{
+  background:#0f172a;   /* fond dark dans le menu */
+  color:#e6ecff;
+}
+
+/* Scrollbar du menu déroulant (Chrome/Edge/Blink) */
+.bt-select::-webkit-scrollbar{ width:10px; }
+.bt-select::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.25);
+  border-radius:8px;
+}
+.bt-select::-webkit-scrollbar-thumb:hover{
+  background:rgba(255,255,255,.40);
+}
+.bt-select::-webkit-scrollbar-track{ background:transparent; }
+
+/* Scrollbar (Firefox) */
+.bt-select{
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,.25) transparent;
+}
+
+@media (min-width:1024px){.ins-panel{inset:6% 8% 6% 8%;border-radius:14px;box-shadow:0 30px 80px rgba(2,8,23,.7)}}
+

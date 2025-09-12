@@ -1,0 +1,16 @@
+{
+    "date": "2025-05-07_18-51",
+    "strategy": "ob_pullback_pure",
+    "pair": "GBPUSD",
+    "timeframe": "M5",
+    "period": "15 Mars \u2013 15 Avril 2025",
+    "params": {
+        "min_wait_candles": 3,
+        "max_wait_candles": 20,
+        "allow_multiple_entries": false,
+        "sl": 70,
+        "tp1": 70,
+        "tp20": 140
+    },
+    "note": "backtest ob normal sans gap  . Setup d\u00e9tect\u00e9s OK."
+}

@@ -1,0 +1,40 @@
+/* TopProgress — barre fine, dégradé cyan→indigo, shimmer, peg lumineux */
+.tp-root{
+  position: fixed;
+  top: 0; left: 0; width: 100%;
+  height: var(--tp-height, 3px);
+  z-index: var(--tp-z, 9999);
+  pointer-events: none;
+}
+.tp-bar{
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  background: linear-gradient(90deg, var(--tp-from, #22d3ee), var(--tp-to, #6366f1));
+  box-shadow: 0 0 8px var(--tp-to, #6366f1);
+  transform: translateZ(0);
+  will-change: width;
+  transition: width .18s ease;
+  overflow: hidden;
+}
+.tp-bar::after{ /* shimmer */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,.18) 50%,
+    transparent 100%);
+  background-size: 200% 100%;
+  animation: tpShimmer 1.2s linear infinite;
+}
+@keyframes tpShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.tp-peg{
+  position: absolute;
+  right: 0; top: 0; height: 100%; width: 10px;
+  box-shadow: 0 0 10px 2px rgba(99,102,241,.55), 0 0 3px 1px rgba(99,102,241,.6);
+  border-radius: 0 2px 2px 0;
+  opacity: .9;
+}

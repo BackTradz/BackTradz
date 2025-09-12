@@ -1,0 +1,514 @@
+/* src/pages/support/support.css
+   =========================================================
+   SUPPORT PAGE — STYLE PRO, COMMENTÉ & TAILWIND-READY
+   - Palette & tokens CSS variables alignés sur ton thème
+   - Grille responsive propre
+   - Centrage parfait du switch (PillTabs)
+   - Champs + confortables, bouton full-width
+   ========================================================= */
+
+/* ---------- THEME / TOKENS (root local à la page) ---------- */
+.support-page {
+  /* Couleurs (garde les mêmes clés qu'ailleurs pour switcher vers Tailwind facilement) */
+  --bg0:        #1e293b;          /* fond global */
+  --card:       #0f172a;          /* panneau/section */
+  --text:       #e6ecff;          /* texte principal */
+  --muted:      #94a3b8;          /* texte secondaire */
+  --primary:    #3b82f6;          /* bleu brand */
+  --primary-15: rgba(59,130,246,.15);
+  --primary-25: rgba(59,130,246,.25);
+
+  /* Espace / rayons / ombres (tokens pour cohérence UI) */
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 16px;
+  --space-5: 20px;
+
+  --radius-s: 8px;
+  --radius-m: 10px;
+  --radius-l: 12px;
+  --radius-xl: 14px;
+
+  --shadow-1: 0 1px 2px rgba(0,0,0,.25);
+  --shadow-2: 0 6px 18px rgba(0,0,0,.25);
+
+  background: var(--bg0);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ---------- HERO ---------- */
+.support-hero {
+  padding: 36px 0 16px;
+  background: var(--bg0);
+}
+.support-hero .title { font-weight: 800; font-size: 28px; }
+.support-hero .subtitle { margin-top: 6px; color: var(--muted); }
+
+/* ---------- SECTION UTIL (hérite visuellement de ta Section.jsx) ---------- */
+/* Rien à styliser ici : on se concentre sur le contenu interne (switch + forms). */
+
+/* ---------- SWITCH (PillTabs) — CENTRÉ + AÉRÉ ---------- */
+#support .tabs-center {
+  display: flex;
+  justify-content: center;          /* centre horizontalement */
+  margin: 0 auto var(--space-4) auto;
+}
+
+/* Le wrapper ne s’étire pas jusqu’aux bords; on limite naturellement avec le contenu */
+#support .tabs-center > * {
+  display: inline-flex;             /* prend juste la largeur des boutons */
+}
+
+/* ---------- FORMULAIRES ---------- */
+.support-form {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 640px;                 /* largeur confortable et centrée */
+  margin: 0 auto;
+}
+
+/* Grille Nom/Email sur 2 colonnes desktop → 1 colonne mobile */
+.support-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+@media (max-width: 860px) {
+  .support-form .form-row { grid-template-columns: 1fr; }
+}
+
+.support-form .form-group { display: grid; gap: var(--space-2); }
+.support-form label { font-weight: 700; font-size: 14px; }
+
+/* Champs */
+.support-form input,
+.support-form textarea {
+  width: 100%;
+  height: 46px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: var(--radius-l);
+  padding: 10px 12px;
+  color: var(--text);
+  font: 500 14px/1.2 inherit;
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+.support-form input::placeholder,
+.support-form textarea::placeholder { color: var(--muted); }
+
+.support-form textarea {
+  min-height: 180px;
+  height: auto;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.support-form input:focus,
+.support-form textarea:focus {
+  border-color: var(--primary-25);
+  box-shadow: 0 0 0 3px var(--primary-15);
+  outline: none;
+}
+
+/* Bouton */
+.btn-primary {
+  height: 44px;
+  border-radius: var(--radius-m);
+  font-weight: 800;
+  padding: 0 var(--space-4);
+  cursor: pointer;
+  background: var(--primary);
+  color: #0b1220;
+  border: none;
+  box-shadow: var(--shadow-1);
+  transition: filter .15s ease, transform .02s ease;
+}
+.btn-primary:hover { filter: brightness(1.05); }
+.btn-primary:active { transform: translateY(1px); }
+.btn-block { width: 100%; }
+
+/* Note légale */
+.small-note { font-size: 13px; margin-top: var(--space-4); color: var(--muted); }
+.small-note .link { color: var(--primary); text-decoration: none; }
+.small-note .link:hover { text-decoration: underline; }
+
+
+/* Réduction de l'espace entre le hero et la première section */
+.support-hero {
+  padding-bottom: 1px;  /* au lieu de 16px */
+}
+
+#support.section {
+  margin-top: 1px;     /* réduit (au lieu de 32px souvent par défaut) */
+}
+
+/* =========================================================
+   PANEL — largeur maîtrisée + ombrage premium
+   ========================================================= */
+
+/* Tokens (facile à tweaker plus tard ou mapper sur Tailwind) */
+.support-page {
+  --panel-w: 940px;   /* largeur max du panneau Support */
+  --form-w:  700px;   /* largeur max des inputs */
+}
+
+/* Cible le container rendu par <Section id="support" ...>  */
+.support-page #support.card-std,
+.support-page section#support.card-std,
+.support-page .card-std#support {
+  max-width: var(--panel-w);
+  margin-left: auto;
+  margin-right: auto;
+  /* ombrage propre + léger glow bleu très discret */
+  box-shadow:
+    0 8px 24px rgba(2, 8, 23, 0.45),
+    0 1px 0 rgba(255,255,255,0.04),
+    0 20px 60px rgba(59,130,246,0.08);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(15,23,42,.98), rgba(15,23,42,.93));
+  padding: 22px; /* un peu plus compact visuellement */
+}
+
+/* Formulaire centré, un poil plus large pour occuper mieux le panel */
+.support-form {
+  max-width: var(--form-w);
+  margin: 0 auto;
+}
+
+/* Switch (PillTabs) parfaitement centré et sans coller les bords */
+#support .tabs-center {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 18px auto;
+}
+#support .tabs-center > * {
+  display: inline-flex;
+  padding: 0 6px;       /* évite l’effet "collé" aux bords du contour */
+  border-radius: 12px;
+}
+
+/* Responsive : quand l’écran est étroit, on relâche les contraintes */
+@media (max-width: 1080px) {
+  .support-page { --panel-w: 96vw; --form-w: 86vw; }
+}
+@media (max-width: 860px) {
+  .support-page { --form-w: 92vw; }
+}
+
+/* ===================== FIX #1 — Titre centré ===================== */
+/* Hero (si tu veux aussi centrer le H1 en haut) */
+.support-hero .container-std { text-align: center; }
+
+/* Titre de la carte "Contactez-nous" (Section #support uniquement) */
+#support .section-title,
+#support header .title,
+#support .head .title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  margin: 0 auto var(--space-3);
+}
+
+/* ===================== FIX #2 — Switch clean & bien centré ===================== */
+/* Wrapper centré */
+#support .tabs-center {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 18px auto;
+}
+/* IMPORTANT : retire/écrase toute ancienne règle qui stylait l’enfant direct.
+   C’était la source du "contour décalé" sur la gauche. */
+#support .tabs-center > * {
+  display: inline-flex;
+  padding: 0;           /* reset: plus de padding ici */
+  border-radius: 0;     /* reset: pas de radius ici */
+}
+
+/* Si ton composant root a la classe .pill-tabs, on sécurise l’overflow
+   pour éviter les halos qui débordent sur les coins. */
+#support .pill-tabs {
+  overflow: hidden;
+  border-radius: 12px;  /* s’adapte à ton composant */
+}
+
+/* ===================== FIX #3 — Panel: ombrage + lisibilité ===================== */
+/* On renforce l’ombre et on ajoute un léger glow bleuté très discret */
+.support-page #support.card-std,
+.support-page section#support.card-std,
+.support-page .card-std#support {
+  box-shadow:
+    0 20px 60px rgba(2, 8, 23, 0.55),
+    0 30px 80px rgba(2, 8, 23, 0.35),
+    0 0 0 1px rgba(255,255,255,0.05),
+    0 0 0 6px rgba(59,130,246,0.06); /* glow doux */
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(15,23,42,.98), rgba(15,23,42,.93));
+}
+
+/* Form centré + largeur confortable (déjà fait, on rappelle les tokens) */
+.support-page { --panel-w: 940px; --form-w: 700px; }
+.support-form { max-width: var(--form-w); margin: 0 auto; }
+
+/* ==== Mini-nav du hero : aide à “sortir” de la page ==== */
+.support-hero .mini-nav{
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.support-hero .mn-link{
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 700;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+.support-hero .mn-link:hover{ text-decoration: underline; }
+.support-hero .mn-sep{ color: var(--muted); }
+
+/* Bouton “Fermer” optionnel dans le panel */
+#support .panel-close{
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 34px; height: 34px;
+  border-radius: 999px;
+  display: grid; place-items: center;
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  text-decoration: none;
+  transition: background .15s ease;
+}
+#support .panel-close:hover{ background: rgba(255,255,255,.1); }
+
+/* Le CTAButton a déjà ses classes .dbt-*, on lui laisse le style global.
+   Pour garantir la pleine largeur dans ce panel : */
+#support .dbt-btn.dbt-btn-block{ width: 100%; }
+
+#support { position: relative; }
+
+/* ============== Mini-nav : liens simples, pas de pills ============== */
+.support-hero .mini-nav{
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.support-hero .mn-link{
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 700;
+  padding: 0;                 /* plus de fond ni de bord */
+  border: 0;
+  background: transparent;
+}
+.support-hero .mn-link:hover{ text-decoration: underline; }
+.support-hero .mn-sep{ color: var(--muted); }
+
+/* ============== Panel : rapprocher du titre + ombrage visible ============== */
+.support-page section#support.card-std,
+.support-page #support.card-std,
+.support-page .card-std#support{
+  margin: 10px auto 0 auto;   /* rapproché du hero */
+  /* ombre renforcée */
+  box-shadow:
+    0 20px 60px rgba(2, 8, 23, 0.55),
+    0 30px 80px rgba(2, 8, 23, 0.35),
+    0 0 0 1px rgba(255,255,255,0.05),
+    0 0 0 6px rgba(59,130,246,0.06);
+}
+
+/* ============== En-tête du panel : on masque le titre ============== */
+/* si le composant Section impose un header, on cache juste le libellé */
+#support .section-title,
+#support header .title,
+#support .head .title { display: none; }
+
+/* on réduit l’espace du header si présent */
+#support .head, 
+#support header {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* ============== Switch centré (rappel) ============== */
+#support .tabs-center{
+  display:flex; justify-content:center; margin: 0 auto 16px;
+}
+#support .tabs-center > *{ display:inline-flex; padding:0; border-radius:0; }
+#support .pill-tabs{ overflow:hidden; border-radius:12px; }
+
+/* ============== Bouton “X” dans le panel, à gauche ============== */
+#support { position: relative; } /* ancre */
+#support .panel-close{
+  position: absolute;
+  top: 12px; left: 12px;     /* à gauche */
+  width: 34px; height: 34px;
+  border-radius: 999px;
+  display: grid; place-items: center;
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  text-decoration: none;
+  transition: background .15s ease, transform .02s;
+  z-index: 3;
+}
+#support .panel-close:hover{ background: rgba(255,255,255,.1); }
+#support .panel-close:active{ transform: translateY(1px); }
+
+/* ============== Form largeur ============== */
+.support-page { --panel-w: 940px; --form-w: 700px; }
+.support-form { max-width: var(--form-w); margin: 0 auto; }
+
+/* ===== Close button: fix position + draw "X" in CSS ===== */
+#support .panel-close{
+  left: 12px;               /* force côté gauche */
+  right: auto !important;   /* évite l’ancienne règle "right:12px" */
+}
+
+/* icône "X" sans glyphe (plus aucun caractère parasite) */
+#support .panel-close .x{
+  position: relative;
+  display: block;
+  width: 16px; height: 16px;
+}
+#support .panel-close .x::before,
+#support .panel-close .x::after{
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 14px; height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transform-origin: center;
+}
+#support .panel-close .x::before{ transform: translate(-50%,-50%) rotate(45deg); }
+#support .panel-close .x::after { transform: translate(-50%,-50%) rotate(-45deg); }
+
+/* permet à un champ de prendre toute la rangée de la grille */
+.support-form .col-span-2 { grid-column: 1 / -1; }
+
+.footer{
+  display: flex;
+  position: relative;
+  justify-content: center;
+}
+/* Centrer le bloc de note dans le panel */
+.footer {
+  display: flex;
+  justify-content: center;
+}
+
+/* Le wrapper se dimensionne sur le contenu (≈ largeur de la 2e ligne) */
+.footer .note-block {
+  display: inline-block;
+  text-align: left;            /* la 2e ligne reste alignée à gauche */
+}
+
+/* 1ère ligne centrée à l'intérieur de la même largeur */
+.footer .line-1 {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+/* Option: compacter un peu le texte secondaire */
+.footer .small-note { line-height: 1.4; }
+
+/* ===== Bouton succès (scopé à la page Support) ===== */
+#support .dbt-btn[data-state="success"] {
+  background: #22c55e !important;    /* vert succès */
+  color: #0b1220 !important;
+  border-color: transparent !important;
+  animation: btn-pop 180ms ease, btn-glow 1.2s ease;
+}
+
+/* légère variation au hover pendant l'état succès */
+#support .dbt-btn[data-state="success"]:hover {
+  filter: brightness(1.04);
+}
+
+/* petit pop */
+@keyframes btn-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* glow qui se diffuse puis disparaît */
+@keyframes btn-glow {
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.45); }
+  100% { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+}
+
+/* === Resserre l’espace haut du hero + gap vers le panel === */
+.support-hero {
+  padding: 14px 0 8px !important;  /* au lieu de 36px / 16px */
+}
+
+/* gap minimal entre le hero et la carte */
+.support-page section#support.card-std,
+.support-page #support.card-std,
+.support-page .card-std#support {
+  margin-top: 6px !important;      /* au lieu de 10px */
+}
+
+/* mini-nav un peu plus près du titre */
+.support-hero .mini-nav { 
+  margin-top: 6px !important;      /* au lieu de 10px */
+}
+
+/* =========================================================
+   📱 SUPPORT — Hotfix mobile ≤360px (0 régression)
+   - Panel moins “massif” + pas de collage bords
+   - Forme 1 colonne sûre, champs confort (anti-zoom iOS)
+   - Tabs (pill) scrollables si trop longues
+   ========================================================= */
+@media (max-width: 360px) {
+  /* Panel (Section #support) : un peu plus compact */
+  .support-page section#support.card-std,
+  .support-page #support.card-std,
+  .support-page .card-std#support {
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+
+  /* Formulaire : passe en 1 colonne, gaps réduits */
+  .support-form { gap: 12px !important; }
+  .support-form .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Champs confort + anti-zoom iOS (font-size >= 16px) */
+  .support-form input,
+  .support-form textarea {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+
+  /* CTA pleine largeur + hauteur confortable */
+  .btn-primary,
+  #support .dbt-btn.dbt-btn-block { min-height: 48px; width: 100%; }
+
+  /* Tabs pill : pas de casse, défilement horizontal propre */
+  #support .tabs-center { padding: 0 6px; }
+  #support .pill-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  #support .pill-tabs > * { white-space: nowrap; }
+
+  /* Sécurité anti-scroll horizontal de la page */
+  .support-page { overflow-x: clip; }
+}

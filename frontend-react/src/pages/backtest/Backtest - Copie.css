@@ -1,0 +1,487 @@
+/* ============================================================
+   Backtest.css — Styles SaaS (clean + commenté)
+   ------------------------------------------------------------
+   - Zéro régression visuelle
+   - Pas de doublons (bt-page, bt-card, section-title, etc.)
+   - Regroupé par zones : page, header, form, controls, aside,
+     alerts, loader, compactage
+   ============================================================ */
+
+/* ========== PAGE & HEADER ================================== */
+
+.bt-page {
+  min-height: calc(100vh - 80px);
+  background: #1e293b;                 /* cohérent avec tes autres pages */
+  color: #e5edf6;
+  padding: 1.25rem 1rem 3rem;           /* header compact */
+}
+.bt-page .max-w-7xl { margin: 0 auto; }
+
+.bt-header {
+  /* ✅ mêmes dimensions que le panel pour aligner parfaitement à gauche */
+  max-width: 1200px;           /* idem panel */
+  margin: 0 auto 8px auto;     /* centre le bloc, espace sous le titre */
+  padding: 0 16px;             /* idem panel (garde la même marge intérieure) */
+
+  display: grid;
+  gap: .25rem;
+}
+.bt-header h1 { margin: 0; line-height: 1.15; }
+.bt-muted { color: #94a3b8; font-size: .95rem; margin: 0; }
+
+/* Quand une grille principale a une classe mt-6 côté JSX,
+   on réduit un peu l’espace pour coller le header */
+.bt-page .grid.mt-6 { margin-top: 1rem !important; }
+@media (min-width: 1024px) {
+  .bt-page { padding-top: 1rem; }
+  .bt-page .grid.mt-6 { margin-top: .75rem !important; }
+}
+
+/* ========== CARDS & FORM =================================== */
+
+.bt-card,
+.bt-form {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgba(0,0,0,.25);
+}
+.bt-form {
+  padding: 1.1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+/* ========== GRIDS & FIELDS ================================= */
+
+.bt-grid {
+  display: grid;
+  gap: 0.9rem; /* léger resserrage */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.bt-field { min-width: 0; }             /* évite chevauchement en grid */
+
+.bt-field label {
+  display: block;
+  font-size: .85rem;
+  color: #94a3b8;
+  margin-bottom: .35rem;
+}
+ .bt-hint{
+   color:#94a3b8;
+   font-size:.85rem;
+ }
+ .bt-badge{
+   display:inline-block;
+   margin-left:.5rem;
+   padding:.1rem .5rem;
+   font-size:.75rem;
+   border-radius:999px;
+   background:#0f172a;
+   border:1px solid #334155;
+   color:#dbeafe;
+ }
+
+.bt-field input,
+.bt-field select {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  overflow: hidden;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  border-radius: 8px;
+  padding: .55rem .8rem;
+  font-size: .95rem;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.bt-field input:focus,
+.bt-field select:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56,189,248,.15);
+}
+/* ====== File upload (CSV) ====== */
+.bt-file {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  border-radius: 10px;
+  padding: .55rem .6rem;
+  font-size: .95rem;
+  line-height: 1.2;
+  transition: border-color .2s ease, box-shadow .2s ease, filter .15s ease;
+}
+
+/* style du bouton intégré côté navigateur */
+.bt-file::file-selector-button {
+  margin-right: .75rem;
+  padding: .5rem .9rem;
+  border: 1px solid #3b82f6;                 /* indigo-500 */
+  border-radius: 8px;
+  background: linear-gradient(180deg,#60a5fa,#3b82f6); /* sky→indigo */
+  color: #0b1220;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(59,130,246,.25);
+}
+
+.bt-file:hover::file-selector-button { filter: brightness(1.05); }
+.bt-file:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56,189,248,.15);
+}
+
+/* petit “pill” pour le nom du fichier sélectionné */
+.bt-file-name {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: .45rem;
+  padding: .35rem .6rem;
+  max-width: 100%;
+  background: #0b1220;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  border-radius: 8px;
+  font-size: .85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bt-file-name .size { color: #94a3b8; font-weight: 600; }
+.bt-hint {
+  display: block;
+  margin-top: .45rem;
+  color: #94a3b8;             /* muted */
+  font-size: .9rem;
+}
+
+.bt-link {
+  color: #60a5fa;             /* sky-400 */
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(96,165,250,.45);
+  padding-bottom: 1px;
+}
+.bt-link:hover { text-decoration: underline; }
+
+
+/* 3 colonnes fixes (SL / TP1 / TP2) dès md */
+@media (min-width: 768px) {
+  .bt-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+/* ========== SEGMENT/TABS & PRESETS ========================= */
+
+.bt-segmented {
+  display: inline-flex;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.bt-seg-btn {
+  background: transparent;
+  border: 0;
+  color: #cbd5e1;
+  padding: .45rem .75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .9rem;
+}
+.bt-seg-btn:hover { color: #fff; }
+.bt-seg-btn.is-active {
+  background: #38bdf8; /* sky-400 */
+  color: #0b1220;
+  box-shadow: 0 8px 18px rgba(56,189,248,.22);
+}
+
+.bt-presets {
+  display: flex; gap: .5rem; flex-wrap: wrap; align-items: center;
+  margin-bottom: .35rem;
+}
+.bt-chip {
+  position: relative;
+  background: transparent;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  font-size: .8rem;
+  cursor: pointer;
+}
+.bt-chip:hover { border-color: #38bdf8; }
+.bt-chip:active { transform: translateY(1px); }
+.bt-chip.is-active { border-color: #38bdf8; background: rgba(56,189,248,.08); }
+
+/* ========== PARAMS & ACTIONS =============================== */
+
+.bt-params { border-top: 1px dashed #334155; padding-top: .75rem; }
+
+.bt-section-title {
+  color: #dbeafe;            /* lisible */
+  font-weight: 700;
+  display: flex; align-items: center; gap: .5rem;
+}
+.bt-section-title::before {
+  content: "⚙️";
+  font-size: 1rem;
+  opacity: .9;
+}
+
+.bt-actions { display: flex; gap: 10px; align-items: center; }
+
+.bt-run {
+  background: #38bdf8;
+  color: #0b1220;
+  border: 0;
+  border-radius: 8px;
+  padding: .6rem 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.bt-run:disabled { opacity: .55; cursor: not-allowed; }
+
+.bt-sticky-actions {
+  position: sticky; bottom: -1px;
+  background: linear-gradient(180deg, rgba(11,18,32,0) 0%, rgba(11,18,32,.9) 35%, #0f172a 100%);
+  backdrop-filter: blur(4px);
+  margin-top: .5rem; padding-top: .75rem;
+  border-top: 1px solid #1e293b;
+  display: flex; gap: .5rem; align-items: center;
+}
+
+/* ========== ASIDE & ALERTS ================================= */
+
+.bt-aside { display: grid; gap: 1rem; }
+
+.bt-alert {
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: .75rem .9rem;
+  font-size: .92rem;
+}
+.bt-alert.info    { background: #0f172a; color: #cbd5e1; }
+.bt-alert.success { background: #0f172a; color: #bbf7d0; border-color: #065f46; }
+.bt-alert.error   { background: #0f172a; color: #fecaca; border-color: #7f1d1d; }
+
+.bt-error { color: #ef4444; font-size: .9rem; }
+
+/* ========== LOADER (overlay + top bar) ===================== */
+
+.bt-progress {
+  position: fixed; inset: 0; z-index: 9999;  /* au-dessus de tout */
+  background: rgba(6, 8, 15, .55);
+  backdrop-filter: blur(4px);
+  display: grid; place-items: center;
+  pointer-events: all;
+}
+.bt-progress-card {
+  width: min(520px, 92vw);
+  background: #0b1220;
+  border: 1px solid #1e293b;
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,.4);
+  text-align: center;
+}
+.bt-progress-title { color: #e2e8f0; font-weight: 700; font-size: 1.05rem; margin-bottom: .6rem; }
+.bt-progress-bar { height: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 999px; overflow: hidden; }
+.bt-progress-fill { height: 100%; background: linear-gradient(90deg, #22d3ee, #38bdf8, #60a5fa); transition: width .18s ease; }
+.bt-progress-percent { margin-top: .45rem; color: #cbd5e1; font-weight: 600; }
+.bt-progress-note { margin-top: .2rem; color: #94a3b8; font-size: .9rem; }
+
+.bt-topbar { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10000; background: transparent; }
+.bt-topbar-fill { height: 100%; background: linear-gradient(90deg, #22d3ee, #38bdf8, #60a5fa); box-shadow: 0 0 12px rgba(56,189,248,.6); transition: width .18s ease; }
+
+
+/* ===== INLINE PROGRESS (non bloquant, dans le form) ===== */
+.bt-inline-progress{
+  pointer-events: none;            /* n'intercepte pas la souris */
+  margin-bottom: .25rem;
+}
+.bt-inline-track{
+  height: 8px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bt-inline-fill{
+  height: 100%;
+  transition: width .18s ease;
+  background: linear-gradient(90deg,#22d3ee,#38bdf8,#60a5fa);
+  box-shadow: 0 0 10px rgba(56,189,248,.35) inset;
+}
+.bt-inline-legend{
+  display: flex; gap: .5rem; align-items: baseline;
+  margin-top: .35rem;
+  font-size: .9rem;
+  color: #cbd5e1;
+}
+.bt-inline-percent{ font-weight: 700; }
+.bt-inline-note{ opacity: .85; }
+
+/* === Barre de chargement à côté du bouton — pleine largeur ================= */
+
+/* la rangée actions occupe toute la largeur */
+.bt-sticky-actions{
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  flex-wrap: nowrap;             /* pas de retour à la ligne sur desktop */
+}
+
+/* le bouton garde sa taille, la barre prend tout l'espace restant */
+.bt-sticky-actions .bt-run{ 
+  flex: 0 0 auto;                /* taille du bouton = contenu */
+}
+
+.bt-sticky-actions .bt-inline-progress{
+  flex: 1 1 auto;                /* ⬅️ occupe tout l'espace disponible */
+  min-width: 0;                  /* évite tout overflow */
+  margin: 0;                     /* on vire le margin du mode "plein form" */
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.bt-sticky-actions .bt-inline-track{
+  width: 100%;                   /* ⬅️ la barre s'étire à 100% de la ligne */
+  height: 6px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bt-sticky-actions .bt-inline-fill{
+  height: 100%;
+  background: linear-gradient(90deg,#22d3ee,#38bdf8,#60a5fa);
+  transition: width .18s ease;
+}
+
+.bt-sticky-actions .bt-inline-legend{
+  margin-top: 0;
+  display: inline-flex;
+  gap: .4rem;
+  align-items: baseline;
+  font-size: .85rem;
+  color: #cbd5e1;
+  white-space: nowrap;           /* “64% Analyse en cours…” tient sur une ligne */
+}
+
+.bt-sticky-actions .bt-inline-percent{
+  font-weight: 700;
+  min-width: 34px;
+  text-align: right;
+}
+
+ /* --- Fix z-index du menu Select uniquement sur la page Backtest --- */
+ .bt-page .strt-select { position: relative; z-index: 1000; }
+ .bt-page .strt-panel  { z-index: 2000; }   /* au-dessus des champs voisins */
+ .bt-form, .bt-field { overflow: visible; } /* évite tout clipping éventuel */
+
+ /* --- Fix stacking des Selects uniquement sur la page Backtest --- */
+/* On neutralise l'isolation qui crée un stacking context par Select */
+.bt-page .strt-select { isolation: auto; }
+
+/* On élève le panneau du Select largement au-dessus des champs voisins */
+.bt-page .strt-panel { z-index: 4000 !important; }
+
+/* Sécurité si un parent a overflow hidden (évite tout clipping) */
+.bt-page .bt-form,
+.bt-page .bt-field { overflow: visible; }
+/* ===== Backtest: layout & anti-overflow ===== */
+
+/* Tout le form en boîte, pour que width:100% ne déborde pas */
+.bt-form, .bt-form * {
+  box-sizing: border-box;
+}
+
+/* Empêche les enfants de forcer la largeur de leur parent */
+.bt-field, .bt-field > * {
+  min-width: 0;
+}
+
+/* Tous les champs prennent 100% de la largeur utile */
+.bt-field input,
+.bt-field select,
+.bt-field textarea,
+.bt-field .strt-select {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Grille dates: 1 col mobile → 2 cols dès md */
+.bt-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 768px) {
+  .bt-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Grille SL/TP: auto-fit pour éviter tout dépassement */
+.bt-grid-3 {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+}
+
+/* Sélects: pas de clipping local, menu au-dessus */
+.bt-page .strt-select { position: relative; }
+.bt-page .strt-panel  { z-index: 2000; }
+
+/* Sécurité: aucun parent ne coupe le contenu du form */
+.bt-form, .bt-field { overflow: visible; }
+
+/* Mobile : on laisse passer la barre sous le bouton pour respirer */
+@media (max-width: 640px){
+  .bt-sticky-actions{ flex-wrap: wrap; }
+  .bt-sticky-actions .bt-inline-progress{ flex-basis: 100%; }
+}
+
+/* Empêche tout dépassement horizontal */
+.bt-form, .bt-form * { box-sizing: border-box; }
+.bt-field, .bt-field > * { min-width: 0; }
+.bt-field input, .bt-field select, .bt-field textarea, .bt-field .strt-select { width: 100%; max-width: 100%; }
+
+/* Backtest.css */
+
+/* … (le reste ne change pas) */
+
+/* ====== Conteneur max-width (remplace les utilitaires Tailwind ignorés) ====== */
+/* Centre la page et remet une marge latérale propre. */
+.bt-container{
+  width: 100%;
+  max-width: 1280px;     /* ≈ l’ancien max-w-[1200px] */
+  margin: 0 auto;        /* ≈ mx-auto */
+  padding: 0 16px;       /* ≈ px-4 */
+}
+
+/* ====== Wrapper pour centrer le pill (remplace flex/justify-center) ====== */
+.bt-pills{
+  display: flex;
+  justify-content: center; /* pill centré horizontalement */
+  margin: 0 auto 12px auto;/* petit espace sous le switch */
+}
+
+/* (optionnel) si ton composant de pill a un bloc interne, on le laisse en largeur naturelle */
+.bt-pills > * { max-width: 100%; }
+

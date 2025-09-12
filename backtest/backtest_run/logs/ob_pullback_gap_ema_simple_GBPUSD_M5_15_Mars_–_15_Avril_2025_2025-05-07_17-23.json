@@ -1,0 +1,17 @@
+{
+    "date": "2025-05-07_17-23",
+    "strategy": "ob_pullback_gap_ema_simple",
+    "pair": "GBPUSD",
+    "timeframe": "M5",
+    "period": "15 Mars \u2013 15 Avril 2025",
+    "params": {
+        "min_wait_candles": 3,
+        "max_wait_candles": 20,
+        "allow_multiple_entries": false,
+        "ema": 50,
+        "sl": 100,
+        "tp1": 100,
+        "tp20": 200
+    },
+    "note": "backtest ob*(gap)+ buy si prix>ema50 et l'inverse . Setup d\u00e9tect\u00e9s OK."
+}
