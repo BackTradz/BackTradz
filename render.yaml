@@ -1,64 +1,30 @@
+# render.yaml — BackTradz (Blueprint)
+
+envVarGroups:
+  - name: backtradz-prod     # <- ce nom doit être EXACTEMENT celui créé dans Render
+
 services:
+  # ---------- BACKEND (FastAPI) ----------
   - type: web
     name: backtradz-backend
     env: python
-    buildCommand: "pip install -r backend/requirements.txt"
-    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port 10000"
+    rootDir: backend
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port 10000"
     envVars:
-      - key: RESEND_API_KEY
-        fromEnvVar: RESEND_API_KEY
-      - key: SUPPORT_INBOX
-        fromEnvVar: SUPPORT_INBOX
-      - key: SUPPORT_FROM
-        fromEnvVar: SUPPORT_FROM
-      - key: CORS_ORIGINS
-        fromEnvVar: CORS_ORIGINS
-      - key: FRONTEND_URL
-        fromEnvVar: FRONTEND_URL
-      - key: BACKEND_PUBLIC_URL
-        fromEnvVar: BACKEND_PUBLIC_URL
-      - key: BRAND_NAME
-        fromEnvVar: BRAND_NAME
-      - key: SMTP_HOST
-        fromEnvVar: SMTP_HOST
-      - key: SMTP_PORT
-        fromEnvVar: SMTP_PORT
-      - key: SMTP_SECURE
-        fromEnvVar: SMTP_SECURE
-      - key: SMTP_USER
-        fromEnvVar: SMTP_USER
-      - key: SMTP_PASS
-        fromEnvVar: SMTP_PASS
-      - key: SMTP_FROM
-        fromEnvVar: SMTP_FROM
-      - key: SMTP_DEBUG
-        fromEnvVar: SMTP_DEBUG
-      - key: GOOGLE_CLIENT_ID
-        fromEnvVar: GOOGLE_CLIENT_ID
-      - key: GOOGLE_CLIENT_SECRET
-        fromEnvVar: GOOGLE_CLIENT_SECRET
-      - key: GOOGLE_REDIRECT_URI
-        fromEnvVar: GOOGLE_REDIRECT_URI
-      - key: STRIPE_SECRET_KEY
-        fromEnvVar: STRIPE_SECRET_KEY
-      - key: STRIPE_WEBHOOK_SECRET
-        fromEnvVar: STRIPE_WEBHOOK_SECRET
-      - key: PAYPAL_CLIENT_ID
-        fromEnvVar: PAYPAL_CLIENT_ID
-      - key: PAYPAL_CLIENT_SECRET
-        fromEnvVar: PAYPAL_CLIENT_SECRET
-      - key: NOWPAYMENTS_API_KEY
-        fromEnvVar: NOWPAYMENTS_API_KEY
-      - key: IPN
-        fromEnvVar: IPN
-      - key: KEY public
-        fromEnvVar: KEY public
+      - fromGroup: backtradz-prod
+    healthCheckPath: /health   # adapte si tu n’as pas /health
 
-  - type: web
+  # ---------- FRONTEND (Vite) ----------
+  - type: static
     name: backtradz-frontend
-    env: static
-    buildCommand: "cd frontend && npm install && npm run build"
-    staticPublishPath: frontend/dist
+    rootDir: frontend-react
+    buildCommand: "npm ci && npm run build"
+    staticPublishPath: dist
     envVars:
-      - key: VITE_API_BASE_URL
-        fromEnvVar: VITE_API_BASE_URL
+      - fromGroup: backtradz-prod
+    # (optionnel) pour éviter le cache agressif pendant la V1
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-store
