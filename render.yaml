@@ -1,10 +1,16 @@
+# render.yaml — backend only (start at repo root)
+envVarGroups:
+  - name: backtradz-prod
+
 services:
   - type: web
     name: backtradz-backend
     env: python
     plan: free
-    rootDir: backend
-    buildCommand: "pip install -r ../requirements.txt"
-    startCommand: "uvicorn main:app --host 0.0.0.0 --port 10000"
+    rootDir: .                          # <- démarre à la RACINE
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port 10000"
     envVars:
+      - key: PYTHONPATH                 # <- facultatif mais safe
+        value: .
       - fromGroup: backtradz-prod
