@@ -1,29 +1,30 @@
 # render.yaml — BackTradz (Blueprint)
 
 envVarGroups:
-  - name: backtradz-prod     # <- ce nom doit être EXACTEMENT celui créé dans Render
+  - name: backtradz-prod   # doit matcher EXACTEMENT le nom du group créé dans Render
 
 services:
   # ---------- BACKEND (FastAPI) ----------
   - type: web
     name: backtradz-backend
     env: python
+    plan: free
     rootDir: backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn main:app --host 0.0.0.0 --port 10000"
     envVars:
       - fromGroup: backtradz-prod
-    healthCheckPath: /health   # adapte si tu n’as pas /health
+    healthCheckPath: /health   # adapte si besoin
 
   # ---------- FRONTEND (Vite) ----------
-  - type: static
+  - type: static_site        # <= le bon type !
     name: backtradz-frontend
-    rootDir: frontend-react
+    plan: free
+    rootDir: frontend-react   # adapte si ton dossier diffère
     buildCommand: "npm ci && npm run build"
     staticPublishPath: dist
     envVars:
       - fromGroup: backtradz-prod
-    # (optionnel) pour éviter le cache agressif pendant la V1
     headers:
       - path: /*
         name: Cache-Control
