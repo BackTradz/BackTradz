@@ -1,7 +1,7 @@
 # render.yaml — BackTradz (Blueprint)
 
 envVarGroups:
-  - name: backtradz-prod   # EXACTEMENT le nom de ton Environment Group
+  - name: backtradz-prod   # EXACTEMENT le nom du Environment Group
 
 services:
   # ---------- BACKEND (FastAPI) ----------
@@ -16,13 +16,13 @@ services:
     envVars:
       - fromGroup: backtradz-prod
 
-staticSites:
   # ---------- FRONTEND (Vite) ----------
-  - name: backtradz-frontend
+  - type: static
+    name: backtradz-frontend
     plan: free
-    rootDir: frontend-react        # adapte si besoin
+    rootDir: frontend-react       # adapte si ton dossier est "frontend" ou "frontend-react"
     buildCommand: "npm ci && npm run build"
-    publishPath: dist
+    staticPublishPath: dist
     envVars:
       - fromGroup: backtradz-prod
     headers:
