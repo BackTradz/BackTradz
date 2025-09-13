@@ -4,7 +4,7 @@ import HeroSection from "../../components/home/HeroSection";
 import HeroMessage from "../../components/home/HeroMessage";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
 
-import "./home.css"; // <-- ajoute ce fichier
+import "./Home.css"; // <-- ajoute ce fichier
 
 export default function Home() {
   const [strategy, setStrategy] = useState(null);
