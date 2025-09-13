@@ -24,7 +24,7 @@ import ResetPassword from "./pages/resetpassword/ResetPassword";
 import MentionsLegales from "./pages/legal/MentionsLegales";
 import ConditionsGenerales from "./pages/legal/ConditionsGenerales";
 import PolitiqueConfidentialite from "./pages/legal/PolitiqueConfidentialite";
-import SupportPage from "./pages/support/Support";
+import SupportPage from "./pages/support/support";
 
 
 
@@ -47,8 +47,8 @@ export default function App() {
       </Route>
 
       <Route path="/login" element={<AuthPage />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/resetpassword/forgot-password" element={<ForgotPassword />} />
+      <Route path="/resetpassword//reset-password/:token" element={<ResetPassword />} />
       <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
       <Route path="/legal/cgu" element={<ConditionsGenerales />} />
       <Route path="/legal/politique-confidentialite" element={<PolitiqueConfidentialite />} />
