@@ -33,7 +33,7 @@ from fastapi import FastAPI
 from fastapi.openapi.models import APIKey, APIKeyIn, SecuritySchemeType
 from fastapi.openapi.utils import get_openapi
 from fastapi import Request
-from fastapi.responses import HTMLResponse
+#from fastapi.responses import HTMLResponse
 from apscheduler.schedulers.background import BackgroundScheduler
 from backend.routes import user_routes  # ou le nom du fichier .py
 
@@ -41,7 +41,7 @@ from backend import auth  # ← déjà fait chez toi normalement
 
 from backend.routes.a_savoir_routes import router as a_savoir_router
 
-from backend.utils.templates import templates  # NOTE: utilisé côté rendu templates si besoin
+#from backend.utils.templates import templates  # NOTE: utilisé côté rendu templates si besoin
 
 from backend.routes.official_data_routes import router as official_data_router
 from backend.routes.user_routes import router as user_router
@@ -50,7 +50,7 @@ from backend.routes.strategy_params_route import router as strategy_params_route
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routes.analyse_routes import router as download_xlsx
 from backend.routes.csv_library_routes import router as csv_library_router
-from fastapi.staticfiles import StaticFiles
+#from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from backend.routes.csv_library_routes import router as csv_router
 from backend.routes.admin_routes import router as admin_router
@@ -82,10 +82,10 @@ app = FastAPI()
 # NOTE: secret "STRATIFY_SECRET" en clair ici → prévoir .env + rotation
 app.add_middleware(SessionMiddleware, secret_key="STRATIFY_SECRET")
 
-# Répertoire statique (front)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "../frontend/static")
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+# Répertoire statique (front) VIEUX FRONT HTML 
+#BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+#STATIC_DIR = os.path.join(BASE_DIR, "../frontend/static")
+#app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # CORS: actuellement très permissif (toutes origines, méthodes, headers).
 # TODO(prod): restreindre à tes domaines front (ex: https://app.stratify.ai)
@@ -126,6 +126,22 @@ app.include_router(run_backtest_router, prefix="/api")
 app.include_router(user_router, prefix="/api")
 app.include_router(official_data_router, prefix="/api")
 app.include_router(backtest_xlsx_routes.router, prefix="/api")  # ⬅️ mount
+
+from fastapi.responses import JSONResponse, RedirectResponse
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+@app.get("/health", include_in_schema=False)
+def health():
+    return {"ok": True}
+
+@app.get("/", include_in_schema=False)
+def root_redirect():
+    # Redirige vers le vrai front (Static Site):
+    return RedirectResponse(url=FRONTEND_URL, status_code=307)
+    # (si tu préfères garder un JSON, remplace par:)
+    # return JSONResponse({"status": "ok", "service": "api"})
+
 
 @app.get("/debug/routes")
 def debug_routes():
