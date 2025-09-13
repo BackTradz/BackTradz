@@ -104,7 +104,7 @@ app.add_middleware(
 # NOTE: l'ordre peut influencer la résolution des routes statiques vs API si conflits de chemins.
 app.include_router(csv_router)
 app.include_router(csv_library_router)
-app.include_router(frontend_routes.router)
+#app.include_router(frontend_routes.router)
 app.include_router(pricing_routes.router)
 app.include_router(user_profile_routes.router)
 app.include_router(top_strategy_routes.router)
