@@ -1,6 +1,6 @@
 import React from "react";
 import CTAButton from "../../components/ui/button/CTAButton";
-import CsvCard from "../../components/ui/CSVcard/CsvCard";
+import CsvCard from "../../components/ui/CSVcard/CSVCard";
 
 // 🧠 Formatte une date "YYYY-MM-DD" -> "DD/MM/YYYY"
 function fmtFR(d) {
