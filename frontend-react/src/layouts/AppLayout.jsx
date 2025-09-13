@@ -1,6 +1,6 @@
 import { Outlet, useNavigation } from "react-router-dom";
 import Navbar from "../components/ui/navbar/Navbar";
-import Footer from "../components/ui/footer/footer";
+import Footer from "../components/ui/footer/Footer";
 import TopProgress from "../components/ui/progressbar/TopProgress"; 
 
 
