@@ -7,7 +7,7 @@
 // ------------------------------------------------------------
 import { useEffect, useMemo, useState } from "react";
 import SectionTitle from "../ui/SectionTitle";
-import CTAButton from "../ui/button/CTAbutton";
+import CTAButton from "../ui/button/CTAButton";
 import AdminInsightsOverlay from "./AdminInsightsOverlay";
 
 // Helpers affichage
