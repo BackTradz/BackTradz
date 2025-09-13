@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 import { formatStrategy } from "../../lib/labels";
 
 import SectionTitle from "../ui/SectionTitle";
-import "../../pages/home/home.css";
+import "../../pages/home/Home.css";
 import PublicInsightsOverlay from "../overlay/PublicInsightsOverlay";
 import DetailButton from "../ui/button/DetailButton";
 // Animations légères
