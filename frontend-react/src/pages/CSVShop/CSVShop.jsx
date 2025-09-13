@@ -7,10 +7,10 @@ import { useEffect, useMemo, useState } from "react";
 import { listCsvLibrary, downloadCsvByPathUrl } from "../../sdk/catalogApi";
 import "./CSVShop.css";
 import CsvCard from "../../components/ui/CSVcard/CSVCard";
-import CSVShopFilters from "../../components/csvshop/CSVShopFilters";
-import ExtractorInline from "../../components/csvshop/ExtractorInline";
-import PrivateExtraction from "../../components/csvshop/PrivateExtraction";
-import CSVInfoBanner from "../../components/csvshop/CSVInfoBanner";
+import CSVShopFilters from "../../components/CSVshop/CSVShopFilters";
+import ExtractorInline from "../../components/CSVshop/ExtractorInline";
+import PrivateExtraction from "../../components/CSVshop/PrivateExtraction";
+import CSVInfoBanner from "../../components/CSVshop/CSVInfoBanner";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
 
 // TF à masquer côté front
