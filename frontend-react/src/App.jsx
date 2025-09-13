@@ -35,7 +35,7 @@ import Pricing from "./pages/pricing/Pricing.jsx";
 import Profile from "./pages/profile/Profile.jsx";
 import Dashboard from "./pages/dashboard/dashboard.jsx";
 import AdminDashboard from "./pages/admin/admin";
-import ASavoir from "./pages/asavoir/a_Savoir";
+import ASavoir from "./pages/asavoir/a_savoir";
 import Success from "./pages/Success";
 
 export default function App() {
