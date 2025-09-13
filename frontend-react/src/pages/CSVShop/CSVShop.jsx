@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { listCsvLibrary, downloadCsvByPathUrl } from "../../sdk/catalogApi";
 import "./CSVShop.css";
-import CsvCard from "../../components/ui/CSVcard/CsvCard";
+import CsvCard from "../../components/ui/CSVcard/CSVCard";
 import CSVShopFilters from "../../components/csvshop/CSVShopFilters";
 import ExtractorInline from "../../components/csvshop/ExtractorInline";
 import PrivateExtraction from "../../components/csvshop/PrivateExtraction";
