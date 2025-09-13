@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-import "./profil.css";
+import "./Profil.css";
 import ProfileHeader from "../../components/profil/ProfileHeader";
 import AccountSettings from "../../components/profil/AccountSettings";
 import DangerZone from "../../components/profil/DangerZone";
