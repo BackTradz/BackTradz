@@ -36,3 +36,4 @@ backend/output_live/
 .idea/
 .DS_Store
 Thumbs.db
+.env.dev

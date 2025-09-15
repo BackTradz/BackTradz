@@ -6,7 +6,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import PillTabs from "../ui/switchonglet/PillTabs";
-import { xlsxMeta, xlsxSheet } from "../../sdk/publicXlsxApi";
+import { xlsxMeta, xlsxSheet } from "../../sdk/PublicXlsxApi";
 import { formatPair, formatStrategy } from "../../lib/labels";
 import CTAButton from "../ui/button/CTAButton";
 
