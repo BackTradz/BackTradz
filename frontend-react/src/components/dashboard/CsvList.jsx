@@ -1,6 +1,6 @@
 // src/components/dashboard/CsvList.jsx
 import { useEffect, useState, useMemo } from "react";
-import CsvCard from "../ui/CSVcard/CsvCard";
+import CsvCard from "../ui/CSVcard/CSVCard";
 
 
 import { myPurchasedCSVs } from "../../sdk/userApi";
