@@ -40,7 +40,6 @@ PARIS_TZ = ZoneInfo("Europe/Paris")
 
 router = APIRouter()
 
-
 class BacktestRequest(BaseModel):
     """
     Payload d'entrée pour /run_backtest (données officielles chargées côté backend).

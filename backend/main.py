@@ -42,6 +42,7 @@ from backend import auth  # ← déjà fait chez toi normalement
 from backend.routes.a_savoir_routes import router as a_savoir_router
 
 #from backend.utils.templates import templates  # NOTE: utilisé côté rendu templates si besoin
+from backend.core.config import FRONTEND_URL, PUBLIC_API_URL
 
 from backend.routes.official_data_routes import router as official_data_router
 from backend.routes.user_routes import router as user_router
@@ -62,7 +63,7 @@ from backend.routes.crypto_routes import router as crypto_router
 
 from fastapi_utils.tasks import repeat_every
 from backend.utils.subscription_utils import renew_all_subscriptions  # adapte au bon chemin
-from backend.core.config import FRONTEND_URL
+
 from backend.routes import user_profile_routes
 from starlette.middleware.sessions import SessionMiddleware
 from backend.routes import stripe_routes
@@ -73,7 +74,6 @@ from backend.routes import backtest_xlsx_routes  # ⬅️ import
 from backend.routes.admin_stat_routes import stats_router  # ⬅️ nouveau
 
 from backend.routes.meta_routes import router as meta_router
-
 
 
 app = FastAPI()
@@ -147,8 +147,7 @@ app.include_router(backtest_xlsx_routes.router, prefix="/api")  # ⬅️ mount
 
 from fastapi.responses import JSONResponse, RedirectResponse
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
-PUBLIC_API_URL = os.getenv("PUBLIC_API_URL", "https://api.backtradz.com").rstrip("/")
+
 
 print(f"[BOOT] FRONTEND_URL={FRONTEND_URL} | PUBLIC_API_URL={PUBLIC_API_URL}")
 

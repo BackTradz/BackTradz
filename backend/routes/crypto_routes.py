@@ -30,7 +30,7 @@ import hashlib
 router = APIRouter()
 NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY")
 NOWPAYMENTS_API_BASE = "https://api.nowpayments.io/v1"
-FRONTEND_URL =os.getenv("FRONTEND_URL", "http://localhost:5173")
+
 
 
 

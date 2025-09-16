@@ -9,6 +9,7 @@ Security:
   - Pas d’auth ici → ⚠️ en prod, à restreindre (X-API-Key / cookie).
 """
 
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from pathlib import Path
