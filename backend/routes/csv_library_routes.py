@@ -12,8 +12,7 @@ Side-effects:
 Security:
   - Certaines routes publiques (listage), d’autres protégées par X-API-Key.
 """
-
-from backend.core.paths import DATA_ROOT, OUTPUT_DIR  # + ANALYSIS_DIR si besoin plus tard
+from backend.core.paths import OUTPUT_DIR, OUTPUT_LIVE_DIR, DATA_ROOT
 from fastapi import APIRouter, Request, HTTPException, Header
 from fastapi.responses import FileResponse
 from backend.models.users import get_user_by_token, update_user, decrement_credits
@@ -140,7 +139,7 @@ def list_csv_files():
           "files_by_pair": { "AUDUSD": [ { timeframe, filename }, ... ] }
         }
     """
-    official_dir = Path("backend/data/official")
+    official_dir = OUTPUT_DIR
     csv_files = list(official_dir.glob("*.csv"))
 
     files_by_pair = {}
@@ -176,7 +175,7 @@ def download_csv(filename: str):
     Returns:
         FileResponse ou {error:"Fichier introuvable"}
     """
-    file_path = Path("backend/data/official") / filename
+    file_path = OUTPUT_DIR/ filename
     if file_path.exists():
         return FileResponse(path=file_path, filename=filename, media_type='text/csv')
     return {"error": "Fichier introuvable"}
@@ -191,7 +190,7 @@ def list_backtest_csv_from_output():
     """
     from collections import defaultdict
 
-    root_dir = Path("backend/output")
+    root_dir = OUTPUT_DIR
     csv_files = list(root_dir.rglob("*.csv"))
 
     result = defaultdict(lambda: defaultdict(list))
@@ -279,16 +278,13 @@ def download_csv_by_path(
 
     file_path = Path(path)
     if not file_path.is_absolute():
-        # on accepte d'abord relatif à OUTPUT_DIR (préféré), puis DATA_ROOT, sinon fallback ancien
-        cand = OUTPUT_DIR / path
-        if cand.exists():
-            file_path = cand
-        else:
-            file_path = DATA_ROOT / path
-            
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Fichier introuvable")
+        # accepte chemin relatif à DATA_ROOT
+        file_path = (DATA_ROOT / path).resolve()
 
+    # garde-fou: n'autorise que sous nos racines légitimes
+    allowed_roots = [OUTPUT_DIR.resolve(), OUTPUT_LIVE_DIR.resolve(), DATA_ROOT.resolve()]
+    if not any(r in file_path.parents or file_path == r for r in allowed_roots):
+        raise HTTPException(status_code=400, detail="Chemin hors stockage autorisé")
     # 👇 Choix du jeton : header prioritaire, sinon query
     api_key = x_api_key or token
     user = get_user_by_token(api_key)
@@ -351,7 +347,7 @@ def extract_to_output_live(
         end_token = end_date.replace("-", "")
 
         # Dossier attendu : backend/output_live/{SYMBOL}/{TF}/
-        base_dir = Path("backend/output_live") / sym / tf
+        base_dir = (OUTPUT_LIVE_DIR / sym / tf)
         offers = []
         if base_dir.exists():
             # Cherche fichier qui contient _TF_ + dates

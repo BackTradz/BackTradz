@@ -2,8 +2,8 @@
 # ============================================================
 # 🔖 Invoice Generator (JSON + HTML)
 # - Aucune dépendance externe (pas de PDF à ce stade).
-# - Écrit dans: backend/database/facture/YYYY/MM/INV-YYYYMM-0001.{json,html}
-# - Numérotation persistante via: backend/database/facture/.invoice_index.json
+# - Écrit dans: DATA_ROOT/private/invoices/YYYY/MM/INV-YYYYMM-0001.{json,html}
+# - Numérotation persistante via: DATA_ROOT/private/invoices/.invoice_index.json
 # - Zéro régression: purement additif, pas d'effet sur tes flux existants.
 # ============================================================
 
@@ -11,10 +11,12 @@ from __future__ import annotations
 from pathlib import Path
 import json, datetime, re
 from typing import Dict, Any, Optional, List
+# backend/utils/invoice_generator.py
+from backend.core.paths import INVOICES_DIR  # + DATA_ROOT si besoin debug
 
-# Racine pour les factures (→ "mois" = YYYY/MM)
-FACTURE_ROOT = Path("backend/database/facture")
-INDEX_FILE   = FACTURE_ROOT / ".invoice_index.json"
+# Racine pour les factures (→ "mois" = YYYY/MM) — disque privé
+FACTURE_ROOT = INVOICES_DIR
+INDEX_FILE   = INVOICES_DIR / ".invoice_index.json"
 
 # --- Infos "société" de secours (si tu n’en as pas encore dans une config centrale)
 FALLBACK_COMPANY = {

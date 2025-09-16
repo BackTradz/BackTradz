@@ -22,3 +22,17 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
++# --- BackTradz runtime data (do NOT commit) ---
++backend/output/**
++backend/output_live/**
++backend/analysis/**
++backend/database/**        # anciens chemins
++backend/data/**            # anciens chemins (audit, etc.)
++var/**
++/var/**
++
++# DATA_ROOT on Render (monté dans /var/data/backtradz)
++**/db/**
++**/private/**
++**/audit/**

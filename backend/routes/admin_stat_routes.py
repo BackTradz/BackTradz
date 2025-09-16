@@ -24,7 +24,9 @@ import builtins
 from backend.core.admin import require_admin as _admin_guard
 from backend.models.users import USERS_FILE
 from backend.models.offers import OFFERS  # prix des plans (SUB_9, SUB_25, …)
-
+from backend.core.paths import DATA_ROOT
+from pathlib import Path as _Path
+AUDIT_FILE = (DATA_ROOT / "audit" / "ledger.jsonl")
 
 stats_router = APIRouter()
 
@@ -130,9 +132,6 @@ def _time_bounds(range_key: str):
     return None, now
 
 # === Ledger (audit) ===
-from pathlib import Path as _Path
-AUDIT_FILE = _Path("backend/data/audit/ledger.jsonl")
-
 def _iter_ledger():
     """Retourne la liste des événements du ledger (jsonl)."""
     if not AUDIT_FILE.exists():

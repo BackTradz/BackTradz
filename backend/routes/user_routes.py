@@ -13,7 +13,9 @@ Security:
 Notes:
   - Les logs '🔄 UPDATE REQ' sont gardés pour debug.
 """
-from backend.core.paths import DB_DIR, USERS_JSON
+from backend.core.paths import USERS_JSON as USERS_FILE, DB_DIR, DATA_ROOT
+
+
 from backend.utils.json_db import read_json, write_json_atomic, file_lock
 from fastapi import APIRouter, Depends, Request
 from backend.auth import get_current_user
@@ -43,7 +45,7 @@ import json
 
 router = APIRouter()
 
-RECREATE_FILE = Path("backend/database/email_recreate.json")
+RECREATE_FILE = (DB_DIR / "email_recreate.json")
 RECREATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 def _load_json_safe(path: Path) -> dict:
@@ -57,7 +59,7 @@ def _load_json_safe(path: Path) -> dict:
         return {}
     
 # --- Ledger (audit) pour stats immuables ---
-AUDIT_FILE = Path("backend/data/audit/ledger.jsonl")
+AUDIT_FILE = (DATA_ROOT / "audit" / "ledger.jsonl")
 AUDIT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 def _audit_append(evt: dict) -> None:
@@ -66,7 +68,7 @@ def _audit_append(evt: dict) -> None:
     from pathlib import Path
     import json, os
 
-    path = Path("backend/data/audit/ledger.jsonl")
+    path = AUDIT_FILE
     path.parent.mkdir(parents=True, exist_ok=True)
     try:
         data = dict(evt)
@@ -100,7 +102,7 @@ async def get_me(user: User = Depends(get_current_user)):
     # On lit l’état brut pour savoir si l’email est vérifié et combien de crédits sont en attente
     import json
     from pathlib import Path
-    USERS_FILE = Path("backend/database/users.json")
+    USERS_FILE = USERS_FILE
     email_verified = False
     pending_bonus = 0
     sub = dict(user.subscription or {})   
@@ -222,8 +224,8 @@ async def register_user(request: Request):
     
     # Chargement des utilisateurs existants
     users = {}
-    if USERS_JSON.exists():
-        users = json.loads(USERS_JSON.read_text())
+    if USERS_FILE.exists():
+        users = json.loads(USERS_FILE.read_text())
 
     # Vérification de doublons
     if any(u.get("email") == email or u.get("username") == username for u in users.values()):
@@ -258,7 +260,7 @@ async def register_user(request: Request):
 
         # Enregistrement
     users[token] = new_user
-    USERS_JSON.write_text(json.dumps(users, indent=2), encoding="utf-8")
+    USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
 
     # ✅ incrémente le compteur de créations
     try:
@@ -407,7 +409,7 @@ async def set_password(payload: SetPasswordPayload, user: User = Depends(get_cur
 
     # Set du nouveau mdp (toujours hashé)
     u["password"] = hash_password(payload.new_password)
-    _atomic_write_json(USERS_JSON, users)
+    _atomic_write_json(USERS_FILE, users)
 
     return {"status": "success"}
 
@@ -431,12 +433,12 @@ def _atomic_write_json(path: Path, data: dict) -> None:
                 pass
 
 def load_users() -> dict:
-    return read_json(USERS_JSON, {})
+    return read_json(USERS_FILE, {})
 
 def save_users(users: dict) -> None:
     lock = DB_DIR / "users.json.lock"
     with file_lock(lock):
-        write_json_atomic(USERS_JSON, users)
+        write_json_atomic(USERS_FILE, users)
 
 # --- SCHÉMA D’ENTRÉE / VALIDATION ------------------------------------------
 class RegisterPayload(BaseModel):
@@ -526,7 +528,7 @@ async def register_user(request: Request):
     }
 
     users[token] = new_user
-    _atomic_write_json(USERS_JSON, users)
+    _atomic_write_json(USERS_FILE, users)
 
     # ✅ incrémente le compteur de créations
     try:
@@ -609,7 +611,7 @@ async def delete_own_account(request: Request, user: User = Depends(get_current_
     - loggue 'user_deleted' dans le ledger
     - supprime l'entrée du users.json
     """
-    users = _load_json_safe(USERS_JSON)
+    users = _load_json_safe(USERS_FILE)
     uid = user.id
     if uid not in users:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
@@ -624,7 +626,7 @@ async def delete_own_account(request: Request, user: User = Depends(get_current_
     # 3) suppression effective
     try:
         del users[uid]
-        USERS_JSON.write_text(json.dumps(users, indent=2, ensure_ascii=False), encoding="utf-8")
+        USERS_FILE.write_text(json.dumps(users, indent=2, ensure_ascii=False), encoding="utf-8")
     except Exception:
         raise HTTPException(status_code=500, detail="Erreur lors de la suppression")
 

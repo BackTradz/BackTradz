@@ -15,6 +15,7 @@ Notes:
 from backend.core.paths import ANALYSIS_DIR
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from pathlib import Path
+from backend.core.paths import ANALYSIS_DIR, DATA_ROOT
 import json
 from typing import List
 from backend.auth import get_current_user
@@ -22,6 +23,7 @@ import openpyxl
 import os
 from fastapi.responses import JSONResponse
 import shutil
+
 
 
 
@@ -230,8 +232,8 @@ def delete_backtest(folder: str, user=Depends(get_current_user)):
     Returns:
       dict: message de confirmation
     """
-    base_dir = ANALYSIS_DIR  # on restreint la suppression à /analysis uniquement
-    target = (base_dir / rel_after_backend).resolve()
+
+    target_path = (ANALYSIS_DIR / folder).resolve()
 
     if not target_path.exists() or not target_path.is_dir():
         raise HTTPException(status_code=404, detail="Dossier introuvable")
@@ -264,20 +266,17 @@ from fastapi import Query, Body
 from fastapi.responses import Response
 
 def _normalize_backend_rel(p: str) -> str:
-    x = (p or "").replace("\\", "/").lstrip("/")
-    # on refuse toute tentative de sortie du dossier analysis
-    if ".." in x:
-        raise HTTPException(status_code=400, detail="Chemin invalide")
+    x = (p or "").replace("\\", "/").strip()
     return x
 
 
 def _delete_csv_file(rel_after_backend: str, user):
     """Supprime le fichier situé sous backend/<rel_after_backend>."""
-    base_dir = Path(os.path.dirname(__file__)).parent  # dossier 'backend'
-    target = (base_dir / rel_after_backend).resolve()
-
-    # sécurité minimale : le fichier doit rester sous /backend et exister
-    if base_dir not in target.parents and target != base_dir:
+    # Autorise uniquement des fichiers sous DATA_ROOT (output / output_live / analysis)
+    target = Path(rel_after_backend)
+    if not target.is_absolute():
+        target = (DATA_ROOT / rel_after_backend).resolve()
+    if DATA_ROOT not in target.parents and target != DATA_ROOT:
         raise HTTPException(status_code=400, detail="Chemin invalide")
     if not target.exists() or not target.is_file():
         raise HTTPException(status_code=404, detail="CSV introuvable")

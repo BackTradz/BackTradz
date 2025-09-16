@@ -15,7 +15,7 @@ Notes:
   - À terme, remplacer les JSON par une base (SQLite/Postgres) et mettre un RBAC propre.
 """
 from backend.core.paths import OUTPUT_DIR, ANALYSIS_DIR, USERS_JSON
-
+from backend.core.paths import DATA_ROOT
 from fastapi import APIRouter
 from fastapi import Request, HTTPException
 from backend.models.users import USERS_FILE
@@ -35,9 +35,9 @@ import openpyxl
 PARIS_TZ = ZoneInfo("Europe/Paris")
 
 # === AUDIT LEDGER (append-only) ===
-AUDIT_DIR = Path("backend/data/audit")
+AUDIT_DIR = (DATA_ROOT / "audit").resolve()
 AUDIT_DIR.mkdir(parents=True, exist_ok=True)
-AUDIT_FILE = AUDIT_DIR / "ledger.jsonl"
+AUDIT_FILE = (AUDIT_DIR / "ledger.jsonl").resolve()
 
 
 
@@ -74,6 +74,7 @@ router = APIRouter()
 
 
 
+
 @router.get("/admin/ping")
 def admin_ping(request: Request):
     require_admin(request)
@@ -99,7 +100,7 @@ def daily_summary():
           à partir des colonnes 'phase' et 'result'.
         - Ignore silencieusement les dossiers mal nommés / CSV invalides (logs print).
     """
-    base_path = Path("ANALYSIS_DIR")
+    base_path = ANALYSIS_DIR
     summary = []
 
     for folder in base_path.iterdir():
@@ -206,7 +207,7 @@ def backtest_summary():
         SL Size (avg, pips), TP1 Size (avg, pips), TP2 Size (avg, pips)
         (ou TP Size (avg, pips) comme fallback global).
     """
-    base_path = Path("ANALYSIS_DIR")
+    base_path = ANALYSIS_DIR
     summary = []
 
     for folder in base_path.iterdir():
@@ -838,8 +839,7 @@ def admin_download_xlsx(
     # sécurité admin
     admin_required_from_request_or_query(request)
 
-    base_dir = Path(os.path.dirname(__file__)).parent / "data" / "analysis"
-
+    base_dir = ANALYSIS_DIR
     # --- Normalisation de 'period' : garde only 'YYYY-MM-DDtoYYYY-MM-DD'
     #    (certains dossiers/period traînent 'to100' / '_100' / '_sl100')
     import re
