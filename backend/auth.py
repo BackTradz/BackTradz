@@ -325,30 +325,30 @@ async def auth_google_callback(request: Request):
         }
         users[new_token] = new_user
 
-        # --- persistance (et on redirige quoi qu'il arrive)
+       # --- persistance (on ne bloque pas le login si l'écriture échoue)
         try:
             USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
         except Exception:
-            # on ne bloque pas la connexion si l'écriture échoue
             pass
-        # ✅ Incrémente le compteur de créations pour cet email
+
+        # Incrémente compteur création (tolérant)
         try:
             counts[email_norm] = int(counts.get(email_norm, 0)) + 1
             _atomic_write_json(RECREATE_FILE, counts)
         except Exception:
             pass
-        
-           # BACKTRADZ 2025-09-08: phase 1 implementation verif mail pour recevoir les token 
+
+        # (optionnel) init/verif + bonus, tolérant aux erreurs
         try:
-            # Assure un pending=2 si besoin (pour nouveaux comptes)
             init_email_verification(new_token, pending_bonus=2)
             mark_email_verified_and_grant_pending_bonus(new_token)
         except Exception as e:
             print("[google-callback] verify+bonus error:", e)
 
-        # Redirection front comme avant (pas de verifyToken nécessaire désormais)
-            return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&apiKey={new_token}")
-            
+        # ✅ REDIRECTION UNIQUE, HORS des try/except
+        return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&apiKey={new_token}")
+
+                    
     except Exception as e:
         # En cas d'erreur globale → retour sur /login avec message
         # (ne surtout pas renvoyer une variable non définie)
@@ -384,7 +384,7 @@ async def get_current_user_optional(request: Request) -> dict | None:
 @router.get("/auth/verify-email")
 async def verify_email(token: str = Query(..., description="Token de vérification reçu")):
     uid = get_user_id_by_verification_token(token)
-    frontend = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    frontend = FRONTEND_URL
 
     if not uid:
         target = f"{frontend}/profile?verified=error"

@@ -17,50 +17,40 @@ export default function AuthPage() {
   const [verifyUrl, setVerifyUrl] = useState("");
   const navigate = useNavigate(); // ✅ AJOUT
 
+  // ✅ Remplace tout ton useEffect par celui-ci
   useEffect(() => {
     document.body.classList.add("auth-page");
 
-    // ✅ Détection callback Google OAuth
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("provider") === "google") {
-      // 1) succès → overlay + clean URL
-      if (params.get("apiKey")) {
-        localStorage.setItem("apiKey", params.get("apiKey"));
-        setShowSignupSuccess(true);
-        window.history.replaceState({}, document.title, "/login");
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const provider = params.get("provider");
+      const apiKey = params.get("apiKey") || params.get("token"); // compat
+
+      if (provider === "google") {
+        const err = params.get("error");
+        if (err === "recreate_limit") {
+          setOauthError(
+            "Tu as déjà recréé un compte 3 fois avec cette adresse. Connecte-toi avec ton compte existant ou utilise un autre e-mail."
+          );
+          window.history.replaceState({}, document.title, "/login");
+        } else if (apiKey) {
+          // 🔐 Stocke + montre overlay succès OAuth
+          localStorage.setItem("apiKey", apiKey);
+          setShowSignupSuccess(true);
+          window.history.replaceState({}, document.title, "/login");
+
+          // (facultatif) redirection auto après 1.5s
+          const t = setTimeout(() => navigate("/home", { replace: true }), 1500);
+          return () => clearTimeout(t);
+        }
       }
-      // 2) erreur limite de recréation → bandeau message
-      const err = params.get("error");
-      if (err === "recreate_limit") {
-        setOauthError("Tu as déjà recréé un compte 3 fois avec cette adresse. Connecte-toi avec ton compte existant ou utilise un autre e-mail.");
-        window.history.replaceState({}, document.title, "/login");
-      }
+    } catch (e) {
+      console.error("OAuth processing error:", e);
     }
 
     return () => document.body.classList.remove("auth-page");
-  }, []);
+  }, [navigate]);
 
-  const handleLogin = async (identifier, password) => {
-    try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier, password }),
-      });
-      const data = await res.json();
-      if (data.status === "success") {
-        // ✅ Persiste le token (clé cohérente avec RequireAuth/AuthContext)
-        localStorage.setItem("apiKey", data.token || data.apiKey);
-        // ✅ Redirection SPA (évite 404 côté Render) → /home canonique
-        navigate("/home", { replace: true });
-      } else {
-        alert(data.message || "Erreur lors de la connexion");
-      }
-    } catch (err) {
-      console.error("Erreur login:", err);
-      alert("Erreur inattendue.");
-    }
-  };
 
   const handleRegister = async ({ firstName, lastName, email, username, password }) => {
     try {
