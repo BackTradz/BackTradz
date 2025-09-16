@@ -19,6 +19,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from pathlib import Path
 from backend.extract.extract_data import extract_data_auto
+from backend.core.paths import OUTPUT_DIR, OUTPUT_LIVE_DIR  # <- DISK paths
 
 
 def load_csv_filtered(symbol: str, timeframe: str, start_date: str, end_date: str):
@@ -38,13 +39,14 @@ def load_csv_filtered(symbol: str, timeframe: str, start_date: str, end_date: st
     end_dt = datetime.strptime(end_date, "%Y-%m-%d")
 
     month_str = start_dt.strftime("%Y-%m")
-    folder = f"backend/output/{symbol}/{month_str}"
-    file_path = f"{folder}/{symbol}_{timeframe}_{month_str}.csv"
-
-    # ⚠️ On exige que le fichier existe
-    if not os.path.exists(file_path):
+    # 2 patterns supportés:
+    #   A) output/<SYM>/<YYYY-MM>/<SYM>_<TF>_<YYYY-MM>.csv
+    #   B) output/<SYM>/<TF>/<SYM>_<TF>_<YYYY-MM>.csv
+    candA = OUTPUT_DIR / symbol / month_str / f"{symbol}_{timeframe}_{month_str}.csv"
+    candB = OUTPUT_DIR / symbol / timeframe / f"{symbol}_{timeframe}_{month_str}.csv"
+    file_path = candA if candA.exists() else candB
+    if not file_path.exists():
         raise FileNotFoundError(f"❌ Fichier introuvable : {file_path}")
-
     # Lecture + nettoyage minimal
     df = pd.read_csv(file_path)
     df = df[df["Open"] != "GBPUSD=X"]  # nettoyage spécifique à ta data source
@@ -80,13 +82,16 @@ def load_data_or_extract(symbol: str, timeframe: str, start_date: str, end_date:
 
     print(f"🔎 Recherche des données entre {start_date} et {end_date}")
 
-    # === 1) Lecture mensuelle depuis backend/output/
+    # === 1) Lecture mensuelle depuis OUTPUT_DIR (disk)
     month_start = start_dt.replace(day=1)
     current = month_start
     while current <= end_dt:
         month_str = current.strftime("%Y-%m")
         filename = f"{symbol}_{timeframe}_{month_str}.csv"
-        file_path = Path(f"backend/output/{symbol}/{month_str}/{filename}")
+        # 2 patterns: <SYM>/<YYYY-MM>/... ou <SYM>/<TF>/...
+        candA = OUTPUT_DIR / symbol / month_str / filename
+        candB = OUTPUT_DIR / symbol / timeframe / filename
+        file_path = candA if candA.exists() else candB
 
         if file_path.exists():
             try:
@@ -101,8 +106,8 @@ def load_data_or_extract(symbol: str, timeframe: str, start_date: str, end_date:
         # Passe au 1er du mois suivant (truc du 28+4 pour gérer tous les mois)
         current = (current.replace(day=28) + pd.Timedelta(days=4)).replace(day=1)
 
-    # === 2) Lecture live depuis backend/output_live/<symbol>/<tf>/*.csv
-    live_dir = Path(f"backend/output_live/{symbol}/{timeframe}")
+    # === 2) Lecture live depuis OUTPUT_LIVE_DIR/<symbol>/<tf>/*.csv
+    live_dir = OUTPUT_LIVE_DIR / symbol / timeframe
     if live_dir.exists():
         for file in live_dir.glob("*.csv"):
             try:

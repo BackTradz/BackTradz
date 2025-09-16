@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import yfinance as yf
 import pandas as pd
+from backend.core.paths import OUTPUT_LIVE_DIR  # <- DISK path
 
 ###===== CLEAN V5
 # Forex = ajouter "=X" à la fin (ex: GBPUSD = "GBPUSD=X")
@@ -163,7 +164,7 @@ def extract_data_auto(symbol: str, tf: str, start: str, end: str):
             print(f"❌ Erreur construction df_clean : {e}")
             return None
 
-        output_dir = Path(f"backend/output_live/{symbol}/{tf}")
+        output_dir = (OUTPUT_LIVE_DIR / symbol / tf)
         output_dir.mkdir(parents=True, exist_ok=True)
         name = f"{symbol}_{tf}_{start.replace('-', '')}_to_{end.replace('-', '')}.csv"
         df_clean.to_csv(output_dir / name, index=False)
