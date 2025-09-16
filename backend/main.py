@@ -105,13 +105,21 @@ def _allowed_origins():
     # dédoublonne
     return list(dict.fromkeys(origins))
 
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_allowed_origins(),
+    allow_origins=[
+        "https://www.backtradz.com",
+        "https://backtradz.com",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 # Montage des routers (certains en prefix /api)
