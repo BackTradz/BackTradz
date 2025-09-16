@@ -14,6 +14,7 @@ Security:
 """
 
 import json
+from backend.core.config import FRONTEND_URL, PUBLIC_API_URL
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
 from backend.utils.invoice_generator import create_invoice
@@ -91,12 +92,11 @@ async def create_crypto_order(request: Request):
         "price_amount": price,
         "price_currency": "eur",
         "pay_currency": currency,
-        "order_id": f"{user_token}_{offer_id}",  # concat user + offre
-        "ipn_callback_url": "https://TON_NGROK_OU_DOMAINE/api/payment/crypto/webhook",
+        "order_id": f"{user_token}_{offer_id}",
+        "ipn_callback_url": f"{PUBLIC_API_URL}/api/payment/crypto/webhook",   # ✅ au lieu de TON_NGROK
         "success_url": f"{FRONTEND_URL}/pricing?payment=crypto&status=success",
         "cancel_url": f"{FRONTEND_URL}/pricing?payment=crypto&status=cancel",
     }
-
     response = requests.post(f"{NOWPAYMENTS_API_BASE}/invoice", json=payload, headers=headers)
 
     if response.status_code != 200:

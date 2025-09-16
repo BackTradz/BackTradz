@@ -28,6 +28,7 @@ from backend.utils.payment_utils import update_user_after_payment
 from backend.models.users import get_user_by_token, USERS_FILE
 from backend.utils.logger import logger  
 from fastapi import HTTPException
+from backend.core.config import FRONTEND_URL
 from pathlib import Path
 from backend.models.users import (
     get_user_by_token,
@@ -48,7 +49,6 @@ load_dotenv()
 
 router = APIRouter()
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 # === 🔐 API Key Stripe (mode test) ===
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")

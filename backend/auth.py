@@ -22,6 +22,7 @@ from authlib.integrations.starlette_client import OAuth
 from dotenv import load_dotenv
 from starlette.config import Config
 from pathlib import Path
+from backend.core.config import FRONTEND_URL
 from dotenv import load_dotenv
 import uuid
 import os
@@ -199,7 +200,6 @@ ROOT_DIR = Path(__file__).resolve().parents[1]   # backend/ → remonte à la ra
 load_dotenv(ROOT_DIR / ".env")                   # charge le .env racine
 
 # .env
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")  # ex: http://127.0.0.1:8000/api/auth/google/callback

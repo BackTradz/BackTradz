@@ -62,7 +62,7 @@ from backend.routes.crypto_routes import router as crypto_router
 
 from fastapi_utils.tasks import repeat_every
 from backend.utils.subscription_utils import renew_all_subscriptions  # adapte au bon chemin
-
+from backend.core.config import FRONTEND_URL
 from backend.routes import user_profile_routes
 from starlette.middleware.sessions import SessionMiddleware
 from backend.routes import stripe_routes
@@ -82,10 +82,6 @@ app = FastAPI()
 # NOTE: secret "STRATIFY_SECRET" en clair ici → prévoir .env + rotation
 app.add_middleware(SessionMiddleware, secret_key="STRATIFY_SECRET")
 
-# Répertoire statique (front) VIEUX FRONT HTML 
-#BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-#STATIC_DIR = os.path.join(BASE_DIR, "../frontend/static")
-#app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # CORS: actuellement très permissif (toutes origines, méthodes, headers).
 # --- CORS (prod): autorise explicitement tes domaines front ---
@@ -157,12 +153,10 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 def health():
     return {"ok": True}
 
+
 @app.get("/", include_in_schema=False)
 def root_redirect():
-    # Redirige vers le vrai front (Static Site):
     return RedirectResponse(url=FRONTEND_URL, status_code=307)
-    # (si tu préfères garder un JSON, remplace par:)
-    # return JSONResponse({"status": "ok", "service": "api"})
 
 
 @app.get("/debug/routes")
