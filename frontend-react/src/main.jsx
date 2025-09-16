@@ -5,6 +5,35 @@ import App from './App';
 import { AuthProvider } from './auth/AuthContext';
 import "./index.css";
 
+// 🔗 Route tous les appels '/api/*' directement vers l'API (prod)
+(function patchFetchBaseURL() {
+  try {
+    const BASE = (import.meta.env.VITE_API_URL || "https://api.backtradz.com/api").replace(/\/+$/, "");
+    const _fetch = window.fetch.bind(window);
+    const ORIGIN = window.location.origin.replace(/\/+$/, "");
+
+    window.fetch = (input, init) => {
+      try {
+        let url = typeof input === "string" ? input : input?.url;
+        // 1) appels relatifs '/api/...'
+        if (typeof url === "string" && url.startsWith("/api/")) {
+          const rewritten = BASE + url.replace(/^\/api/, "");
+          input = typeof input === "string" ? rewritten : new Request(rewritten, input);
+        }
+        // 2) appels absolus vers le front 'https://www.backtradz.com/api/...'
+        else if (typeof url === "string" && url.startsWith(ORIGIN + "/api/")) {
+          const tail = url.slice(ORIGIN.length).replace(/^\/api/, "");
+          const rewritten = BASE + tail;
+          input = typeof input === "string" ? rewritten : new Request(rewritten, input);
+        }
+      } catch {}
+      return _fetch(input, init);
+    };
+    // debug rapide
+    window.__API_BASE__ = BASE;
+  } catch {}
+})();
+
 
 // main.jsx
 const urlParams = new URLSearchParams(window.location.search);
