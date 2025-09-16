@@ -101,14 +101,13 @@ async def get_me(user: User = Depends(get_current_user)):
 
     # On lit l’état brut pour savoir si l’email est vérifié et combien de crédits sont en attente
     import json
-    from pathlib import Path
-    USERS_FILE = USERS_FILE
     email_verified = False
     pending_bonus = 0
-    sub = dict(user.subscription or {})   
+    sub = dict(user.subscription or {})
+    rec_all = {}
     try:
-        raw = json.loads(USERS_FILE.read_text(encoding="utf-8")) if USERS_FILE.exists() else {}
-        rec = raw.get(user.id) or {}
+        rec_all = json.loads(USERS_FILE.read_text(encoding="utf-8")) if USERS_FILE.exists() else {}
+        rec = rec_all.get(user.id) or {}
         email_verified = bool(rec.get("email_verified"))
         pending_bonus = int(rec.get("pending_bonus_credits_on_verify") or 0)
 
@@ -139,10 +138,8 @@ async def get_me(user: User = Depends(get_current_user)):
         return float(offer.get("price_eur") or 0)
 
     # --- enrichit l'historique pour l'affichage
-    rec = raw  # déjà lu plus haut; sinon relis users.json
-    u_rec = rec.get(user.id, {}) if isinstance(rec, dict) else {}
-    hist = list((u_rec.get("purchase_history") if isinstance(u_rec, dict) else user.purchase_history) or [])
-
+    u_rec = rec_all.get(user.id, {}) if isinstance(rec_all, dict) else {}
+    hist = list((u_rec.get("purchase_history") if isinstance(u_rec, dict) else (user.purchase_history or [])) or [])
     enriched = []
     for tx in hist:
         t = dict(tx)
