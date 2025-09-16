@@ -117,27 +117,6 @@ export default function AuthPage() {
     }
   };
 
-  const handleLogin = async ({ email, password }) => {
-    try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-
-      if (res.ok && data.token) {
-        localStorage.setItem("apiKey", data.token);
-        navigate("/home"); // ✅ SPA redirect vers /home
-      } else {
-        alert(data.message || "Identifiants invalides.");
-      }
-    } catch (err) {
-      console.error("Erreur login:", err);
-      alert("Erreur inattendue lors de la connexion.");
-    }
-  };
-
 
   return (
     <div className="auth-container">
@@ -191,7 +170,7 @@ export default function AuthPage() {
                   {oauthError}
                 </div>
               )}
-              <LoginForm onLogin={handleLogin} />
+              <LoginForm />
             </div>
             <div className="auth-form register-form">
               <RegisterForm onRegister={handleRegister} />
