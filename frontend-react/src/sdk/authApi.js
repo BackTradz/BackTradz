@@ -16,7 +16,7 @@ export const register = (payload) =>
   api('/api/register', { method:'POST', auth:false, body: payload });
 
 export const me       = () =>
-  api('/api/me'); // header X-API-Key ajouté automatiquement par apiClient
+  api('/me'); // // header X-API-Key ajouté automatiquement par apiClient
 
 // 🔗 Vérification email (GET avec token en query)
 export const verifyEmail = (token) =>
