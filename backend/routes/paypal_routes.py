@@ -50,7 +50,7 @@ def get_paypal_access_token():
     response.raise_for_status()
     return response.json()["access_token"]
 
-@router.post("/api/payment/paypal/create-order")
+@router.post("/payment/paypal/create-order")
 async def create_order(request: Request):
     """
     Crée une commande PayPal.
@@ -105,7 +105,7 @@ async def create_order(request: Request):
     data = response.json()
     return {"id": data["id"]}
 
-@router.post("/api/payment/paypal/capture-order")
+@router.post("/payment/paypal/capture-order")
 async def capture_order(request: Request):
     """
     Capture une commande PayPal après retour frontend.

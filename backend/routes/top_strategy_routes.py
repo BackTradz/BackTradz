@@ -5,7 +5,7 @@ import pandas as pd
 
 router = APIRouter()
 
-@router.get("/api/top-strategy")
+@router.get("/top-strategy")
 def get_top_strategies():
     base_path = Path("backend/data/analysis")
     results = []
@@ -79,7 +79,7 @@ def _find_xlsx_in_folder(folder: str) -> Path:
         raise HTTPException(status_code=404, detail="No xlsx in folder")
     return files[0]  # on prend le premier
 
-@router.get("/api/public/xlsx/meta")
+@router.get("/public/xlsx/meta")
 def public_xlsx_meta(folder: str = Query(..., min_length=1)):
     xlsx_path = _find_xlsx_in_folder(folder)
     try:
@@ -89,7 +89,7 @@ def public_xlsx_meta(folder: str = Query(..., min_length=1)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Meta error: {e}")
 
-@router.get("/api/public/xlsx/sheet")
+@router.get("/public/xlsx/sheet")
 def public_xlsx_sheet(
     folder: str = Query(..., min_length=1),
     sheet: str = Query(..., min_length=1),

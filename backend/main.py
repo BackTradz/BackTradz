@@ -120,17 +120,17 @@ app.add_middleware(
 
 # Montage des routers (certains en prefix /api)
 # NOTE: l'ordre peut influencer la résolution des routes statiques vs API si conflits de chemins.
-app.include_router(csv_router)
-app.include_router(csv_library_router)
-#app.include_router(frontend_routes.router)
-app.include_router(pricing_routes.router)
-app.include_router(user_profile_routes.router)
-app.include_router(top_strategy_routes.router)
-app.include_router(a_savoir_router)
-app.include_router(stripe_routes.router)
-app.include_router(paypal_router)
-app.include_router(crypto_router)
-app.include_router(meta_router)
+app.include_router(csv_router, prefix="/api")
+app.include_router(csv_library_router, prefix="/api")
+app.include_router(pricing_routes.router, prefix="/api")
+app.include_router(user_profile_routes.router, prefix="/api")
+app.include_router(top_strategy_routes.router, prefix="/api")
+app.include_router(a_savoir_router, prefix="/api")
+app.include_router(stripe_routes.router, prefix="/api")
+app.include_router(paypal_router, prefix="/api")
+app.include_router(crypto_router, prefix="/api")
+app.include_router(meta_router, prefix="/api")
+
 
 app.include_router(auth_reset_routes.router, prefix="/api/auth")
 app.include_router(auth.router, prefix="/api")

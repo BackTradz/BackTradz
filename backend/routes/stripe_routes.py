@@ -85,7 +85,7 @@ def resolve_price_for_offer(offer_id: str) -> str:
 
 # === ✅ Route pour créer une session de paiement ===
 
-@router.post("/api/payment/stripe/session")
+@router.post("/payment/stripe/session")
 async def create_stripe_session(request: Request):
     """
     Crée une session Checkout Stripe à partir d'une offre.
@@ -243,7 +243,7 @@ async def create_stripe_session(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 # === 🎯 Webhook Stripe pour traiter le paiement confirmé ===
-@router.post("/api/payment/stripe/webhook")
+@router.post("/payment/stripe/webhook")
 async def stripe_webhook(request: Request):
 
     """

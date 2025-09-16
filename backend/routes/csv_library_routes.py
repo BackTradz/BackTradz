@@ -91,7 +91,7 @@ def _load_recent_extractions(user):
     return rows[:RECENT_MAX_RETURN]
 
 
-@router.get("/api/list_csv_library")
+@router.get("/list_csv_library")
 def list_csv_library():
     """
     Liste les CSV dans backend/output.
@@ -127,7 +127,7 @@ def list_csv_library():
 
     return library
 
-@router.get("/api/list_csv_files")
+@router.get("/list_csv_files")
 def list_csv_files():
     """
     Liste les CSV officiels (backend/data/official).
@@ -163,7 +163,7 @@ def list_csv_files():
         "files_by_pair": files_by_pair
     }
 
-@router.get("/api/download_csv/{filename}")
+@router.get("/download_csv/{filename}")
 def download_csv(filename: str):
     """
     Téléchargement d’un CSV officiel (backend/data/official).
@@ -179,7 +179,7 @@ def download_csv(filename: str):
         return FileResponse(path=file_path, filename=filename, media_type='text/csv')
     return {"error": "Fichier introuvable"}
 
-@router.get("/api/list_output_backtest_files")
+@router.get("/list_output_backtest_files")
 def list_backtest_csv_from_output():
     """
     Liste des CSV présents dans backend/output, regroupés par symbol/timeframe.
@@ -209,7 +209,7 @@ def list_backtest_csv_from_output():
 
     return result
 
-@router.get("/api/download_csv/{filename}")
+@router.get("/download_csv/{filename}")
 def download_csv(filename: str, x_api_key: str = Header(None)):
     """
     Télécharge un CSV de la librairie (backend/assets/csv_library).
@@ -260,7 +260,7 @@ def download_csv(filename: str, x_api_key: str = Header(None)):
 
 from fastapi import Query
 
-@router.get("/api/download_csv_by_path/{path:path}")
+@router.get("/download_csv_by_path/{path:path}")
 def download_csv_by_path(
     path: str,
     x_api_key: str = Header(None),
@@ -311,7 +311,7 @@ def download_csv_by_path(
 
 # --- AJOUT --- (à la fin du fichier)
 from fastapi import Query
-@router.get("/api/extract_to_output_live")
+@router.get("/extract_to_output_live")
 def extract_to_output_live(
     symbol: str = Query(..., min_length=3),
     timeframe: str = Query(..., min_length=1),
@@ -387,7 +387,7 @@ def extract_to_output_live(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/api/my_recent_extractions")
+@router.get("/my_recent_extractions")
 def my_recent_extractions(x_api_key: str = Header(None)):
     """
     Renvoie jusqu'à 10 extractions récentes (TTL 48h) POUR L'UTILISATEUR COURANT.

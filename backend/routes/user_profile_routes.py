@@ -36,7 +36,7 @@ from backend.models import users
 router = APIRouter()
 
 
-@router.get("/api/profile", response_class=HTMLResponse)
+@router.get("/profile", response_class=HTMLResponse)
 def profile_page(request: Request, token: str = Query(None)):
     """
     Rendu de la page profil via token passé en query (?token=...).
@@ -56,7 +56,7 @@ def profile_page(request: Request, token: str = Query(None)):
         "token": token
     })
 
-@router.post("/api/profile/update")
+@router.post("/profile/update")
 async def update_profile(
     request: Request,
     x_api_key: str = Header(None, alias="X-API-Key"),
@@ -80,7 +80,7 @@ async def update_profile(
 
 
 
-@router.post("/api/profile/delete")
+@router.post("/profile/delete")
 async def delete_account(user: User = Depends(get_current_user)):
     """
     Supprime définitivement le compte de l'utilisateur courant.
@@ -91,7 +91,7 @@ async def delete_account(user: User = Depends(get_current_user)):
     return {"status": "error", "message": "Impossible de supprimer le compte"}
 
 
-@router.post("/api/profile/unsubscribe")
+@router.post("/profile/unsubscribe")
 async def unsubscribe(user: User = Depends(get_current_user)):
     """
     Annule l'abonnement (si présent) de l'utilisateur courant.

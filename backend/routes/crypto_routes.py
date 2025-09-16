@@ -42,7 +42,7 @@ def verify_nowpayments_signature(raw_body: bytes, signature: str, api_key: str) 
     return hmac.compare_digest(computed_sig, signature)
 
 
-@router.post("/api/payment/crypto/create-order")
+@router.post("/payment/crypto/create-order")
 async def create_crypto_order(request: Request):
     """
     Crée un ordre de paiement crypto via NowPayments.
@@ -107,7 +107,7 @@ async def create_crypto_order(request: Request):
     return {"payment_url": data.get("invoice_url")}
 
 
-@router.post("/api/payment/crypto/webhook")
+@router.post("/payment/crypto/webhook")
 async def nowpayments_webhook(request: Request):
     """
     Webhook sécurisé appelé par NowPayments quand un paiement change de statut.

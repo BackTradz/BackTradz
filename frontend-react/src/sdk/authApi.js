@@ -16,12 +16,12 @@ export const register = (payload) =>
   api('/api/register', { method:'POST', auth:false, body: payload });
 
 export const me       = () =>
-  api('/me'); // // header X-API-Key ajouté automatiquement par apiClient
+  api('api/me'); // // header X-API-Key ajouté automatiquement par apiClient
 
 // 🔗 Vérification email (GET avec token en query)
 export const verifyEmail = (token) =>
-  api(`/api/auth/verify-email?token=${encodeURIComponent(token)}`, { auth: false });
+  api(`api/auth/verify-email?token=${encodeURIComponent(token)}`, { auth: false });
 
 // 🔁 Renvoyer un lien de vérif (authed)
 export const resendVerification = () =>
-  api('/api/auth/resend-verification', { method: 'POST' });
+  api('api/auth/resend-verification', { method: 'POST' });

@@ -13,14 +13,14 @@
 import { api } from './apiClient';
 
 export const myBacktests = () =>
-  api('/api/user/backtests'); // besoin d'être connecté (X-API-Key)
+  api('api/user/backtests'); // besoin d'être connecté (X-API-Key)
 
 // Nouveau : liste des CSV achetés
 export const myPurchasedCSVs = () =>
-  api('/api/user/csvs'); // besoin d'être connecté
+  api('api/user/csvs'); // besoin d'être connecté
 
 export const downloadXlsxUrl = (filename) =>
-  `/api/download/${filename}`; // URL directe (proxy vite -> backend)
+  `api/download/${filename}`; // URL directe (proxy vite -> backend)
 
 // Update profil : accepte un FormData ou un <form>, mappe vers { email, full_name }
 export const updateProfile = async (formElOrFD) => {
@@ -43,15 +43,15 @@ export const updateProfile = async (formElOrFD) => {
   try {
     // Route officielle (sans /api)
     // 🔧 on tape l’alias /api coté backend
-    return api('/api/profile/update', { method: 'POST', body: fd });
+    return api('api/profile/update', { method: 'POST', body: fd });
   } catch (err) {
     // Si ton reverse proxy ajoute /api/ devant : on retente proprement
     if (String(err?.message || '').includes('HTTP 404')) {
-      return await api('/api/profile/update', { method: 'POST', body: fd });
+      return await api('api/profile/update', { method: 'POST', body: fd });
     }
     throw err;
   }
 };
 
-export const unsubscribe = () => api('/api/profile/unsubscribe', { method: 'POST' });
-export const deleteAccount = () => api('/api/profile/delete', { method: 'POST' });
+export const unsubscribe = () => api('api/profile/unsubscribe', { method: 'POST' });
+export const deleteAccount = () => api('api/profile/delete', { method: 'POST' });
