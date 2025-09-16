@@ -23,9 +23,10 @@ Notes d’emailing:
 """
 
 import os
+from backend.core.config import FRONTEND_URL
 
 # -- Configuration marque -----------------------------------------------------
-FRONTEND_URL      = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
+
 BRAND_NAME        = os.getenv("BRAND_NAME", "BackTradz")
 BRAND_LOGO_URL    = os.getenv("BRAND_LOGO_URL", "").strip()  # Optionnel
 BRAND_SUPPORT_URL = os.getenv("BRAND_SUPPORT_URL", "").strip()

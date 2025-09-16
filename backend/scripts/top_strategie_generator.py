@@ -27,7 +27,7 @@ def generate_top_strategies():
     puis enregistre un fichier JSON contenant le TOP 3 des stratégies
     selon leur winrate TP1.
     """
-    url = "http://127.0.0.1:8000/api/admin/stats/backtest_summary"
+    url = "https://www.backtradz.com/api/admin/stats/backtest_summary"
     headers = {"X-API-Key": "florian-token"}  # ⚠️ Clé codée en dur (à externaliser)
 
     try:

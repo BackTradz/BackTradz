@@ -21,6 +21,7 @@ from backend.utils.logger import logger
 from backend.models.users import get_user_by_token
 from backend.utils.payment_utils import update_user_after_payment
 from fastapi.responses import JSONResponse
+from backend.core.config import FRONTEND_URL
 
 import json
 import os
@@ -28,7 +29,6 @@ import os
 router = APIRouter()
 
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
 PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET")
