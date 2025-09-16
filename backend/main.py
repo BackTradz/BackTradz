@@ -88,17 +88,31 @@ app.add_middleware(SessionMiddleware, secret_key="STRATIFY_SECRET")
 #app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # CORS: actuellement très permissif (toutes origines, méthodes, headers).
-# TODO(prod): restreindre à tes domaines front (ex: https://app.stratify.ai)
+# --- CORS (prod): autorise explicitement tes domaines front ---
+def _allowed_origins():
+    # Lis d'abord CORS_ORIGINS (séparé par virgules), sinon FRONTEND_URL
+    raw = os.getenv("CORS_ORIGINS") or os.getenv("FRONTEND_URL") or ""
+    origins = [o.strip().rstrip("/") for o in raw.split(",") if o.strip()]
+
+    # Ajoute automatiquement les variantes avec/sans www pour backtradz.com
+    if any("backtradz.com" in o for o in origins):
+        for v in ("https://backtradz.com", "https://www.backtradz.com"):
+            if v not in origins:
+                origins.append(v)
+
+    # Garde le confort dev
+    origins += ["http://localhost:5173", "http://127.0.0.1:5173"]
+    # dédoublonne
+    return list(dict.fromkeys(origins))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-                  "http://localhost:5173",
-                  "http://127.0.0.1:5173",
-    ], 
+    allow_origins=_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Montage des routers (certains en prefix /api)
 # NOTE: l'ordre peut influencer la résolution des routes statiques vs API si conflits de chemins.
