@@ -44,6 +44,8 @@ export default function App() {
       {/* === PUBLIC === */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<Home />} />   {/* Home publique AVEC Navbar/Footer */}
+        {/* ✅ Alias explicite : /home pointe vers la même Home (utile car tu y vas manuellement) */}
+        <Route path="/home" element={<Home />} />
       </Route>
 
       <Route path="/login" element={<AuthPage />} />
@@ -67,6 +69,8 @@ export default function App() {
           <Route element={<RequireAdmin />}>
             <Route path="/admin" element={<AdminDashboard />} />
           </Route>
+          {/* 🧯 Fallback global SPA : si une route n’existe pas, renvoie vers /home (évite le NotFound) */}
+          <Route path="*" element={<Navigate to="/home" replace />} />
         </Route>
       </Route>
     </Routes>

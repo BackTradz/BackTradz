@@ -1,5 +1,6 @@
 // src/pages/auth/AuthPage.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ AJOUT
 import LoginForm from "../../components/auth/LoginForm";
 import RegisterForm from "../../components/auth/RegisterForm";
 import CTAButton from "../../components/ui/button/CTAButton";
@@ -7,13 +8,14 @@ import BacktradzLogo from "../../components/ui/BacktradzLogo/BacktradzLogo";
 import SignupSuccessOverlay from "../../components/auth/SignupSuccessOverlay"; 
 import "./auth.css";
 
+
 export default function AuthPage() {
   const [isLoginActive, setIsLoginActive] = useState(true);
   const [showSignupSuccess, setShowSignupSuccess] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [oauthError, setOauthError] = useState("");
   const [verifyUrl, setVerifyUrl] = useState("");
-
+  const navigate = useNavigate(); // ✅ AJOUT
 
   useEffect(() => {
     document.body.classList.add("auth-page");
@@ -47,8 +49,10 @@ export default function AuthPage() {
       });
       const data = await res.json();
       if (data.status === "success") {
-        localStorage.setItem("apiKey", data.token);
-        window.location.href = "/dashboard"; // login normal -> pas d’overlay
+        // ✅ Persiste le token (clé cohérente avec RequireAuth/AuthContext)
+        localStorage.setItem("apiKey", data.token || data.apiKey);
+        // ✅ Redirection SPA (évite 404 côté Render) → /home canonique
+        navigate("/home", { replace: true });
       } else {
         alert(data.message || "Erreur lors de la connexion");
       }
@@ -134,7 +138,7 @@ export default function AuthPage() {
             <SignupSuccessOverlay
               onResend={handleResend}
               resendLoading={resendLoading}
-              onClose={() => (window.location.href = "/backtest")}
+              onClose={() => navigate("/home", { replace: true })} // ✅ SPA redirect
             />
           </div>
         )}

@@ -293,7 +293,8 @@ async def auth_google_callback(request: Request):
         # --- utilisateur déjà existant → réutilise son token (clé du dict)
         for token_key, user in users.items():
             if str(user.get("email", "")).strip().lower() == email_norm:
-                return StarletteRedirect(f"{FRONTEND_URL}/?provider=google&apiKey={token_key}")
+             # ⛔️ AVANT: f"{FRONTEND_URL}/?provider=google&apiKey={token_key}"
+                return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&apiKey={token_key}")
 
 
         # --- création d'un nouvel utilisateur
@@ -346,7 +347,7 @@ async def auth_google_callback(request: Request):
             print("[google-callback] verify+bonus error:", e)
 
         # Redirection front comme avant (pas de verifyToken nécessaire désormais)
-        return StarletteRedirect(f"{FRONTEND_URL}/?provider=google&apiKey={new_token}")
+            return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&apiKey={new_token}")
             
     except Exception as e:
         # En cas d'erreur globale → retour sur /login avec message
