@@ -53,6 +53,36 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 # === 🔐 API Key Stripe (mode test) ===
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
+# --- Resolver de Price Stripe (ENV -> lookup_key -> fallback offers)
+def resolve_price_for_offer(offer_id: str) -> str:
+    from backend.models.offers import get_offer_by_id  # local import pour éviter cycles
+    offer = get_offer_by_id(offer_id) or {}
+    # 1) ENV direct par convention STRIPE_PRICE_<OFFER_ID>
+    env_direct = os.getenv(f"STRIPE_PRICE_{offer_id}")
+    if env_direct and env_direct.startswith("price_"):
+        return env_direct
+
+    # 2) ENV via clé déclarée dans l’offre ("stripe_env_key")
+    env_key = offer.get("stripe_env_key")
+    if env_key:
+        val = os.getenv(env_key)
+        if val and val.startswith("price_"):
+            return val
+
+    # 3) ENV via lookup_key (optionnel) : STRIPE_LOOKUP_<OFFER_ID>
+    lookup = os.getenv(f"STRIPE_LOOKUP_{offer_id}")
+    if lookup:
+        res = stripe.Price.list(active=True, lookup_keys=[lookup], limit=1)
+        if res.data:
+            return res.data[0].id
+
+    # 4) Fallback (legacy): champ 'stripe_price_id' dans l’offre
+    legacy = offer.get("stripe_price_id")
+    if legacy and legacy.startswith("price_"):
+        return legacy
+
+    raise HTTPException(status_code=500, detail=f"Stripe price introuvable pour {offer_id}")
+
 # === ✅ Route pour créer une session de paiement ===
 
 @router.post("/api/payment/stripe/session")
@@ -103,8 +133,42 @@ async def create_stripe_session(request: Request):
     unit_amount = int(price * 100)  # Stripe attend un montant en centimes
 
     try:
+        # --- Résolution robuste du price Stripe (ENV -> lookup_key -> legacy) ---
+        def _resolve_price_id(offer_id: str, offer: dict) -> str | None:
+            # 1) ENV direct: STRIPE_PRICE_<OFFER_ID> = price_xxx
+            pid = os.getenv(f"STRIPE_PRICE_{offer_id}")
+            if pid and pid.startswith("price_"):
+                return pid
+
+            # 2) ENV via clé déclarée dans l’offre (si tu ajoutes offer["stripe_env_key"])
+            env_key = (offer or {}).get("stripe_env_key")
+            if env_key:
+                val = os.getenv(env_key)
+                if val and val.startswith("price_"):
+                    return val
+
+            # 3) ENV lookup_key: STRIPE_LOOKUP_<OFFER_ID> = backtradz_...
+            lookup = os.getenv(f"STRIPE_LOOKUP_{offer_id}")
+            if lookup:
+                try:
+                    res = stripe.Price.list(active=True, lookup_keys=[lookup], limit=1)
+                    if res.data:
+                        return res.data[0].id
+                except Exception as _e:
+                    logger.warning(f"[stripe] lookup_key KO: {lookup} → {_e}")
+
+            # 4) Fallback legacy: offer["stripe_price_id"]
+            legacy = (offer or {}).get("stripe_price_id")
+            if legacy and legacy.startswith("price_"):
+                return legacy
+
+            return None
+
         if is_subscription:
-            price_id = offer.get("stripe_price_id")
+            # 💡 En prod, on veut absolument un price existant
+            price_id = _resolve_price_id(offer_id, offer)
+            if not price_id:
+                raise HTTPException(status_code=500, detail=f"Stripe price introuvable pour {offer_id}")
 
             # --- déterminer/assurer un customer Stripe ---
             customer_id = None
@@ -125,7 +189,7 @@ async def create_stripe_session(request: Request):
                 logger.warning(f"[stripe] customer ensure KO: {_e}")
                 customer_id = None  # Checkout saura en créer un si vraiment nécessaire
 
-            # --- créer la session Checkout SUBSCRIPTION (sans customer_creation) ---
+            # --- créer la session Checkout SUBSCRIPTION ---
             session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
                 mode="subscription",
@@ -136,26 +200,42 @@ async def create_stripe_session(request: Request):
                 customer=customer_id,  # ✅ on passe un customer explicite si dispo
                 success_url=f"{FRONTEND_URL}/pricing?payment=stripe&status=success&session_id={{CHECKOUT_SESSION_ID}}",
                 cancel_url=f"{FRONTEND_URL}/pricing?payment=stripe&status=cancel",
+                allow_promotion_codes=True,
             )
 
         else:
-            unit_amount = int(price * 100)  # ton code existant
-            session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
-                mode="payment",
-                line_items=[{
-                    "price_data": {
-                        "currency": "eur",
-                        "product_data": {"name": offer["label"]},
-                        "unit_amount": unit_amount,
-                    },
-                    "quantity": 1,
-                }],
-                metadata={"offer_id": offer_id, "user_token": user_token},
-                success_url=f"{FRONTEND_URL}/pricing?payment=stripe&status=success&session_id={{CHECKOUT_SESSION_ID}}",
-                cancel_url=f"{FRONTEND_URL}/pricing?payment=stripe&status=cancel",
-            )
+            # One-shot: on utilise d’abord un price existant ; sinon fallback inline (pas idéal, mais no-break)
+            price_id = _resolve_price_id(offer_id, offer)
+            if price_id:
+                session = stripe.checkout.Session.create(
+                    payment_method_types=["card"],
+                    mode="payment",
+                    line_items=[{"price": price_id, "quantity": 1}],
+                    metadata={"offer_id": offer_id, "user_token": user_token},
+                    success_url=f"{FRONTEND_URL}/pricing?payment=stripe&status=success&session_id={{CHECKOUT_SESSION_ID}}",
+                    cancel_url=f"{FRONTEND_URL}/pricing?payment=stripe&status=cancel",
+                    allow_promotion_codes=True,
+                )
+            else:
+                # Fallback (dernier recours) — conserve ton comportement actuel pour ne rien casser
+                unit_amount = int(price * 100)
+                session = stripe.checkout.Session.create(
+                    payment_method_types=["card"],
+                    mode="payment",
+                    line_items=[{
+                        "price_data": {
+                            "currency": "eur",
+                            "product_data": {"name": offer["label"]},
+                            "unit_amount": unit_amount,
+                        },
+                        "quantity": 1,
+                    }],
+                    metadata={"offer_id": offer_id, "user_token": user_token},
+                    success_url=f"{FRONTEND_URL}/pricing?payment=stripe&status=success&session_id={{CHECKOUT_SESSION_ID}}",
+                    cancel_url=f"{FRONTEND_URL}/pricing?payment=stripe&status=cancel",
+                )
         return {"url": session.url}
+
 
     except Exception as e:
         logger.exception(f"[stripe_session] create error: {e}")  # log serveur
@@ -213,7 +293,10 @@ async def stripe_webhook(request: Request):
             # A1) ONE-SHOT (inchangé)
             # ---------------------------
             if mode == "payment":
-                update_user_after_payment(user.id, offer_id, method="Stripe")
+                  # Récupère un identifiant robuste
+                tx_id = session.get("payment_intent") or session.get("id") or "stripe-session"
+                update_user_after_payment(user.id, offer_id, method="Stripe", transaction_id=tx_id)
+
 
                 # Montant payé (fallbacks robustes)
                 paid_eur = None
