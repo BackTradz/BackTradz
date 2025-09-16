@@ -6,7 +6,8 @@ from backend.models.offers import get_offer_by_id
 
 
 # 💳 Mettre à jour un utilisateur après un paiement
-def update_user_after_payment(user_id: str, offer_id: str, method: str = "unknown", order_id: str = None):
+def update_user_after_payment(user_id: str, offer_id: str, method: str = "unknown",
+                              order_id: str = None, transaction_id: str = None):
     """
     Applique les effets d’un paiement :
     - Ajoute des crédits si achat one_shot
@@ -20,6 +21,15 @@ def update_user_after_payment(user_id: str, offer_id: str, method: str = "unknow
         users = json.load(f)
         if user_id not in users:
             return False
+        user = users[user_id]
+
+        # 🔐 Anti-doublon générique (Stripe/Autres) si on a un identifiant
+        dedup_id = transaction_id or order_id
+        if dedup_id:
+            for tx in user.get("purchase_history", []):
+                if tx.get("transaction_id") == dedup_id or tx.get("order_id") == dedup_id:
+                    print(f"⚠️ Paiement déjà enregistré — {dedup_id}")
+                    return False
 
         offer = get_offer_by_id(offer_id)
         if not offer:
@@ -72,8 +82,10 @@ def update_user_after_payment(user_id: str, offer_id: str, method: str = "unknow
             "method": method,
             "discount_applied": discount_str
         }
-        if method == "PayPal" and order_id:
+        if order_id:
             tx["order_id"] = order_id
+        if transaction_id:
+            tx["transaction_id"] = transaction_id
 
         user.setdefault("purchase_history", []).append(tx)
 
