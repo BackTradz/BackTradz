@@ -148,6 +148,9 @@ app.include_router(backtest_xlsx_routes.router, prefix="/api")  # ⬅️ mount
 from fastapi.responses import JSONResponse, RedirectResponse
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+PUBLIC_API_URL = os.getenv("PUBLIC_API_URL", "https://api.backtradz.com").rstrip("/")
+
+print(f"[BOOT] FRONTEND_URL={FRONTEND_URL} | PUBLIC_API_URL={PUBLIC_API_URL}")
 
 @app.get("/health", include_in_schema=False)
 def health():
@@ -176,6 +179,15 @@ def run_subscription_renewal() -> None:
     """
     print("⏳ Vérification des abonnements...")
     renew_all_subscriptions()
+
+# --- plus bas, à côté de tes autres routes ---
+@app.get("/api/_env_check", include_in_schema=False)
+def _env_check(request: Request):
+    return JSONResponse({
+        "FRONTEND_URL": FRONTEND_URL,
+        "PUBLIC_API_URL": PUBLIC_API_URL,
+        "HostHeader": request.headers.get("host"),
+    })
 
 # 🔒 Custom doc avec champ X-API-Key
 def custom_openapi():
