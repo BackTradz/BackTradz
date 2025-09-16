@@ -5,19 +5,23 @@
 #    la création d’ordres (Stripe/PayPal/NowPayments) et la mise à jour user.
 # 🧩 Évolutif: champs "bonus_triggered", "promo_code_applicable" prévus pour features futures.
 
+# offers.py
+import os
 from datetime import timedelta
 
-# Dictionnaire des offres disponibles
+def _env(k: str) -> str | None:
+    return os.getenv(k)
+
 OFFERS = {
-    # 🎁 OFFRES ONE-SHOT (non récurrentes)
+    # ONE-SHOT
     "CREDIT_5": {
         "id": "CREDIT_5",
         "type": "one_shot",
         "price_eur": 5,
         "credits": 5,
         "label": "5 crédits pour 5€",
-        "bonus_triggered": False,
-        "promo_code_applicable": True,
+        # on lit STRIPE_PRICE_CREDIT_5 en prod
+        "stripe_env_key": "STRIPE_PRICE_CREDIT_5",
     },
     "CREDIT_10": {
         "id": "CREDIT_10",
@@ -25,8 +29,7 @@ OFFERS = {
         "price_eur": 10,
         "credits": 12,
         "label": "12 crédits pour 10€",
-        "bonus_triggered": False,
-        "promo_code_applicable": True,
+        "stripe_env_key": "STRIPE_PRICE_CREDIT_10",
     },
     "CREDIT_20": {
         "id": "CREDIT_20",
@@ -34,8 +37,7 @@ OFFERS = {
         "price_eur": 20,
         "credits": 25,
         "label": "25 crédits pour 20€",
-        "bonus_triggered": False,
-        "promo_code_applicable": True,
+        "stripe_env_key": "STRIPE_PRICE_CREDIT_20",
     },
     "CREDIT_50": {
         "id": "CREDIT_50",
@@ -43,21 +45,22 @@ OFFERS = {
         "price_eur": 50,
         "credits": 75,
         "label": "75 crédits pour 50€",
-        "bonus_triggered": True,  # ex: badge fidélité plus tard
-        "promo_code_applicable": True,
+        "stripe_env_key": "STRIPE_PRICE_CREDIT_50",
     },
 
-    # 🔁 ABONNEMENTS MENSUELS
+    # SUBS
     "SUB_9": {
         "id": "SUB_9",
         "type": "subscription",
         "price_eur": 9,
         "credits_monthly": 10,
-        "discount_rate": 0.10,      # -10% sur achats crédits
-        "priority_backtest": True,  # file prioritaire
+        "discount_rate": 0.10,
+        "priority_backtest": True,
         "label": "9€/mois - 10 crédits et plus",
         "duration_days": 30,
-        "stripe_price_id": "price_1S6HhpJ7lIaOTbzgT3xAN8cU"   # ← ajoute l’ID Stripe du plan à 9€
+        # En prod on lira STRIPE_PRICE_SUB_9
+        "stripe_env_key": "STRIPE_PRICE_SUB_9",
+        # ancien fallback éventuel (optionnel): "stripe_price_id": "price_..."
     },
     "SUB_25": {
         "id": "SUB_25",
@@ -68,11 +71,9 @@ OFFERS = {
         "priority_backtest": True,
         "label": "25€/mois - 30 crédits et plus",
         "duration_days": 30,
-        "stripe_price_id": "price_1S6Hi5J7lIaOTbzgybR5TeKy"  # ← ajoute l’ID Stripe du plan à 25€
+        "stripe_env_key": "STRIPE_PRICE_SUB_25",
     },
-
 }
 
 def get_offer_by_id(offer_id: str):
-    """🔍 Renvoie le dict d’offre correspondant à `offer_id` (ou None)."""
     return OFFERS.get(offer_id)
