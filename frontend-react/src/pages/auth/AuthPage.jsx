@@ -7,6 +7,7 @@ import CTAButton from "../../components/ui/button/CTAButton";
 import BacktradzLogo from "../../components/ui/BacktradzLogo/BacktradzLogo";
 import SignupSuccessOverlay from "../../components/auth/SignupSuccessOverlay"; 
 import "./auth.css";
+import { login } from "../../sdk/authApi";
 
 
 export default function AuthPage() {
@@ -75,6 +76,21 @@ export default function AuthPage() {
     } catch (err) {
       console.error("Erreur register:", err);
       alert("Erreur inattendue.");
+    }
+  };
+
+  const handleLogin = async (identifier, password) => {
+    try {
+      const data = await login(identifier, password);
+      if (data?.token) {
+        localStorage.setItem("apiKey", data.token);
+        navigate("/home"); // redirige vers /home après login
+      } else {
+        alert(data.message || "Identifiants invalides");
+      }
+    } catch (err) {
+      console.error("Erreur login:", err);
+      alert(err.message || "Erreur inattendue");
     }
   };
 
@@ -170,7 +186,7 @@ export default function AuthPage() {
                   {oauthError}
                 </div>
               )}
-              <LoginForm />
+              <LoginForm onLogin={handleLogin} />
             </div>
             <div className="auth-form register-form">
               <RegisterForm onRegister={handleRegister} />
