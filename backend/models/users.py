@@ -9,6 +9,7 @@
 #
 # ⚠️ Attention : les mots de passe sont stockés en clair (à sécuriser
 # plus tard avec du hashing type bcrypt).
+from backend.core.paths import USERS_JSON  # ← la DB sur le disque
 
 import json
 from pathlib import Path as _Path
@@ -19,8 +20,7 @@ from backend.models.offers import get_offer_by_id
 import json
 
 # 📂 Chemin du fichier JSON qui fait office de "base de données" utilisateurs
-USERS_FILE = Path(__file__).resolve().parent.parent / "database" / "users.json"
-
+USERS_FILE = USERS_JSON
 AUDIT_FILE = _Path("backend/data/audit/ledger.jsonl")
 AUDIT_FILE.parent.mkdir(parents=True, exist_ok=True)  # ✅ crée le dossier si absent
 def _audit_append(evt: dict):

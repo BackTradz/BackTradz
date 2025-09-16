@@ -13,7 +13,8 @@ Security:
 Notes:
   - Les logs '🔄 UPDATE REQ' sont gardés pour debug.
 """
-
+from backend.core.paths import DB_DIR, USERS_JSON
+from backend.utils.json_db import read_json, write_json_atomic, file_lock
 from fastapi import APIRouter, Depends, Request
 from backend.auth import get_current_user
 from backend.models.users import User
@@ -41,7 +42,7 @@ import uuid
 import json
 
 router = APIRouter()
-USERS_FILE = Path("backend/database/users.json")
+
 RECREATE_FILE = Path("backend/database/email_recreate.json")
 RECREATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
@@ -221,8 +222,8 @@ async def register_user(request: Request):
     
     # Chargement des utilisateurs existants
     users = {}
-    if USERS_FILE.exists():
-        users = json.loads(USERS_FILE.read_text())
+    if USERS_JSON.exists():
+        users = json.loads(USERS_JSON.read_text())
 
     # Vérification de doublons
     if any(u.get("email") == email or u.get("username") == username for u in users.values()):
@@ -257,7 +258,7 @@ async def register_user(request: Request):
 
         # Enregistrement
     users[token] = new_user
-    USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
+    USERS_JSON.write_text(json.dumps(users, indent=2), encoding="utf-8")
 
     # ✅ incrémente le compteur de créations
     try:
@@ -406,7 +407,7 @@ async def set_password(payload: SetPasswordPayload, user: User = Depends(get_cur
 
     # Set du nouveau mdp (toujours hashé)
     u["password"] = hash_password(payload.new_password)
-    _atomic_write_json(USERS_FILE, users)
+    _atomic_write_json(USERS_JSON, users)
 
     return {"status": "success"}
 
@@ -429,15 +430,13 @@ def _atomic_write_json(path: Path, data: dict) -> None:
             except Exception:
                 pass
 
-def _load_users() -> Dict[str, dict]:
-    """Charge users.json de manière tolérante."""
-    if not USERS_FILE.exists():
-        return {}
-    try:
-        raw = USERS_FILE.read_text(encoding="utf-8")
-        return json.loads(raw) if raw.strip() else {}
-    except json.JSONDecodeError:
-        return {}
+def load_users() -> dict:
+    return read_json(USERS_JSON, {})
+
+def save_users(users: dict) -> None:
+    lock = DB_DIR / "users.json.lock"
+    with file_lock(lock):
+        write_json_atomic(USERS_JSON, users)
 
 # --- SCHÉMA D’ENTRÉE / VALIDATION ------------------------------------------
 class RegisterPayload(BaseModel):
@@ -527,7 +526,7 @@ async def register_user(request: Request):
     }
 
     users[token] = new_user
-    _atomic_write_json(USERS_FILE, users)
+    _atomic_write_json(USERS_JSON, users)
 
     # ✅ incrémente le compteur de créations
     try:
@@ -610,7 +609,7 @@ async def delete_own_account(request: Request, user: User = Depends(get_current_
     - loggue 'user_deleted' dans le ledger
     - supprime l'entrée du users.json
     """
-    users = _load_json_safe(USERS_FILE)
+    users = _load_json_safe(USERS_JSON)
     uid = user.id
     if uid not in users:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
@@ -625,7 +624,7 @@ async def delete_own_account(request: Request, user: User = Depends(get_current_
     # 3) suppression effective
     try:
         del users[uid]
-        USERS_FILE.write_text(json.dumps(users, indent=2, ensure_ascii=False), encoding="utf-8")
+        USERS_JSON.write_text(json.dumps(users, indent=2, ensure_ascii=False), encoding="utf-8")
     except Exception:
         raise HTTPException(status_code=500, detail="Erreur lors de la suppression")
 

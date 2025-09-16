@@ -14,6 +14,7 @@ Notes:
   - Aucune modification de logique: uniquement docstrings/commentaires.
   - À terme, remplacer les JSON par une base (SQLite/Postgres) et mettre un RBAC propre.
 """
+from backend.core.paths import OUTPUT_DIR, ANALYSIS_DIR, USERS_JSON
 
 from fastapi import APIRouter
 from fastapi import Request, HTTPException
@@ -98,7 +99,7 @@ def daily_summary():
           à partir des colonnes 'phase' et 'result'.
         - Ignore silencieusement les dossiers mal nommés / CSV invalides (logs print).
     """
-    base_path = Path("backend/data/analysis")
+    base_path = Path("ANALYSIS_DIR")
     summary = []
 
     for folder in base_path.iterdir():
@@ -205,7 +206,7 @@ def backtest_summary():
         SL Size (avg, pips), TP1 Size (avg, pips), TP2 Size (avg, pips)
         (ou TP Size (avg, pips) comme fallback global).
     """
-    base_path = Path("backend/data/analysis")
+    base_path = Path("ANALYSIS_DIR")
     summary = []
 
     for folder in base_path.iterdir():

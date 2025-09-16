@@ -39,6 +39,10 @@ from backend.routes import user_routes  # ou le nom du fichier .py
 
 from backend import auth  # ← déjà fait chez toi normalement
 
+from fastapi.responses import JSONResponse, RedirectResponse
+# backend/main.py (extrait)
+from backend.core.paths import ensure_storage_dirs
+
 from backend.routes.a_savoir_routes import router as a_savoir_router
 
 #from backend.utils.templates import templates  # NOTE: utilisé côté rendu templates si besoin
@@ -145,7 +149,12 @@ app.include_router(user_router, prefix="/api")
 app.include_router(official_data_router, prefix="/api")
 app.include_router(backtest_xlsx_routes.router, prefix="/api")  # ⬅️ mount
 
-from fastapi.responses import JSONResponse, RedirectResponse
+
+
+
+@app.on_event("startup")
+def _ensure_dirs():
+    ensure_storage_dirs()  # crée /output, /analysis, /db si absents
 
 
 

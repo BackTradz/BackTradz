@@ -2,12 +2,13 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 import pandas as pd
+from backend.core.paths import ANALYSIS_DIR
 
 router = APIRouter()
 
 @router.get("/top-strategy")
 def get_top_strategies():
-    base_path = Path("backend/data/analysis")
+    base_path = ANALYSIS_DIR
     results = []
 
     for file in base_path.rglob("*.xlsx"):
@@ -68,7 +69,7 @@ def get_top_strategies():
 
 
 
-BASE_ANALYSIS = Path("backend/data/analysis")  # <-- ajuste si différent
+BASE_ANALYSIS = ANALYSIS_DIR
 
 def _find_xlsx_in_folder(folder: str) -> Path:
     base = BASE_ANALYSIS / folder

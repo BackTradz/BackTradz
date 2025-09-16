@@ -13,6 +13,7 @@ Security:
   - Certaines routes publiques (listage), d’autres protégées par X-API-Key.
 """
 
+from backend.core.paths import DATA_ROOT, OUTPUT_DIR  # + ANALYSIS_DIR si besoin plus tard
 from fastapi import APIRouter, Request, HTTPException, Header
 from fastapi.responses import FileResponse
 from backend.models.users import get_user_by_token, update_user, decrement_credits
@@ -23,6 +24,8 @@ from datetime import datetime, timedelta, timezone
 import os
 
 router = APIRouter()
+
+
 
 # -------- Extractions récentes (Niv.2) --------
 RECENT_STORE_DIR = Path("backend/storage/extractions")
@@ -101,7 +104,7 @@ def list_csv_library():
           symbol, timeframe, year, month, filename, relative_path
         }, ...]
     """
-    root_dir = Path("backend/output")
+    root_dir = OUTPUT_DIR
     csv_files = list(root_dir.rglob("*.csv"))
 
     library = []
@@ -113,8 +116,7 @@ def list_csv_library():
             symbol = parts[0]
             timeframe = parts[1]
             year, month = parts[2].split("-")
-            project_root = Path("backend").resolve()
-            relative_path = str(file.resolve().relative_to(project_root)).replace("\\", "/")
+            relative_path = str(file.resolve().relative_to(OUTPUT_DIR.resolve())).replace("\\", "/")
 
             library.append({
                 "symbol": symbol,
@@ -277,8 +279,13 @@ def download_csv_by_path(
 
     file_path = Path(path)
     if not file_path.is_absolute():
-        file_path = Path("backend") / path
-
+        # on accepte d'abord relatif à OUTPUT_DIR (préféré), puis DATA_ROOT, sinon fallback ancien
+        cand = OUTPUT_DIR / path
+        if cand.exists():
+            file_path = cand
+        else:
+            file_path = DATA_ROOT / path
+            
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Fichier introuvable")
 

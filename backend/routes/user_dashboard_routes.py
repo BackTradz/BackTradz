@@ -12,7 +12,7 @@ Security:
 Notes:
   - Les prints '✅/📄/⛔️/📊' sont des logs debug utiles, conservés.
 """
-
+from backend.core.paths import ANALYSIS_DIR
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from pathlib import Path
 import json
@@ -34,7 +34,7 @@ def get_user_backtests(request: Request, user=Depends(get_current_user)):
     et renvoie des items prêts à afficher (incluant metrics détaillées).
     """
     print(f"✅ USER CONNECTÉ → {user.id}")
-    base_dir = Path(os.path.dirname(__file__)).parent / "data" / "analysis"
+    base_dir = ANALYSIS_DIR
     backtests = []
 
     # Parcours récursif de tous les JSON d'analyse
@@ -230,8 +230,8 @@ def delete_backtest(folder: str, user=Depends(get_current_user)):
     Returns:
       dict: message de confirmation
     """
-    base_dir = Path(os.path.dirname(__file__)).parent / "data" / "analysis"
-    target_path = base_dir / folder
+    base_dir = ANALYSIS_DIR  # on restreint la suppression à /analysis uniquement
+    target = (base_dir / rel_after_backend).resolve()
 
     if not target_path.exists() or not target_path.is_dir():
         raise HTTPException(status_code=404, detail="Dossier introuvable")
@@ -264,20 +264,12 @@ from fastapi import Query, Body
 from fastapi.responses import Response
 
 def _normalize_backend_rel(p: str) -> str:
-    """Retourne le chemin relatif après 'backend/'. Ex: 'assets/...', 'output_live/...'
-    - remplace \ par /
-    - coupe avant le dernier '/backend/'
-    - enlève un 'backend/' en trop si présent
-    """
-    if not p:
-        return ""
-    x = str(p).replace("\\", "/")
-    i = x.lower().rfind("/backend/")
-    if i != -1:
-        x = x[i + len("/backend/") :]
-    if x.lower().startswith("backend/"):
-        x = x[8:]
-    return x.lstrip("/")
+    x = (p or "").replace("\\", "/").lstrip("/")
+    # on refuse toute tentative de sortie du dossier analysis
+    if ".." in x:
+        raise HTTPException(status_code=400, detail="Chemin invalide")
+    return x
+
 
 def _delete_csv_file(rel_after_backend: str, user):
     """Supprime le fichier situé sous backend/<rel_after_backend>."""

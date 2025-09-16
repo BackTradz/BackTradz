@@ -9,6 +9,7 @@ Security:
   - Pas d’auth ici → ⚠️ en prod, à restreindre (X-API-Key / cookie).
 """
 
+from backend.core.paths import ANALYSIS_DIR
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
@@ -30,7 +31,7 @@ def download_xlsx(filename: str):
     Raises:
         HTTPException 404: si le fichier n’existe pas.
     """
-    base_path = Path("backend/data/analysis")
+    base_path = ANALYSIS_DIR
     matches = list(base_path.rglob(filename))  # recherche récursive
 
     if not matches:
