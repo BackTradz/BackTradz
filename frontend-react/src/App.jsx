@@ -11,7 +11,8 @@
 // ============================================================
 // App.jsx
 // App.jsx
-import { Routes, Route } from "react-router-dom";
+// ⬇️ ajoute (ou complète) cet import
+import { Routes, Route, Navigate } from "react-router-dom";
 import RequireAuth from "./auth/RequireAuth";
 import RequireAdmin from "./auth/RequireAdmin";
 import AppLayout from "./layouts/AppLayout";

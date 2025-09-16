@@ -24,13 +24,28 @@ const BASE = (
     : 'https://api.backtradz.com' // ✅ fallback PROD sûr
 );
 
-/** Join sûr BASE + path (gère les slashs) */
-const j = (path) => {
-  if (!path) return BASE;
-  const isAbsolute = /^https?:\/\//i.test(path);
-  if (isAbsolute) return path;
-  return `${BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+// --- Détection contexte
+const onProdDomain =
+  typeof window !== "undefined" &&
+  /(^|\.)backtradz\.com$/i.test(window.location.hostname);
+
+// --- Base URL issue de l'env (si présente)
+const envBase = (import.meta.env?.VITE_API_BASE || "").trim();
+
+// --- Si on est en prod et que l'env pointe sur localhost → on l'ignore
+const looksLikeLocal = /localhost|127\.0\.0\.1|:\d{2,5}/i.test(envBase);
+const effectiveBase =
+  onProdDomain && looksLikeLocal ? "" : envBase;
+
+  (/\/$/, "");
+
+// --- Join sûr BASE + path
+const j = (path = "") => {
+  const isAbs = /^https?:\/\//i.test(path);
+  if (isAbs) return path;
+  return `${BASE}${path.startsWith("/") ? "" : "/"}${path}`;
 };
+
 
 export async function api(path, { method = 'GET', headers = {}, body, auth = true } = {}) {
   // 🔐 Token déjà stocké au login
