@@ -32,7 +32,7 @@ import os
 from datetime import datetime
 import math
 
-ADMIN_EMAIL = "florian.boulinguez@outlook.com"
+ADMIN_EMAIL = "BackTradz@outlook.com"
 
 router = APIRouter()
 
