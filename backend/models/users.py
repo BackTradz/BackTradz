@@ -9,20 +9,22 @@
 #
 # ⚠️ Attention : les mots de passe sont stockés en clair (à sécuriser
 # plus tard avec du hashing type bcrypt).
-from backend.core.paths import USERS_JSON  # ← la DB sur le disque
-
+from backend.core.paths import USERS_JSON as USERS_FILE, DB_DIR, DATA_ROOT
 import json
 from pathlib import Path as _Path
 from pathlib import Path
 from pydantic import BaseModel
 from datetime import datetime, timedelta, timezone
 from backend.models.offers import get_offer_by_id
-import json
+from passlib.context import CryptContext
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 # 📂 Chemin du fichier JSON qui fait office de "base de données" utilisateurs
 USERS_FILE = USERS_JSON
-AUDIT_FILE = _Path("backend/data/audit/ledger.jsonl")
-AUDIT_FILE.parent.mkdir(parents=True, exist_ok=True)  # ✅ crée le dossier si absent
+AUDIT_FILE = DATA_ROOT / "audit" / "ledger.jsonl"
+AUDIT_FILE.parent.mkdir(parents=True, exist_ok=True)
+
 def _audit_append(evt: dict):
     try:
         evt = dict(evt)
@@ -255,13 +257,7 @@ def cancel_subscription(user_id: str) -> bool:
         f.truncate()
        
     return True
-# backend/models/users.py
-from pathlib import Path
-import json, tempfile, os
-from passlib.context import CryptContext
 
-USERS_FILE = Path("backend/database/users.json")
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def _load_users() -> dict:
     if not USERS_FILE.exists():
