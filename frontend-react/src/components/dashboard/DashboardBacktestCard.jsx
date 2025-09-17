@@ -92,9 +92,9 @@ export default function DashboardBacktestCard({ bt = {}, onDeleted }) {
   const trades = bt.trades ?? bt.total_trades ?? bt.count ?? null;
 
   const xlsx = bt.xlsx_filename || bt.xlsx || null;
-  const apiKey = (typeof localStorage !== "undefined" && localStorage.getItem("apiKey")) || "";
+// IMPORTANT : passer folder + filename au helper
   const downloadHref = (bt.folder && xlsx) ? downloadXlsxUrl(bt.folder, xlsx) : null;
-  
+
   const [ask, setAsk] = useState(false);  // ouvre la boîte de confirmation
   const [open, setOpen] = useState(false); // ouvre la modale détails
   const { user } = useAuth ? useAuth() : { user: null };
@@ -172,12 +172,23 @@ export default function DashboardBacktestCard({ bt = {}, onDeleted }) {
       <div className="dbt-actions-secondary">
         <div className="col">
           {downloadHref ? (
-            <DetailButton href={downloadHref} leftIcon="⬇️">
-              Télécharger
-            </DetailButton>
+            <CTAButton
+              as="a"
+              href={downloadHref}
+              download
+              target="_blank"
+              rel="noopener"
+              fullWidth
+            >
+              📥 XLSX
+            </CTAButton>
           ) : (
-            <DetailButton disabled>.xlsx indisponible</DetailButton>
+            <CTAButton as="button" disabled fullWidth>
+              .xlsx indisponible
+            </CTAButton>
           )}
+            <DetailButton disabled>.xlsx indisponible</DetailButton>
+          
         </div>
         <div className="col">
           <DeleteButton onClick={() => setAsk(true)}>Supprimer</DeleteButton>
