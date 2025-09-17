@@ -37,7 +37,7 @@ from backend.models.users import (
 )
 from backend.utils.email_sender import send_email_html
 from backend.utils.email_templates import verification_subject, verification_html, verification_text
-
+from backend.core.paths import USERS_JSON, DB_DIR
 
 
 from passlib.context import CryptContext
@@ -216,12 +216,13 @@ oauth.register(
     client_kwargs={"scope": "openid email profile"},
 )
 
-USERS_FILE = Path("backend/database/users.json")
+# ... et remplace par:
+USERS_FILE = USERS_JSON                       # <- /var/data/backtradz/db/users.json
 USERS_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-# ✅ AJOUTER :
-RECREATE_FILE = Path("backend/database/email_recreate.json")
+RECREATE_FILE = (DB_DIR / "email_recreate.json")  # <- /var/data/backtradz/db/email_recreate.json
 RECREATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+
 
 def _load_json_safe(path: Path) -> dict:
     if not path.exists():
