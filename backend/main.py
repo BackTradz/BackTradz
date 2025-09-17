@@ -82,6 +82,21 @@ from backend.routes.meta_routes import router as meta_router
 
 app = FastAPI()
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://www.backtradz.com",
+        "https://backtradz.com",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+    allow_headers=["*"],
+)
+
+
 # Middleware de session (utilisé par auth/OAuth et/ou vues template)
 # NOTE: secret "STRATIFY_SECRET" en clair ici → prévoir .env + rotation
 app.add_middleware(SessionMiddleware, secret_key="STRATIFY_SECRET")
@@ -106,19 +121,6 @@ def _allowed_origins():
     return list(dict.fromkeys(origins))
 
 
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://www.backtradz.com",
-        "https://backtradz.com",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
-    allow_credentials=True,
-    allow_methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
-    allow_headers=["*"],
-)
 
 
 
