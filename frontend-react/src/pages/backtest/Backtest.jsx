@@ -38,6 +38,7 @@ import { pairsToOptions, formatParam, formatStrategy } from "../../lib/labels";
 import STRATEGIES_MAP from "../../config/labels/strategies.map";
 import usePip from "../../hooks/usePip"; // ✅ nouveau hook
 import { getUiParamsSpec } from "../../config/labels/params.map"; // 🔥 on utilise la spec UI
+import DetailButton from "../../components/ui/button/DetailButton";
 
 
 export default function Backtest() {
@@ -368,9 +369,9 @@ export default function Backtest() {
               };
 
               return (
-                <CTAButton as="button" onClick={handleDownload}>
+                <DetailButton as="button" onClick={handleDownload}>
                   📥 Télécharger le rapport (.xlsx)
-                </CTAButton>
+                </DetailButton>
               );
             })()}
 
