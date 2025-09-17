@@ -31,7 +31,9 @@ from backend.models.users import charge_2_credits_for_backtest
 from fastapi import Header
 from fastapi import UploadFile, File, Form
 from backend.core.admin import is_admin_user
-
+# --- ADD: mirroring vers ANALYSIS_DIR (disque Render) ---
+from backend.core.paths import ANALYSIS_DIR
+import shutil
 import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -205,6 +207,21 @@ def launch_backtest(req: BacktestRequest, authorization: str = Header(None, alia
         print("✅ Analyse terminée :", analysis_xlsx_path)
         elapsed_ms = int((time.perf_counter() - t0) * 1000)
 
+        src_dir = Path(analysis_xlsx_path).parent  # ex: backend/data/analysis/....../
+        try:
+            # On ne copie que si la source est sous 'backend/data/analysis'
+            if "backend/data/analysis" in str(src_dir).replace("\\", "/"):
+                dest_dir = ANALYSIS_DIR / src_dir.name
+                dest_dir.parent.mkdir(parents=True, exist_ok=True)
+
+                # copie tolérante (dirs_exist_ok dispo en Py3.8+)
+                shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
+
+                # on repointe le chemin XLSX vers le miroir sur disque Render
+                analysis_xlsx_path = str(dest_dir / Path(analysis_xlsx_path).name)
+                print(f"🔁 Miroir ANALYSIS_DIR: {dest_dir}")
+        except Exception as _e:
+            print("⚠️ Mirror vers ANALYSIS_DIR échoué:", _e)
 
         # ✅ Crédit décrémenté uniquement si succès
         try:
@@ -370,7 +387,17 @@ async def upload_csv_and_backtest(
             return {"error": "Pas assez de données pour effectuer une analyse. Aucun crédit décompté."}
 
         elapsed_ms = int((time.perf_counter() - t0) * 1000)
-
+        
+        src_dir = Path(analysis_xlsx_path).parent
+        try:
+            if "backend/data/analysis" in str(src_dir).replace("\\", "/"):
+                dest_dir = ANALYSIS_DIR / src_dir.name
+                dest_dir.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
+                analysis_xlsx_path = str(dest_dir / Path(analysis_xlsx_path).name)
+                print(f"🔁 Miroir ANALYSIS_DIR: {dest_dir}")
+        except Exception as _e:
+            print("⚠️ Mirror vers ANALYSIS_DIR échoué:", _e)
         # 🎫 Crédit -2
         try:
             folder = Path(analysis_xlsx_path).parent.name if analysis_xlsx_path else None

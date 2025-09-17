@@ -37,6 +37,14 @@ def get_user_backtests(request: Request, user=Depends(get_current_user)):
     """
     print(f"✅ USER CONNECTÉ → {user.id}")
     base_dir = ANALYSIS_DIR
+    alt_dir = Path("backend/data/analysis").resolve()
+
+    search_dirs = []
+    if base_dir.exists():
+        search_dirs.append(base_dir)
+    if alt_dir.exists() and alt_dir != base_dir:
+        search_dirs.append(alt_dir)
+
     backtests = []
 
     # Parcours récursif de tous les JSON d'analyse

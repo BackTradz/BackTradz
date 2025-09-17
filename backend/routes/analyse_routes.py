@@ -9,39 +9,69 @@ Security:
   - Pas d’auth ici → ⚠️ en prod, à restreindre (X-API-Key / cookie).
 """
 
-from backend.core.paths import ANALYSIS_DIR
 
-from fastapi import APIRouter, HTTPException
+from backend.core.paths import ANALYSIS_DIR
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 from pathlib import Path
 
+
 router = APIRouter()
 
+
+
+
 @router.get("/download/{filename}")
-def download_xlsx(filename: str):
+def download_xlsx(
+    filename: str,
+    folder: str | None = Query(None, description="(optionnel) dossier d'analyse pour désambigüer"),
+):
     """
-    Télécharge un fichier XLSX d'analyse de backtest.
-
-    Args:
-        filename (str): nom exact du fichier attendu (ex: "EURUSD_M5.xlsx").
-
-    Returns:
-        FileResponse: fichier trouvé dans backend/data/analysis/**/filename
-
-    Raises:
-        HTTPException 404: si le fichier n’existe pas.
+    Télécharge un .xlsx de backtest.
+    - Cherche d'abord sous ANALYSIS_DIR (disque Render).
+    - Fallback sous backend/data/analysis (ancien emplacement).
+    - Si `?folder=` est fourni, on privilégie ce sous-dossier.
     """
-    base_path = ANALYSIS_DIR
-    matches = list(base_path.rglob(filename))  # recherche récursive
+    # 1) candidats par ordre de priorité
+    roots = [
+        ANALYSIS_DIR.resolve(),
+        (Path("backend") / "data" / "analysis").resolve(),
+    ]
 
-    if not matches:
+    candidates: list[Path] = []
+
+    # a) si folder fourni → on teste directement {root}/{folder}/{filename}
+    if folder:
+        for r in roots:
+            p = (r / folder / filename).resolve()
+            if p.exists() and p.is_file():
+                candidates.append(p)
+
+    # b) sinon / en complément → rglob(filename) (premier match suffisant)
+    if not candidates:
+        for r in roots:
+            # on limite la profondeur à 3 niveaux pour rester perfs/secure
+            for p in r.rglob(filename):
+                try:
+                    # petit garde-fou : s'assurer que p est bien sous r
+                    if r in p.resolve().parents:
+                        candidates.append(p)
+                        break
+                except Exception:
+                    continue
+            if candidates:
+                break
+
+    if not candidates:
         raise HTTPException(status_code=404, detail="❌ Fichier non trouvé")
 
+    path = candidates[0]
     return FileResponse(
-        path=matches[0],
+        path=path,
         filename=filename,
-        media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+
 
 @router.get("/public/top_strategies")
 def get_top_strategies():
