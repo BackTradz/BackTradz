@@ -9,7 +9,7 @@
 import { useState } from "react";
 import { downloadXlsxUrl } from "../../sdk/userApi";
 import { useAuth } from "../../auth/AuthContext"; 
-
+import { absApi } from "../../sdk/url"; // (en haut du fichier)
 //overlay import 
 import ConfirmDialog from "./ConfirmDialog";
 import BacktestDetailsModal from "./BacktestDetailsModal";
@@ -92,8 +92,9 @@ export default function DashboardBacktestCard({ bt = {}, onDeleted }) {
   const trades = bt.trades ?? bt.total_trades ?? bt.count ?? null;
 
   const xlsx = bt.xlsx_filename || bt.xlsx || null;
-  const downloadHref = xlsx ? downloadXlsxUrl(xlsx) : null;
-
+  const apiKey = (typeof localStorage !== "undefined" && localStorage.getItem("apiKey")) || "";
+  const downloadHref = (bt.folder && xlsx) ? downloadXlsxUrl(bt.folder, xlsx) : null;
+  
   const [ask, setAsk] = useState(false);  // ouvre la boîte de confirmation
   const [open, setOpen] = useState(false); // ouvre la modale détails
   const { user } = useAuth ? useAuth() : { user: null };

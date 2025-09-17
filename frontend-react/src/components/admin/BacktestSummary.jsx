@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import SectionTitle from "../ui/SectionTitle";
 import CTAButton from "../ui/button/CTAButton";
 import AdminInsightsOverlay from "./AdminInsightsOverlay";
+import { downloadXlsxUrl } from "../../sdk/userApi";
 
 // Helpers affichage
 function pct(v) {
@@ -190,14 +191,11 @@ export default function BacktestSummary() {
                       const cleanPeriod = m ? `${m[1]}to${m[2]}` : (bt.period || "");
                       const slVal = (bt?.params?.sl_pips ?? bt?.params?.sl ?? 100);
                       const apiKey = localStorage.getItem("apiKey") || "";
-                      const dlUrl =
-                        `/api/admin/download_xlsx` +
-                        `?symbol=${encodeURIComponent(bt.symbol || "")}` +
-                        `&timeframe=${encodeURIComponent(bt.timeframe || "")}` +
-                        `&strategy=${encodeURIComponent(bt.strategy || "")}` +
-                        `&period=${encodeURIComponent(cleanPeriod)}` +
-                        `&sl=${encodeURIComponent(slVal)}` +
-                        `&apiKey=${encodeURIComponent(apiKey)}`;
+                      
+                      const xlsxFile = bt.xlsx_filename || (bt.folder ? `analyse_${bt.strategy}_${bt.symbol}_SL${slVal}_${cleanPeriod}_resultats.xlsx` : null);
+                      const dlUrl = (bt.folder && xlsxFile)
+                       ? downloadXlsxUrl(bt.folder, xlsxFile)
+                       : null;
                       return (
                         <div className="flex gap-2">
                           <CTAButton href={dlUrl} download variant="primary" fullWidth>

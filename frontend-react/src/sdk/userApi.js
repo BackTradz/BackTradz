@@ -11,6 +11,7 @@
 // - POST /profile/delete                    -> suppression compte
 // ============================================================
 import { api } from './apiClient';
+import { API_BASE } from "./apiClient"; 
 
 export const myBacktests = () =>
   api('api/user/backtests'); // besoin d'être connecté (X-API-Key)
@@ -19,9 +20,11 @@ export const myBacktests = () =>
 export const myPurchasedCSVs = () =>
   api('api/user/csvs'); // besoin d'être connecté
 
-export const downloadXlsxUrl = (filename) =>
-  `api/download/${filename}`; // URL directe (proxy vite -> backend)
-
+export const downloadXlsxUrl = (folder, filename) => {
+  const apiKey = (typeof localStorage !== "undefined" &&
+                 (localStorage.getItem("apiKey") || localStorage.getItem("token"))) || "";
+  return `${API_BASE}/api/download/${encodeURIComponent(filename)}?folder=${encodeURIComponent(folder)}&apiKey=${encodeURIComponent(apiKey)}`;
+ };
 // Update profil : accepte un FormData ou un <form>, mappe vers { email, full_name }
 export const updateProfile = async (formElOrFD) => {
   const raw = formElOrFD instanceof FormData ? formElOrFD : new FormData(formElOrFD);

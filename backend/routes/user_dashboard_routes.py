@@ -12,13 +12,13 @@ Security:
 Notes:
   - Les prints '✅/📄/⛔️/📊' sont des logs debug utiles, conservés.
 """
-from backend.core.paths import ANALYSIS_DIR
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from pathlib import Path
 from backend.core.paths import ANALYSIS_DIR, DATA_ROOT
+from backend.auth import get_current_user, get_user_by_token  # get_user_by_token si besoin
 import json
 from typing import List
-from backend.auth import get_current_user
 import openpyxl
 import os
 from fastapi.responses import JSONResponse

@@ -271,7 +271,7 @@ export default function CSVShop() {
                     period={`${it.year}-${it.month}`}
                     downloadUrl={
                       it.path
-                        ? `${downloadCsvByPathUrl(it.path)}?token=${encodeURIComponent(localStorage.getItem("apiKey")||"")}`
+                        ? `${API_BASE}${downloadCsvByPathUrl(it.path)}?token=${encodeURIComponent(localStorage.getItem("apiKey")||"")}`
                         : ""
                     }
                     className="csvshop-card"
