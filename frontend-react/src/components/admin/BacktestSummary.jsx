@@ -192,15 +192,20 @@ export default function BacktestSummary() {
                           ? `analyse_${bt.strategy}_${bt.symbol}_SL${(bt.params?.sl_pips ?? bt.params?.sl ?? 100)}_${String(bt.period).replaceAll(" ","_")}_resultats.xlsx`
                           : null);
 
-                      // URL absolue vers l’API (inclut ?apiKey=)
-                      const dlUrl = (folder && xlsxFile) ? downloadXlsxUrl(folder, xlsxFile) : null;
+                      if (!folder || !xlsxFile) return (
+                        <CTAButton disabled fullWidth>.xlsx indisponible</CTAButton>
+                      );
+
+                      const token = localStorage.getItem("apiKey") || "";
+                      const url =
+                        `${import.meta.env.VITE_API_BASE?.replace(/\/+$/,'') || 'https://api.backtradz.com'}` +
+                        `/api/download/${encodeURIComponent(xlsxFile)}?folder=${encodeURIComponent(folder)}&apiKey=${encodeURIComponent(token)}`;
 
                       const handleDownload = (e) => {
-                        if (!dlUrl) return;
-                        e.preventDefault(); // évite *toute* navigation SPA
+                        e.preventDefault();
                         const a = document.createElement("a");
-                        a.href = dlUrl;
-                        a.download = "";     // hint navigateur
+                        a.href = url;
+                        a.download = "";
                         a.target = "_blank";
                         a.rel = "noopener";
                         document.body.appendChild(a);
@@ -209,14 +214,12 @@ export default function BacktestSummary() {
                       };
 
                       return (
-                        <div className="flex gap-2">
+                        <>
                           <CTAButton
                             as="button"
-                            onClick={handleDownload}
+                            onClick={handleDownload}   // ⚠️ camelCase
                             variant="primary"
                             fullWidth
-                            disabled={!dlUrl}
-                            title={dlUrl ? "Télécharger le .xlsx" : "XLSX indisponible"}
                           >
                             📥 XLSX
                           </CTAButton>
@@ -225,23 +228,23 @@ export default function BacktestSummary() {
                             variant="danger"
                             fullWidth
                             onClick={() =>
-                              hideItem(bt.id || folder || [bt.symbol, bt.timeframe, bt.strategy, bt.period].join("|"))
+                              hideItem(
+                                bt.id || folder || [bt.symbol, bt.timeframe, bt.strategy, bt.period].join("|")
+                              )
                             }
                             title="Masquer cette carte (front-only)"
                           >
                             🗑️ Masquer
                           </CTAButton>
-                        </div>
+                        </>
                       );
                     })()}
-
-
-                  </div>
-                </div>
-              </div>
+                  </div>    
+                 </div>
+               </div>
             ))}
           </div>
-
+          
           {/* Overlay de détails (porté par AdminInsightsOverlay) */}
           <AdminInsightsOverlay
             open={open && !!selected}

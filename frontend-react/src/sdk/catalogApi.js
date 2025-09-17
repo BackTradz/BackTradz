@@ -9,7 +9,7 @@
 // ============================================================
 
 // src/sdk/catalogApi.js
-import { api } from "./apiClient";
+import { api, API_BASE } from "./apiClient";
 
 // Bibliothèque CSV (officielle)
 export const listCsvLibrary = () => api("/api/list_csv_library", { auth: false });
@@ -19,12 +19,15 @@ export const listOutputBacktestFiles = () =>
   api("/api/list_output_backtest_files", { auth: false });
 
 // URL de téléchargement d'un CSV par "relative_path"
+
+
 export const downloadCsvByPathUrl = (relativePath) => {
   let rel = String(relativePath || "").replaceAll("\\", "/");
   if (rel.toLowerCase().startsWith("backend/")) rel = rel.substring(8); // coupe "backend/"
-  // encode chaque segment pour éviter les soucis d'espaces, etc.
+  // encodage segment par segment (espaces, etc.)
   const encoded = rel.split("/").map(encodeURIComponent).join("/");
-  return `/api/download_csv_by_path/${encoded}`;
+  const token = localStorage.getItem("apiKey") || "";
+  return `${API_BASE}/api/download_csv_by_path/${encoded}?token=${encodeURIComponent(token)}`;
 };
 
 // Extractions récentes (TTL 48h) pour l'utilisateur courant

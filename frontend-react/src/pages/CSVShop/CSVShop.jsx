@@ -270,11 +270,7 @@ export default function CSVShop() {
                     symbol={it.pair}
                     timeframe={it.timeframe}
                     period={`${it.year}-${it.month}`}
-                    downloadUrl={
-                      it.path
-                        ? `${API_BASE}${downloadCsvByPathUrl(it.path)}?token=${encodeURIComponent(localStorage.getItem("apiKey")||"")}`
-                        : ""
-                    }
+                    downloadUrl={ it.path ? downloadCsvByPathUrl(it.path) : "" }
                     className="csvshop-card"
                     downloadLabel="Télécharger(–1 crédit)"   // ← piloté par la page
                     downloadTitle="Télécharger(–1 crédit))"
