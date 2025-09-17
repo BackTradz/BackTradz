@@ -45,7 +45,12 @@ from passlib.context import CryptContext
 # --- PATCH auth.py (ajouts en haut des imports) ---
 from passlib.exc import UnknownHashError
 
+# >> ajoute juste après <<
+USERS_FILE = USERS_JSON                                # /var/data/backtradz/db/users.json
+USERS_FILE.parent.mkdir(parents=True, exist_ok=True)
 
+RECREATE_FILE = DB_DIR / "email_recreate.json"         # /var/data/backtradz/db/email_recreate.json
+RECREATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -122,7 +127,7 @@ async def login_user(request: Request):
     identifier_email = identifier_norm.lower()
 
 
-    USERS_FILE = Path("backend/database/users.json")
+
     if not USERS_FILE.exists():
         return {"status": "error", "message": "Aucun utilisateur enregistré."}
 
