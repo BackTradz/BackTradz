@@ -18,10 +18,13 @@ from datetime import datetime, timedelta, timezone
 from backend.models.offers import get_offer_by_id
 from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+import os
+import tempfile
+
 
 
 # 📂 Chemin du fichier JSON qui fait office de "base de données" utilisateurs
-USERS_FILE = USERS_JSON
+
 AUDIT_FILE = DATA_ROOT / "audit" / "ledger.jsonl"
 AUDIT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
