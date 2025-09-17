@@ -7,9 +7,9 @@
 // ------------------------------------------------------------
 
 import { useState } from "react";
-import { downloadXlsxUrl } from "../../sdk/userApi";
+import { API_BASE } from "../../sdk/apiClient";
 import { useAuth } from "../../auth/AuthContext"; 
-import { absApi } from "../../sdk/url"; // (en haut du fichier)
+
 //overlay import 
 import ConfirmDialog from "./ConfirmDialog";
 import BacktestDetailsModal from "./BacktestDetailsModal";
@@ -92,9 +92,11 @@ export default function DashboardBacktestCard({ bt = {}, onDeleted }) {
   const trades = bt.trades ?? bt.total_trades ?? bt.count ?? null;
 
   const xlsx = bt.xlsx_filename || bt.xlsx || null;
-// IMPORTANT : passer folder + filename au helper
-  const downloadHref = (bt.folder && xlsx) ? downloadXlsxUrl(bt.folder, xlsx) : null;
-
+  const token = (typeof localStorage !== "undefined" && (localStorage.getItem("apiKey") || "")) || "";
+  const downloadHref = (bt.folder && xlsx)
+    ? `${API_BASE}/api/download/${encodeURIComponent(xlsx)}?folder=${encodeURIComponent(bt.folder)}&apiKey=${encodeURIComponent(token)}`
+    : null;
+  console.debug("DL href:", downloadHref); // (optionnel) vérif visuelle
   const [ask, setAsk] = useState(false);  // ouvre la boîte de confirmation
   const [open, setOpen] = useState(false); // ouvre la modale détails
   const { user } = useAuth ? useAuth() : { user: null };
