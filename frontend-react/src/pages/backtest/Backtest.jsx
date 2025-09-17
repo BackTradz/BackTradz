@@ -18,7 +18,7 @@ import {
  } from "../../sdk/runApi";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
 import "./Backtest.css"; // Styles non intrusifs
-
+import { downloadXlsxUrl } from "../../sdk/userApi";
 // Composants existants 
 import TFSegment from "../../components/backtest/TFSegment";
 import DatePresets from "../../components/backtest/DatePresets";
@@ -340,19 +340,21 @@ export default function Backtest() {
           <div className="text-slate-300">🎫 Crédits restants : <b>{result.credits_remaining}</b></div>
         )}
 
-        {result.xlsx_result && (
           <div>
-            {/* le backend expose /api/download/<filename> */}
-            <a
-              href={`/api/download/${String(result.xlsx_result).replaceAll("\\", "/").split("/").pop()}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sky-400 hover:underline"
-            >
-              📥 Télécharger le rapport (.xlsx)
-            </a>
+            {result.xlsx_result && (() => {
+              const p = String(result.xlsx_result).replaceAll("\\","/");
+              const parts = p.split("/");
+              const filename = parts.pop();
+              const folder = parts.pop(); // dossier parent du .xlsx
+              const href = (folder && filename) ? downloadXlsxUrl(folder, filename) : null;
+              return href ? (
+                <a href={href} target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">
+                  📥 Télécharger le rapport (.xlsx)
+                </a>
+              ) : null;
+            })()}
           </div>
-        )}
+        
 
         {result.golden_hours && (
           <div className="bt-card">

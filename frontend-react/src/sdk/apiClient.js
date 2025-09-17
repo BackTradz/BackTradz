@@ -34,10 +34,7 @@ const envBase = (import.meta.env?.VITE_API_BASE || "").trim();
 
 // --- Si on est en prod et que l'env pointe sur localhost → on l'ignore
 const looksLikeLocal = /localhost|127\.0\.0\.1|:\d{2,5}/i.test(envBase);
-const effectiveBase =
-  onProdDomain && looksLikeLocal ? "" : envBase;
-
-  (/\/$/, "");
+const effectiveBase = onProdDomain && looksLikeLocal ? "" : envBase;
 
 // --- Join sûr BASE + path
 const j = (path = "") => {
@@ -45,7 +42,12 @@ const j = (path = "") => {
   if (isAbs) return path;
   return `${BASE}${path.startsWith("/") ? "" : "/"}${path}`;
 };
-
+// 🔥 expose la base API pour construire des HREF absolus (téléchargements)
+export const API_BASE = BASE;
+export const absApi = (path) => {
+  const p = String(path || "");
+  return /^https?:\/\//i.test(p) ? p : `${API_BASE}${p.startsWith("/") ? "" : "/"}${p}`;
+};
 
 export async function api(path, { method = 'GET', headers = {}, body, auth = true } = {}) {
   // 🔐 Token déjà stocké au login

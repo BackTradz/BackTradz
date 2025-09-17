@@ -185,29 +185,26 @@ export default function BacktestSummary() {
                   </div>
                   <div className="flex-1">
                     {(() => {
-                      const m = String(bt.period || "")
-                        .replaceAll("_", " ")
-                        .match(/(20\d{2}-\d{2}-\d{2})\s*to\s*(20\d{2}-\d{2}-\d{2})/i);
-                      const cleanPeriod = m ? `${m[1]}to${m[2]}` : (bt.period || "");
-                      const slVal = (bt?.params?.sl_pips ?? bt?.params?.sl ?? 100);
-                      const apiKey = localStorage.getItem("apiKey") || "";
-                      
-                      const xlsxFile = bt.xlsx_filename || (bt.folder ? `analyse_${bt.strategy}_${bt.symbol}_SL${slVal}_${cleanPeriod}_resultats.xlsx` : null);
-                      const dlUrl = (bt.folder && xlsxFile)
-                       ? downloadXlsxUrl(bt.folder, xlsxFile)
-                       : null;
+                      // on privilégie le nom renvoyé par le backend
+                      const folder = bt.folder || null;
+                      const xlsxFile =
+                        bt.xlsx_filename ||
+                        (folder && bt.strategy && bt.symbol && bt.period
+                          ? `analyse_${bt.strategy}_${bt.symbol}_SL${(bt.params?.sl_pips ?? bt.params?.sl ?? 100)}_${String(bt.period).replaceAll(" ","_")}_resultats.xlsx`
+                          : null);
+
+                      const dlUrl = (folder && xlsxFile) ? downloadXlsxUrl(folder, xlsxFile) : null;
+
                       return (
                         <div className="flex gap-2">
-                          <CTAButton href={dlUrl} download variant="primary" fullWidth>
+                          <CTAButton href={dlUrl || undefined} download={!dlUrl ? undefined : true} variant="primary" fullWidth disabled={!dlUrl}>
                             📥 XLSX
                           </CTAButton>
                           <CTAButton
                             variant="danger"
                             fullWidth
                             onClick={() =>
-                              hideItem(
-                                bt.id || bt.folder || [bt.symbol, bt.timeframe, bt.strategy, bt.period].join("|")
-                              )
+                              hideItem(bt.id || folder || [bt.symbol, bt.timeframe, bt.strategy, bt.period].join("|"))
                             }
                             title="Masquer cette carte (front-only)"
                           >
@@ -216,6 +213,7 @@ export default function BacktestSummary() {
                         </div>
                       );
                     })()}
+
                   </div>
                 </div>
               </div>

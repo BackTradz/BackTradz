@@ -5,6 +5,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { listCsvLibrary, downloadCsvByPathUrl } from "../../sdk/catalogApi";
+import { API_BASE } from "../../sdk/apiClient";
 import "./CSVShop.css";
 import CsvCard from "../../components/ui/CSVcard/CSVCard";
 import CSVShopFilters from "../../components/CSVshop/CSVShopFilters";
