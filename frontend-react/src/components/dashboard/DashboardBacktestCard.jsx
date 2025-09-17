@@ -174,7 +174,7 @@ export default function DashboardBacktestCard({ bt = {}, onDeleted }) {
       <div className="dbt-actions-secondary">
         <div className="col">
           {downloadHref ? (
-            <CTAButton
+            <DetailButton
               as="a"
               href={downloadHref}
               download
@@ -183,11 +183,11 @@ export default function DashboardBacktestCard({ bt = {}, onDeleted }) {
               fullWidth
             >
               📥 XLSX
-            </CTAButton>
+            </DetailButton>
           ) : (
-            <CTAButton as="button" disabled fullWidth>
+            <DetailButton as="button" disabled fullWidth>
               .xlsx indisponible
-            </CTAButton>
+            </DetailButton>
           )}
         </div>
         <div className="col">
