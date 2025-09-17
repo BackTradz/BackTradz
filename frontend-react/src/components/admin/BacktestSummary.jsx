@@ -185,7 +185,6 @@ export default function BacktestSummary() {
                   </div>
                   <div className="flex-1">
                     {(() => {
-                      // on privilégie le nom renvoyé par le backend
                       const folder = bt.folder || null;
                       const xlsxFile =
                         bt.xlsx_filename ||
@@ -193,13 +192,35 @@ export default function BacktestSummary() {
                           ? `analyse_${bt.strategy}_${bt.symbol}_SL${(bt.params?.sl_pips ?? bt.params?.sl ?? 100)}_${String(bt.period).replaceAll(" ","_")}_resultats.xlsx`
                           : null);
 
+                      // URL absolue vers l’API (inclut ?apiKey=)
                       const dlUrl = (folder && xlsxFile) ? downloadXlsxUrl(folder, xlsxFile) : null;
+
+                      const handleDownload = (e) => {
+                        if (!dlUrl) return;
+                        e.preventDefault(); // évite *toute* navigation SPA
+                        const a = document.createElement("a");
+                        a.href = dlUrl;
+                        a.download = "";     // hint navigateur
+                        a.target = "_blank";
+                        a.rel = "noopener";
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                      };
 
                       return (
                         <div className="flex gap-2">
-                          <CTAButton href={dlUrl || undefined} download={!dlUrl ? undefined : true} variant="primary" fullWidth disabled={!dlUrl}>
+                          <CTAButton
+                            as="button"
+                            onClick={handleDownload}
+                            variant="primary"
+                            fullWidth
+                            disabled={!dlUrl}
+                            title={dlUrl ? "Télécharger le .xlsx" : "XLSX indisponible"}
+                          >
                             📥 XLSX
                           </CTAButton>
+
                           <CTAButton
                             variant="danger"
                             fullWidth
@@ -213,6 +234,7 @@ export default function BacktestSummary() {
                         </div>
                       );
                     })()}
+
 
                   </div>
                 </div>

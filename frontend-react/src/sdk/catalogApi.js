@@ -20,11 +20,11 @@ export const listOutputBacktestFiles = () =>
 
 // URL de téléchargement d'un CSV par "relative_path"
 export const downloadCsvByPathUrl = (relativePath) => {
-  let rel = String(relativePath).replaceAll("\\", "/");
-  if (rel.toLowerCase().startsWith("backend/")) {
-    rel = rel.substring(8); // coupe "backend/"
-  }
-  return `/api/download_csv_by_path/${rel}`;
+  let rel = String(relativePath || "").replaceAll("\\", "/");
+  if (rel.toLowerCase().startsWith("backend/")) rel = rel.substring(8); // coupe "backend/"
+  // encode chaque segment pour éviter les soucis d'espaces, etc.
+  const encoded = rel.split("/").map(encodeURIComponent).join("/");
+  return `/api/download_csv_by_path/${encoded}`;
 };
 
 // Extractions récentes (TTL 48h) pour l'utilisateur courant
