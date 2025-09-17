@@ -16,6 +16,9 @@ import {
    runBacktestMapped,     // 👈 ajoute ça
    listOutputBacktestFiles
  } from "../../sdk/runApi";
+
+import { API_BASE } from "../../sdk/apiClient";
+
 import TopProgress from "../../components/ui/progressbar/TopProgress";
 import "./Backtest.css"; // Styles non intrusifs
 import { downloadXlsxUrl } from "../../sdk/userApi";
@@ -345,14 +348,32 @@ export default function Backtest() {
               const p = String(result.xlsx_result).replaceAll("\\","/");
               const parts = p.split("/");
               const filename = parts.pop();
-              const folder = parts.pop(); // dossier parent du .xlsx
-              const href = (folder && filename) ? downloadXlsxUrl(folder, filename) : null;
-              return href ? (
-                <a href={href} target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">
+              const folder = parts.pop();
+
+              if (!folder || !filename) return null;
+
+              const token = (localStorage.getItem("apiKey") || localStorage.getItem("token") || "");
+              const url = `${API_BASE}/api/download/${encodeURIComponent(filename)}?folder=${encodeURIComponent(folder)}&apiKey=${encodeURIComponent(token)}`;
+
+              const handleDownload = (e) => {
+                e.preventDefault();
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "";          // hint navigateur
+                a.target = "_blank";
+                a.rel = "noopener";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+              };
+
+              return (
+                <CTAButton as="button" onClick={handleDownload}>
                   📥 Télécharger le rapport (.xlsx)
-                </a>
-              ) : null;
+                </CTAButton>
+              );
             })()}
+
           </div>
         
 

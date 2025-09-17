@@ -189,8 +189,6 @@ export default function DashboardBacktestCard({ bt = {}, onDeleted }) {
               .xlsx indisponible
             </CTAButton>
           )}
-            <DetailButton disabled>.xlsx indisponible</DetailButton>
-          
         </div>
         <div className="col">
           <DeleteButton onClick={() => setAsk(true)}>Supprimer</DeleteButton>
