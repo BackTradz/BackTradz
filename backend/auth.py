@@ -200,9 +200,13 @@ async def verify_api_key(x_api_key: str = Header(...)):
 
 # === 🌐 Google OAuth (clean) ===============================================
 
+ROOT_DIR = Path(__file__).resolve().parents[1]
 
-ROOT_DIR = Path(__file__).resolve().parents[1]   # backend/ → remonte à la racine du projet
-load_dotenv(ROOT_DIR / ".env")                   # charge le .env racine
+# ✅ Ne charge .env QUE si présent en local, et NE PAS écraser l'env Render
+dotenv_path = ROOT_DIR / ".env"
+if dotenv_path.exists():
+    load_dotenv(dotenv_path, override=False)
+            # charge le .env racine
 
 # .env
 GOOGLE_CLIENT_ID = (os.getenv("GOOGLE_CLIENT_ID") or "").strip()

@@ -217,7 +217,12 @@ def _env_check(request: Request):
 @app.get("/api/_env_oauth", include_in_schema=False)
 def _env_oauth(request: Request):
     import os
+    data = {k: v for k, v in os.environ.items() if k.upper().startswith("GOOGLE_")}
+    # masque le secret dans le retour
+    if "GOOGLE_CLIENT_SECRET" in data:
+        data["GOOGLE_CLIENT_SECRET"] = "•" * 8
     return JSONResponse({
+        "seen": list(sorted(data.keys())),
         "CLIENT_ID": bool(os.getenv("GOOGLE_CLIENT_ID")),
         "SECRET": bool(os.getenv("GOOGLE_CLIENT_SECRET")),
         "REDIRECT": os.getenv("GOOGLE_REDIRECT_URI", ""),
