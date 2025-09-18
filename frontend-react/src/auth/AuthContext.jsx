@@ -109,11 +109,13 @@ export function AuthProvider({ children }) {
    * - Persistant: enregistre 'apiKey' dans localStorage pour les prochains rafraîchissements/page loads.
    * - Note: on peut choisir d'appeler me() ici pour charger l'utilisateur immédiatement (non imposé ici).
    */
-  const loginSuccess = (token) => {
-    localStorage.setItem('apiKey', token);
-    // [BTZ] Option possible (non activée ici pour éviter effet de bord):
-    // me().then(setUser).catch(() => localStorage.removeItem('apiKey'));
-  };
+ const loginSuccess = (token) => {
+   localStorage.setItem('apiKey', token);
+   // ⏩ charge l'utilisateur tout de suite (plus besoin de refresh)
+      me()
+     .then(setUser)
+     .catch(() => localStorage.removeItem('apiKey'));
+ };
 
   /**
    * logout()

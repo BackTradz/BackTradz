@@ -46,7 +46,16 @@ export default function Navbar() {
   const { user } = useAuth(); // ⬅️ source de vérité globale (se met à jour après OAuth/login)
   const navigate = useNavigate();
   const creditsText = safeCreditsText(user);
+  const [adminOK, setAdminOK] = useState(false);
 
+  //🛡️ Recalcule admin quand le user change (login/OAuth)
+ useEffect(() => {
+    const t = localStorage.getItem("apiKey");
+    if (!t) { setAdminOK(false); return; }
+    fetch("/api/admin/ping", { headers: { "X-API-Key": t } })
+      .then(r => setAdminOK(r.ok))
+      .catch(() => setAdminOK(false));
+  }, [user?.email]); // email change -> on re-ping
 
   // Responsive
   useEffect(() => {
@@ -67,8 +76,11 @@ export default function Navbar() {
     { label: "Tarifs", path: "/pricing" },
     { label: "À savoir", path: "/a-savoir" },
   ];
-  // Ajoute "Admin" uniquement si l'utilisateur est admin
-  const isAdmin = useIsAdmin();
+
+  
+  // Ajoute "Admin" si admin confirmé (ping) ou autres flags côté user
+  const hookAdmin = (typeof useIsAdmin === 'function' ? useIsAdmin() : false);
+  const isAdmin = adminOK || hookAdmin || (String(user?.role || '').toLowerCase() === 'admin') || !!user?.is_admin;
   const links = isAdmin
     ? [...baseLinks, { label: "Admin", path: "/admin" }]
     : baseLinks;
