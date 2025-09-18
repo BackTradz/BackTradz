@@ -198,17 +198,43 @@ export default function BacktestSummary() {
                         `&sl=${encodeURIComponent(sl)}` +
                         `&apiKey=${encodeURIComponent(token)}`;
 
-                      const handleDownload = (e) => {
+                      // ... à la place de la création d’<a href=...> avec ?apiKey=...
+                      const handleDownload = async (e) => {
                         e.preventDefault();
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = "";
-                        a.target = "_blank";
-                        a.rel = "noopener";
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
+                        const base = (import.meta.env.VITE_API_BASE?.replace(/\/+$/,'') || 'https://api.backtradz.com');
+                        const sl = (bt.params?.sl_pips ?? bt.params?.sl ?? 100);
+
+                        const qs = new URLSearchParams({
+                          symbol: bt.symbol,
+                          timeframe: bt.timeframe,
+                          strategy: bt.strategy,
+                          period: String(bt.period),
+                          sl: String(sl),
+                        });
+
+                        try {
+                          const res = await fetch(`${base}/api/admin/download_xlsx?${qs.toString()}`, {
+                            headers: { "X-API-Key": localStorage.getItem("apiKey") || "" }
+                          });
+                          if (!res.ok) {
+                            const err = await res.text();
+                            throw new Error(err || `HTTP ${res.status}`);
+                          }
+                          const blob = await res.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          // nom par défaut si possible
+                          a.download = `analyse_${bt.strategy}_${bt.symbol}_SL${sl}_${String(bt.period).replace(/\s+/g,"_")}_resultats.xlsx`;
+                          document.body.appendChild(a);
+                          a.click();
+                          a.remove();
+                          window.URL.revokeObjectURL(url);
+                        } catch (err) {
+                          alert("Téléchargement impossible : " + (err?.message || "Erreur serveur"));
+                        }
                       };
+
 
                       return (
                         <>
