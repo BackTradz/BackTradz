@@ -232,11 +232,13 @@ RECREATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 # --- AJOUT en haut du fichier, près des imports existants ---
 def _compute_redirect_uri(request: Request) -> str:
     """
-    Construit dynamiquement l'URL callback pour Google OAuth
-    (compatible dev et prod).
-    Ex: https://api.backtradz.com/api/auth/google/callback
+    Construit dynamiquement l'URL callback pour Google OAuth (dev + prod).
+    Corrige le schéma HTTP → HTTPS derrière proxy Render pour backtradz.com.
+    Ex attendu (prod): https://api.backtradz.com/api/auth/google/callback
     """
-    base = str(request.base_url).rstrip("/")  # ex: https://api.backtradz.com
+    base = str(request.base_url).rstrip("/")            # ex: http://api.backtradz.com
+    if "backtradz.com" in base and base.startswith("http://"):
+        base = "https://" + base[len("http://"):]       # force https côté public
     return f"{base}/api/auth/google/callback"
 
 def _load_json_safe(path: Path) -> dict:
@@ -283,9 +285,9 @@ async def auth_google_callback(request: Request):
       - redirige vers le front avec ?provider=google&token=API_KEY
     """
     try:
-        print(f"[OAUTH] callback redirect_uri = {redirect_uri}")
-
+        # APRÈS (patch correct et robuste)
         redirect_uri = GOOGLE_REDIRECT_URI or _compute_redirect_uri(request)
+        print(f"[OAUTH] callback redirect_uri = {redirect_uri}")
         token = await oauth.google.authorize_access_token(request, redirect_uri=redirect_uri)
 
         user_info = token.get("userinfo") or {}
