@@ -208,10 +208,39 @@ if dotenv_path.exists():
     load_dotenv(dotenv_path, override=False)
             # charge le .env racine
 
-# .env
-GOOGLE_CLIENT_ID = (os.getenv("GOOGLE_CLIENT_ID") or "").strip()
-GOOGLE_CLIENT_SECRET = (os.getenv("GOOGLE_CLIENT_SECRET") or "").strip()
-GOOGLE_REDIRECT_URI = (os.getenv("GOOGLE_REDIRECT_URI") or "").strip()
+
+# ==== Helpers ENV robustes (ajout) ==========================================
+def _getenv_any(*names: str, default: str = "") -> str:
+    """Retourne la première variable d'env non-vide parmi 'names'."""
+    for n in names:
+        v = os.getenv(n)
+        if v and str(v).strip():
+            return str(v).strip()
+    return default
+
+def _mask_secret(v: str) -> str:
+    """Masque un secret dans les logs."""
+    return "•" * 8 if v else ""
+
+# Optionnel: on lit PUBLIC_API_URL si dispo (pour forcer le callback en prod)
+try:
+    from backend.core.config import PUBLIC_API_URL  # déjà défini ailleurs chez toi
+except Exception:
+    PUBLIC_API_URL = os.getenv("PUBLIC_API_URL", "").rstrip("/")
+
+# .env (robuste: tolère plusieurs alias + log des clés réellement vues)
+GOOGLE_CLIENT_ID = _getenv_any("GOOGLE_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_ID")
+GOOGLE_CLIENT_SECRET = _getenv_any("GOOGLE_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_SECRET")
+GOOGLE_REDIRECT_URI = _getenv_any("GOOGLE_REDIRECT_URI", "GOOGLE_CALLBACK_URL", "GOOGLE_OAUTH_REDIRECT_URI")
+
+_seen_google = sorted([k for k in os.environ.keys() if k.upper().startswith("GOOGLE")])
+print(f"[OAUTH] ENV seen keys: {_seen_google}")
+print(
+    "[OAUTH] ENV check → "
+    f"CLIENT_ID={'SET' if GOOGLE_CLIENT_ID else 'MISSING'} | "
+    f"SECRET={'SET' if GOOGLE_CLIENT_SECRET else 'MISSING'} | "
+    f"REDIRECT={'SET' if GOOGLE_REDIRECT_URI else 'MISSING'}"
+)
 
 def _flag(v): return "SET" if v else "MISSING"
 print(f"[OAUTH] ENV check → CLIENT_ID={_flag(GOOGLE_CLIENT_ID)} | SECRET={_flag(GOOGLE_CLIENT_SECRET)} | REDIRECT={_flag(GOOGLE_REDIRECT_URI)}")
@@ -235,13 +264,15 @@ RECREATE_FILE = (DB_DIR / "email_recreate.json")  # <- /var/data/backtradz/db/em
 RECREATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 
-# --- AJOUT en haut du fichier, près des imports existants ---
+# --- Retouche l'url si besoin --
 def _compute_redirect_uri(request: Request) -> str:
     """
-    Construit l'URL callback (dev+prod) et force HTTPS derrière le proxy Render.
+    Construit l'URL callback (dev+prod). Priorité à PUBLIC_API_URL en prod.
     Ex attendu: https://api.backtradz.com/api/auth/google/callback
     """
-    base = str(request.base_url).rstrip("/")      # ex: http://api.backtradz.com
+    if PUBLIC_API_URL:
+        return f"{PUBLIC_API_URL}/api/auth/google/callback"
+    base = str(request.base_url).rstrip("/")
     if "backtradz.com" in base and base.startswith("http://"):
         base = "https://" + base[len("http://"):]
     return f"{base}/api/auth/google/callback"
