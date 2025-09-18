@@ -33,6 +33,19 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { me } from '../sdk/authApi'; // [BTZ] SDK front: appelle /api/me en utilisant le token stocké côté front
 
+
+const pickTokenFromUrl = () => {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const t = q.get("apiKey") || q.get("token"); // compat ancien param
+    return t && String(t).trim() ? t : null;
+  } catch (e) {
+  void e; // calme ESLint (no-unused-vars)
+  // no-op
+  }
+
+};
+
 // [BTZ] Contexte brut + hook d'accès
 const AuthCtx = createContext(null);
 export const useAuth = () => useContext(AuthCtx);
@@ -49,19 +62,46 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // [BTZ] Au premier rendu, vérifier si un token existe déjà en storage
-    const token = localStorage.getItem('apiKey');
-    if (!token) { 
-      // [BTZ] Cas: pas de token -> aucune requête /api/me à faire, on sort du mode "loading"
-      setLoading(false); 
-      return; 
+    // 1) Priorité au token présent dans l'URL après OAuth
+    const urlToken = pickTokenFromUrl();
+    if (urlToken) {
+      localStorage.setItem('apiKey', urlToken);
+      // Nettoie l'URL pour éviter de garder le token en clair dans l'historique
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('apiKey');
+        url.searchParams.delete('token');
+        window.history.replaceState({}, document.title, url.toString());
+      } catch (e) {
+       void e; // calme ESLint (no-unused-vars)
+        // no-op
+      }
+
+
+      // Charge immédiatement l'utilisateur puis sort du loading
+      me()
+        .then(setUser)
+        .catch(() => {
+          // Si le token retourné par le backend n’est pas reconnu → on l’enlève proprement
+          localStorage.removeItem('apiKey');
+        })
+        .finally(() => setLoading(false));
+      return; // stop ici (on ne fait pas la voie "token depuis localStorage")
     }
-    // [BTZ] Un token existe -> tentative de récupérer l'utilisateur
+
+    // 2) Cas classique : pas de token dans l'URL → on regarde le localStorage
+    const stored = localStorage.getItem('apiKey');
+    if (!stored) {
+      setLoading(false);
+      return;
+    }
+
     me()
-      .then(setUser)                           // [BTZ] OK: on stocke l'objet user pour le reste de l'app
-      .catch(() => localStorage.removeItem('apiKey')) // [BTZ] Token invalide/expiré: on le supprime pour éviter les boucles d'erreurs
-      .finally(() => setLoading(false));       // [BTZ] Fin du cycle de vérification initiale (qu'il y ait eu succès ou erreur)
+      .then(setUser)
+      .catch(() => localStorage.removeItem('apiKey'))
+      .finally(() => setLoading(false));
   }, []);
+
 
   /**
    * loginSuccess(token)
