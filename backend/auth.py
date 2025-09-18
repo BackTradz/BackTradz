@@ -229,6 +229,16 @@ RECREATE_FILE = (DB_DIR / "email_recreate.json")  # <- /var/data/backtradz/db/em
 RECREATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 
+# --- AJOUT en haut du fichier, près des imports existants ---
+def _compute_redirect_uri(request: Request) -> str:
+    """
+    Construit dynamiquement l'URL callback pour Google OAuth
+    (compatible dev et prod).
+    Ex: https://api.backtradz.com/api/auth/google/callback
+    """
+    base = str(request.base_url).rstrip("/")  # ex: https://api.backtradz.com
+    return f"{base}/api/auth/google/callback"
+
 def _load_json_safe(path: Path) -> dict:
     if not path.exists():
         return {}
@@ -256,11 +266,10 @@ async def auth_google(request: Request):
     Démarre le flux OAuth Google.
     Redirige l'utilisateur vers Google.
     """
-    if not GOOGLE_REDIRECT_URI:
-        # Sécurise: évite un crash silencieux si l'ENV est manquant
-        return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&error=missing_redirect_uri")
+    redirect_uri = GOOGLE_REDIRECT_URI or _compute_redirect_uri(request)
+    # (plus de retour 'missing_redirect_uri')
     return await oauth.google.authorize_redirect(
-        request, GOOGLE_REDIRECT_URI, prompt="select_account"
+        request, redirect_uri, prompt="select_account"
     )
 
 
