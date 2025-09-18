@@ -25,6 +25,19 @@ export default function RequireAuth() {
   // [BTZ] Pendant la vérification initiale du token, afficher un indicateur visuel
   if (loading) return <div style={{padding:20}}> Chargement…</div>;
 
+  // ⛱️ Cas retour OAuth: si l’URL contient ?apiKey= ou ?token=,
+  // on NE redirige pas (AuthContext va l’enregistrer dans 0-300ms).
+  try {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get('apiKey') || q.get('token')) {
+      return <div style={{padding:20}}>Connexion en cours…</div>;
+    }
+  } catch (e) {
+    void e; // no-op pour calmer eslint/no-unused-vars
+  }
+
+
+
   // [BTZ] Vérifie simplement la présence du token côté front
   const token = localStorage.getItem('apiKey');
   if (!token) return <Navigate to="/login" replace />;

@@ -7,6 +7,8 @@ import HamburgerButton from "./HamburgerButton";
 import UserAvatar from "../useravatar/UserAvatar";
 import BacktradzLogo from "../BacktradzLogo/BacktradzLogo";
 import { useIsAdmin } from "../../../hooks/UseIsAdmin"
+import { useAuth } from "../../../auth/AuthContext"; // ⬅️ on consomme le user du contexte
+
 
 function pickCredits(u) {
   if (!u) return null;
@@ -41,7 +43,7 @@ function safeCreditsText(user) {
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [user, setUser] = useState(null);
+  const { user } = useAuth(); // ⬅️ source de vérité globale (se met à jour après OAuth/login)
   const navigate = useNavigate();
   const creditsText = safeCreditsText(user);
 
@@ -54,25 +56,6 @@ export default function Navbar() {
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Fetch user léger (comme Profile.jsx -> /api/me)
-  useEffect(() => {
-    (async () => {
-      try {
-        const apiKey = localStorage.getItem("apiKey");
-        if (!apiKey) return;
-        let res = await fetch("/api/me", { headers: { "X-API-Key": apiKey } });
-        if (res.status === 404) {
-          // fallback si ton backend n'a pas le préfixe /api
-          res = await fetch("/me", { headers: { "X-API-Key": apiKey } });
-        }
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-        }
-      } catch {}
-    })();
   }, []);
 
   // Liens visibles pour tout le monde
