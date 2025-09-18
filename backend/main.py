@@ -78,6 +78,7 @@ from backend.routes import backtest_xlsx_routes  # ⬅️ import
 from backend.routes.admin_stat_routes import stats_router  # ⬅️ nouveau
 
 from backend.routes.meta_routes import router as meta_router
+from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 
 
 app = FastAPI()
@@ -99,8 +100,10 @@ app.add_middleware(
 
 # Middleware de session (utilisé par auth/OAuth et/ou vues template)
 # NOTE: secret "STRATIFY_SECRET" en clair ici → prévoir .env + rotation
-app.add_middleware(SessionMiddleware, secret_key="STRATIFY_SECRET")
+app.add_middleware(SessionMiddleware,secret_key=os.getenv("SECRET_KEY", "dev_fallback_secret"))
 
+# Derrière Render/NGINX, corrige scheme/host à partir de X-Forwarded-*
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 # CORS: actuellement très permissif (toutes origines, méthodes, headers).
 # --- CORS (prod): autorise explicitement tes domaines front ---

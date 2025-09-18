@@ -232,14 +232,14 @@ RECREATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 # --- AJOUT en haut du fichier, près des imports existants ---
 def _compute_redirect_uri(request: Request) -> str:
     """
-    Construit dynamiquement l'URL callback pour Google OAuth (dev + prod).
-    Corrige le schéma HTTP → HTTPS derrière proxy Render pour backtradz.com.
-    Ex attendu (prod): https://api.backtradz.com/api/auth/google/callback
+    Construit l'URL callback (dev+prod) et force HTTPS derrière le proxy Render.
+    Ex attendu: https://api.backtradz.com/api/auth/google/callback
     """
-    base = str(request.base_url).rstrip("/")            # ex: http://api.backtradz.com
+    base = str(request.base_url).rstrip("/")      # ex: http://api.backtradz.com
     if "backtradz.com" in base and base.startswith("http://"):
-        base = "https://" + base[len("http://"):]       # force https côté public
+        base = "https://" + base[len("http://"):]
     return f"{base}/api/auth/google/callback"
+
 
 def _load_json_safe(path: Path) -> dict:
     if not path.exists():
@@ -264,15 +264,19 @@ def _atomic_write_json(path: Path, data: dict) -> None:
 
 @router.get("/auth/google")
 async def auth_google(request: Request):
-    """
-    Démarre le flux OAuth Google.
-    Redirige l'utilisateur vers Google.
-    """
-    redirect_uri = GOOGLE_REDIRECT_URI or _compute_redirect_uri(request)
-    # (plus de retour 'missing_redirect_uri')
-    return await oauth.google.authorize_redirect(
-        request, redirect_uri, prompt="select_account"
-    )
+    redirect_uri = (GOOGLE_REDIRECT_URI or _compute_redirect_uri(request))
+    print(f"[OAUTH] authorize redirect_uri = {redirect_uri}")
+    try:
+        return await oauth.google.authorize_redirect(
+            request,
+            redirect_uri,
+            prompt="select_account",
+        )
+    except Exception as e:
+        # log côté API plutôt que 400 côté Google (plus lisible)
+        print("[OAUTH] authorize_redirect FAILED:", e)
+        return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&error=authorize_failed")
+
 
 
 @router.get("/auth/google/callback")
@@ -285,8 +289,7 @@ async def auth_google_callback(request: Request):
       - redirige vers le front avec ?provider=google&token=API_KEY
     """
     try:
-        # APRÈS (patch correct et robuste)
-        redirect_uri = GOOGLE_REDIRECT_URI or _compute_redirect_uri(request)
+        redirect_uri = (GOOGLE_REDIRECT_URI or _compute_redirect_uri(request))
         print(f"[OAUTH] callback redirect_uri = {redirect_uri}")
         token = await oauth.google.authorize_access_token(request, redirect_uri=redirect_uri)
 
