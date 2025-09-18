@@ -8,6 +8,7 @@ import UserAvatar from "../useravatar/UserAvatar";
 import BacktradzLogo from "../BacktradzLogo/BacktradzLogo";
 import { useIsAdmin } from "../../../hooks/UseIsAdmin"
 import { useAuth } from "../../../auth/AuthContext"; // ⬅️ on consomme le user du contexte
+import { API_BASE } from "../../../sdk/apiClient";
 
 
 function pickCredits(u) {
@@ -52,7 +53,7 @@ export default function Navbar() {
  useEffect(() => {
     const t = localStorage.getItem("apiKey");
     if (!t) { setAdminOK(false); return; }
-    fetch("/api/admin/ping", { headers: { "X-API-Key": t } })
+    fetch(`${API_BASE}/api/admin/ping`, { headers: { "X-API-Key": t } })
       .then(r => setAdminOK(r.ok))
       .catch(() => setAdminOK(false));
    }, [user]); // dès que l'objet user change, on (re)ping

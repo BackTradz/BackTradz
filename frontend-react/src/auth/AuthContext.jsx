@@ -32,7 +32,7 @@
 // ============================================================
 import { createContext, useContext, useEffect, useState } from 'react';
 import { me } from '../sdk/authApi'; // [BTZ] SDK front: appelle /api/me en utilisant le token stocké côté front
-
+import { API_BASE } from '../sdk/apiClient';
 
 const pickTokenFromUrl = () => {
   try {
@@ -79,7 +79,7 @@ export function AuthProvider({ children }) {
 
 
       // ⚠️ Bypass apiClient pour éviter le token "figé" avant refresh
-      fetch('/api/me', { headers: { 'X-API-Key': urlToken } })
+      fetch(`${API_BASE}/api/me`, { headers: { 'X-API-Key': urlToken } })
         .then(async (r) => {
           if (!r.ok) throw new Error('HTTP ' + r.status);
           return r.json();
@@ -113,7 +113,7 @@ export function AuthProvider({ children }) {
  const loginSuccess = (token) => {
    localStorage.setItem('apiKey', token);
    // ⏩ Charge l'utilisateur tout de suite, en bypassant l’apiClient pour éviter le “stale token”
-  fetch('/api/me', { headers: { 'X-API-Key': token } })
+  fetch(`${API_BASE}/api/me`, { headers: { 'X-API-Key': token } })
     .then(async (r) => {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
