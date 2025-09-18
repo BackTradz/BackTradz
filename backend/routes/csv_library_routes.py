@@ -278,13 +278,15 @@ def download_csv_by_path(
 
     file_path = Path(path)
     if not file_path.is_absolute():
-        # accepte chemin relatif à DATA_ROOT
-        file_path = (DATA_ROOT / path).resolve()
+        # 🔥 patch: force dans OUTPUT_DIR
+        file_path = (OUTPUT_DIR / path).resolve()
 
-    # garde-fou: n'autorise que sous nos racines légitimes
-    allowed_roots = [OUTPUT_DIR.resolve(), OUTPUT_LIVE_DIR.resolve(), DATA_ROOT.resolve()]
+    # garde-fou (autorise seulement nos dossiers connus)
+    allowed_roots = [OUTPUT_DIR.resolve(), OUTPUT_LIVE_DIR.resolve()]
     if not any(r in file_path.parents or file_path == r for r in allowed_roots):
         raise HTTPException(status_code=400, detail="Chemin hors stockage autorisé")
+
+
     # 👇 Choix du jeton : header prioritaire, sinon query
     api_key = x_api_key or token
     user = get_user_by_token(api_key)
