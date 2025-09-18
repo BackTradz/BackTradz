@@ -186,20 +186,17 @@ export default function BacktestSummary() {
                   <div className="flex-1">
                     {(() => {
                       const folder = bt.folder || null;
-                      const xlsxFile =
-                        bt.xlsx_filename ||
-                        (folder && bt.strategy && bt.symbol && bt.period
-                          ? `analyse_${bt.strategy}_${bt.symbol}_SL${(bt.params?.sl_pips ?? bt.params?.sl ?? 100)}_${String(bt.period).replaceAll(" ","_")}_resultats.xlsx`
-                          : null);
-
-                      if (!folder || !xlsxFile) return (
-                        <CTAButton disabled fullWidth>.xlsx indisponible</CTAButton>
-                      );
-
-                      const token = localStorage.getItem("apiKey") || "";
+                      const sl = (bt.params?.sl_pips ?? bt.params?.sl ?? 100);
+                      const base = (import.meta.env.VITE_API_BASE?.replace(/\/+$/,'') || 'https://api.backtradz.com');
+                      // on passe par la route robuste côté backend (cherche le bon .xlsx dans ANALYSIS_DIR)
                       const url =
-                        `${import.meta.env.VITE_API_BASE?.replace(/\/+$/,'') || 'https://api.backtradz.com'}` +
-                        `/api/download/${encodeURIComponent(xlsxFile)}?folder=${encodeURIComponent(folder)}&apiKey=${encodeURIComponent(token)}`;
+                        `${base}/api/admin/download_xlsx` +
+                        `?symbol=${encodeURIComponent(bt.symbol)}` +
+                        `&timeframe=${encodeURIComponent(bt.timeframe)}` +
+                        `&strategy=${encodeURIComponent(bt.strategy)}` +
+                        `&period=${encodeURIComponent(String(bt.period))}` +
+                        `&sl=${encodeURIComponent(sl)}` +
+                        `&apiKey=${encodeURIComponent(token)}`;
 
                       const handleDownload = (e) => {
                         e.preventDefault();
