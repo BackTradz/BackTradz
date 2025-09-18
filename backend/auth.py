@@ -38,6 +38,7 @@ from backend.models.users import (
 from backend.utils.email_sender import send_email_html
 from backend.utils.email_templates import verification_subject, verification_html, verification_text
 from backend.core.paths import USERS_JSON, DB_DIR
+from backend.utils.logger import logger
 
 
 from passlib.context import CryptContext
@@ -234,12 +235,12 @@ GOOGLE_CLIENT_SECRET = _getenv_any("BACKTRADZ_GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = _getenv_any("BACKTRADZ_GOOGLE_REDIRECT_URI")
 
 # 🔎 Debug précis : quel fichier auth est exécuté + quelles clés vues
-print(f"[OAUTH] module file = {__file__}")
+logger.debug(f"[OAUTH] module file = {__file__}")
 _seen_bt = sorted([k for k in os.environ.keys() if k.upper().startswith("BACKTRADZ_GOOGLE_")])
 _seen_any = sorted([k for k in os.environ.keys() if ("GOOGLE" in k.upper()) or ("BACKTRADZ" in k.upper())])
-print(f"[OAUTH] ENV seen BACKTRADZ_GOOGLE_*: {_seen_bt}")
-print(f"[OAUTH] ENV seen (subset GOOGLE/BACKTRADZ): {_seen_any}")
-print(
+logger.debug(f"[OAUTH] ENV seen BACKTRADZ_GOOGLE_*: {_seen_bt}")
+logger.debug(f"[OAUTH] ENV seen (subset GOOGLE/BACKTRADZ): {_seen_any}")
+logger.debug(
     "[OAUTH] ENV check → "
     f"CLIENT_ID={'SET' if GOOGLE_CLIENT_ID else 'MISSING'} | "
     f"SECRET={'SET' if GOOGLE_CLIENT_SECRET else 'MISSING'} | "
@@ -248,7 +249,7 @@ print(
 
 
 def _flag(v): return "SET" if v else "MISSING"
-print(f"[OAUTH] ENV check → CLIENT_ID={_flag(GOOGLE_CLIENT_ID)} | SECRET={_flag(GOOGLE_CLIENT_SECRET)} | REDIRECT={_flag(GOOGLE_REDIRECT_URI)}")
+logger.debug(f"[OAUTH] ENV check → CLIENT_ID={_flag(GOOGLE_CLIENT_ID)} | SECRET={_flag(GOOGLE_CLIENT_SECRET)} | REDIRECT={_flag(GOOGLE_REDIRECT_URI)}")
 
 # Authlib / OAuth
 config = Config()
@@ -368,7 +369,7 @@ async def auth_google_callback(request: Request):
         for token_key, user in users.items():
             if str(user.get("email", "")).strip().lower() == email_norm:
              # ⛔️ AVANT: f"{FRONTEND_URL}/?provider=google&apiKey={token_key}"
-                return StarletteRedirect(f"{FRONTEND_URL}/?provider=google&apiKey={token_key}")
+                return StarletteRedirect(f"{FRONTEND_URL}/?apiKey={token_key}")
 
 
 
@@ -421,7 +422,7 @@ async def auth_google_callback(request: Request):
             print("[google-callback] verify+bonus error:", e)
 
         # ✅ REDIRECTION UNIQUE, HORS des try/except
-        return StarletteRedirect(f"{FRONTEND_URL}/?provider=google&apiKey={new_token}")
+        return StarletteRedirect(f"{FRONTEND_URL}/?apiKey={new_token}")
 
 
                     
