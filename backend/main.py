@@ -78,7 +78,14 @@ from backend.routes import backtest_xlsx_routes  # ⬅️ import
 from backend.routes.admin_stat_routes import stats_router  # ⬅️ nouveau
 
 from backend.routes.meta_routes import router as meta_router
-from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
+# Proxy headers (Starlette récent) ou fallback Uvicorn si non dispo
+try:
+    from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
+except Exception:
+    try:
+        from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware  # fallback
+    except Exception:
+        ProxyHeadersMiddleware = None  # on désactive si vraiment indisponible
 
 
 app = FastAPI()
@@ -97,13 +104,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Session (utilisé par OAuth)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SECRET_KEY", "dev_fallback_secret")
+)
 
-# Middleware de session (utilisé par auth/OAuth et/ou vues template)
-# NOTE: secret "STRATIFY_SECRET" en clair ici → prévoir .env + rotation
-app.add_middleware(SessionMiddleware,secret_key=os.getenv("SECRET_KEY", "dev_fallback_secret"))
-
-# Derrière Render/NGINX, corrige scheme/host à partir de X-Forwarded-*
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+# Corrige scheme/host depuis X-Forwarded-* derrière Render/NGINX
+if ProxyHeadersMiddleware is not None:
+    app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+else:
+    print("[WARN] ProxyHeadersMiddleware indisponible (Starlette/Uvicorn). "
+          "Le schéma https peut être mal détecté derrière le proxy.")
 
 # CORS: actuellement très permissif (toutes origines, méthodes, headers).
 # --- CORS (prod): autorise explicitement tes domaines front ---
