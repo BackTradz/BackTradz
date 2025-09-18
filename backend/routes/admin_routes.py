@@ -810,18 +810,6 @@ def get_global_stats(request: Request):
 
 from fastapi.responses import FileResponse
 
-def admin_required_from_request_or_query(request: Request):
-    """
-    Auth admin via header X-API-Key OU via query ?apiKey=...
-    (même vérification d'email admin).
-    """
-    api_key = request.headers.get("X-API-Key") or request.query_params.get("apiKey")
-    if not api_key:
-        raise HTTPException(status_code=403, detail="Token requis")
-    user = get_user_by_token(api_key)
-    if not user or user.email != "BackTradz@outlook.com":
-        raise HTTPException(status_code=403, detail="Accès admin requis")
-    return user
 
 @router.get("/admin/download_xlsx")
 def admin_download_xlsx(
@@ -836,8 +824,9 @@ def admin_download_xlsx(
     Télécharge le fichier XLSX d'un backtest (feuille Global).
     Auth: admin (header X-API-Key ou query ?apiKey=...)
     """
-    # sécurité admin
-    admin_required_from_request_or_query(request)
+    # sécurité admin (source of truth, tolère header X-API-Key et, si activé, ?apiKey=)
+    require_admin_from_request_or_query(request)
+
 
     base_dir = ANALYSIS_DIR
     # --- Normalisation de 'period' : garde only 'YYYY-MM-DDtoYYYY-MM-DD'
