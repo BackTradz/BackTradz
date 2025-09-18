@@ -229,18 +229,19 @@ except Exception:
     PUBLIC_API_URL = os.getenv("PUBLIC_API_URL", "").rstrip("/")
 
 # .env (robuste: tolère plusieurs alias + log des clés réellement vues)
-GOOGLE_CLIENT_ID = _getenv_any("GOOGLE_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_ID")
-GOOGLE_CLIENT_SECRET = _getenv_any("GOOGLE_CLIENT_SECRET", "GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_SECRET")
-GOOGLE_REDIRECT_URI = _getenv_any("GOOGLE_REDIRECT_URI", "GOOGLE_CALLBACK_URL", "GOOGLE_OAUTH_REDIRECT_URI")
+GOOGLE_CLIENT_ID = _getenv_any("BACKTRADZ_GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = _getenv_any("BACKTRADZ_GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = _getenv_any("BACKTRADZ_GOOGLE_REDIRECT_URI")
 
-_seen_google = sorted([k for k in os.environ.keys() if k.upper().startswith("GOOGLE")])
-print(f"[OAUTH] ENV seen keys: {_seen_google}")
+_seen_bt = sorted([k for k in os.environ.keys() if k.upper().startswith("BACKTRADZ_GOOGLE_")])
+print(f"[OAUTH] ENV seen keys: {_seen_bt}")
 print(
     "[OAUTH] ENV check → "
     f"CLIENT_ID={'SET' if GOOGLE_CLIENT_ID else 'MISSING'} | "
     f"SECRET={'SET' if GOOGLE_CLIENT_SECRET else 'MISSING'} | "
     f"REDIRECT={'SET' if GOOGLE_REDIRECT_URI else 'MISSING'}"
 )
+
 
 def _flag(v): return "SET" if v else "MISSING"
 print(f"[OAUTH] ENV check → CLIENT_ID={_flag(GOOGLE_CLIENT_ID)} | SECRET={_flag(GOOGLE_CLIENT_SECRET)} | REDIRECT={_flag(GOOGLE_REDIRECT_URI)}")
