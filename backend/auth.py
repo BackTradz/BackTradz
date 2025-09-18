@@ -228,13 +228,17 @@ try:
 except Exception:
     PUBLIC_API_URL = os.getenv("PUBLIC_API_URL", "").rstrip("/")
 
-# .env (robuste: tolère plusieurs alias + log des clés réellement vues)
+# .env (lecture strictement sur BACKTRADZ_GOOGLE_*)
 GOOGLE_CLIENT_ID = _getenv_any("BACKTRADZ_GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = _getenv_any("BACKTRADZ_GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = _getenv_any("BACKTRADZ_GOOGLE_REDIRECT_URI")
 
+# 🔎 Debug précis : quel fichier auth est exécuté + quelles clés vues
+print(f"[OAUTH] module file = {__file__}")
 _seen_bt = sorted([k for k in os.environ.keys() if k.upper().startswith("BACKTRADZ_GOOGLE_")])
-print(f"[OAUTH] ENV seen keys: {_seen_bt}")
+_seen_any = sorted([k for k in os.environ.keys() if ("GOOGLE" in k.upper()) or ("BACKTRADZ" in k.upper())])
+print(f"[OAUTH] ENV seen BACKTRADZ_GOOGLE_*: {_seen_bt}")
+print(f"[OAUTH] ENV seen (subset GOOGLE/BACKTRADZ): {_seen_any}")
 print(
     "[OAUTH] ENV check → "
     f"CLIENT_ID={'SET' if GOOGLE_CLIENT_ID else 'MISSING'} | "

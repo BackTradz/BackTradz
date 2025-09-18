@@ -217,18 +217,22 @@ def _env_check(request: Request):
 @app.get("/api/_env_oauth", include_in_schema=False)
 def _env_oauth(request: Request):
     import os
-    data = {k: v for k, v in os.environ.items() if k.upper().startswith("GOOGLE_")}
-    # masque le secret dans le retour
-    if "GOOGLE_CLIENT_SECRET" in data:
-        data["GOOGLE_CLIENT_SECRET"] = "•" * 8
+    data = {
+        k: v for k, v in os.environ.items()
+        if k.upper().startswith("GOOGLE_") or k.upper().startswith("BACKTRADZ_GOOGLE_")
+    }
+    # masque secrets connus
+    for sk in ("GOOGLE_CLIENT_SECRET", "BACKTRADZ_GOOGLE_CLIENT_SECRET"):
+        if sk in data:
+            data[sk] = "•" * 8
     return JSONResponse({
         "seen": list(sorted(data.keys())),
-        "CLIENT_ID": bool(os.getenv("GOOGLE_CLIENT_ID")),
-        "SECRET": bool(os.getenv("GOOGLE_CLIENT_SECRET")),
-        "REDIRECT": os.getenv("GOOGLE_REDIRECT_URI", ""),
+        "CLIENT_ID": bool(os.getenv("BACKTRADZ_GOOGLE_CLIENT_ID") or os.getenv("GOOGLE_CLIENT_ID")),
+        "SECRET": bool(os.getenv("BACKTRADZ_GOOGLE_CLIENT_SECRET") or os.getenv("GOOGLE_CLIENT_SECRET")),
+        "REDIRECT": os.getenv("BACKTRADZ_GOOGLE_REDIRECT_URI") or os.getenv("GOOGLE_REDIRECT_URI") or "",
         "base_url_seen": str(request.base_url),
+        "module_auth_file": getattr(__import__("backend").auth, "__file__", "n/a"),
     })
-
 
 # 🔒 Custom doc avec champ X-API-Key
 def custom_openapi():
