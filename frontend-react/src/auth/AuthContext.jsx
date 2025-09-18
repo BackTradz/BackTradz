@@ -66,27 +66,32 @@ export function AuthProvider({ children }) {
     const urlToken = pickTokenFromUrl();
     if (urlToken) {
       localStorage.setItem('apiKey', urlToken);
-      // Nettoie l'URL pour éviter de garder le token en clair dans l'historique
       try {
         const url = new URL(window.location.href);
         url.searchParams.delete('apiKey');
         url.searchParams.delete('token');
         window.history.replaceState({}, document.title, url.toString());
       } catch (e) {
-       void e; // calme ESLint (no-unused-vars)
-        // no-op
+        void e; // no-op
       }
 
-
-      // Charge immédiatement l'utilisateur puis sort du loading
       me()
-        .then(setUser)
+        .then((u) => {
+          setUser(u);
+          const path = window.location.pathname;
+          const q = new URLSearchParams(window.location.search);
+          if (path === "/login" || q.get("provider") || q.get("apiKey") || q.get("token")) {
+            window.location.replace("/");
+            return;
+          }
+        })
         .catch(() => {
-          // Si le token retourné par le backend n’est pas reconnu → on l’enlève proprement
           localStorage.removeItem('apiKey');
         })
         .finally(() => setLoading(false));
-      return; // stop ici (on ne fait pas la voie "token depuis localStorage")
+
+      // ⚠️ Ici on ferme le if (urlToken)
+      return;
     }
 
     // 2) Cas classique : pas de token dans l'URL → on regarde le localStorage
@@ -103,17 +108,30 @@ export function AuthProvider({ children }) {
   }, []);
 
 
+
   /**
    * loginSuccess(token)
    * - À appeler juste après un /api/login réussi (back renvoie un token).
    * - Persistant: enregistre 'apiKey' dans localStorage pour les prochains rafraîchissements/page loads.
    * - Note: on peut choisir d'appeler me() ici pour charger l'utilisateur immédiatement (non imposé ici).
    */
-  const loginSuccess = (token) => {
+
+  // 🔐 Appelée après un /login classique réussi
+  const loginSuccess = async (token) => {
+    // 1) on stocke le token
     localStorage.setItem('apiKey', token);
-    // [BTZ] Option possible (non activée ici pour éviter effet de bord):
-    // me().then(setUser).catch(() => localStorage.removeItem('apiKey'));
+
+    // 2) on récupère immédiatement l'utilisateur et on met à jour le contexte
+    try {
+      const u = await me();
+      setUser(u);
+    } catch (e) {
+      void e;                 // calme ESLint no-unused-vars
+      localStorage.removeItem('apiKey');
+      setUser(null);
+    }
   };
+
 
   /**
    * logout()
