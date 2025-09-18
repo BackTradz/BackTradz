@@ -214,6 +214,17 @@ def _env_check(request: Request):
         "HostHeader": request.headers.get("host"),
     })
 
+@app.get("/api/_env_oauth", include_in_schema=False)
+def _env_oauth(request: Request):
+    import os
+    return JSONResponse({
+        "CLIENT_ID": bool(os.getenv("GOOGLE_CLIENT_ID")),
+        "SECRET": bool(os.getenv("GOOGLE_CLIENT_SECRET")),
+        "REDIRECT": os.getenv("GOOGLE_REDIRECT_URI", ""),
+        "base_url_seen": str(request.base_url),
+    })
+
+
 # 🔒 Custom doc avec champ X-API-Key
 def custom_openapi():
     """

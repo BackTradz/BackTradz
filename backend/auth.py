@@ -205,10 +205,12 @@ ROOT_DIR = Path(__file__).resolve().parents[1]   # backend/ → remonte à la ra
 load_dotenv(ROOT_DIR / ".env")                   # charge le .env racine
 
 # .env
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")  # ex: http://127.0.0.1:8000/api/auth/google/callback
-print("DEBUG GOOGLE_REDIRECT_URI =", GOOGLE_REDIRECT_URI)
+GOOGLE_CLIENT_ID = (os.getenv("GOOGLE_CLIENT_ID") or "").strip()
+GOOGLE_CLIENT_SECRET = (os.getenv("GOOGLE_CLIENT_SECRET") or "").strip()
+GOOGLE_REDIRECT_URI = (os.getenv("GOOGLE_REDIRECT_URI") or "").strip()
+
+def _flag(v): return "SET" if v else "MISSING"
+print(f"[OAUTH] ENV check → CLIENT_ID={_flag(GOOGLE_CLIENT_ID)} | SECRET={_flag(GOOGLE_CLIENT_SECRET)} | REDIRECT={_flag(GOOGLE_REDIRECT_URI)}")
 
 # Authlib / OAuth
 config = Config()
@@ -264,6 +266,11 @@ def _atomic_write_json(path: Path, data: dict) -> None:
 
 @router.get("/auth/google")
 async def auth_google(request: Request):
+    # Si le client_id/secret ne sont pas chargés → on n’envoie PAS une requête cassée à Google
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        print("[OAUTH] ABORT authorize: missing client envs")
+        return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&error=oauth_env_missing")
+
     redirect_uri = (GOOGLE_REDIRECT_URI or _compute_redirect_uri(request))
     print(f"[OAUTH] authorize redirect_uri = {redirect_uri}")
     try:
@@ -273,7 +280,6 @@ async def auth_google(request: Request):
             prompt="select_account",
         )
     except Exception as e:
-        # log côté API plutôt que 400 côté Google (plus lisible)
         print("[OAUTH] authorize_redirect FAILED:", e)
         return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&error=authorize_failed")
 
@@ -287,8 +293,12 @@ async def auth_google_callback(request: Request):
       - récupère userinfo (email, prénom, nom)
       - crée l'utilisateur si nécessaire
       - redirige vers le front avec ?provider=google&token=API_KEY
-    """
+      """
     try:
+        if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+            print("[OAUTH] ABORT callback: missing client envs")
+            return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&error=oauth_env_missing")
+
         redirect_uri = (GOOGLE_REDIRECT_URI or _compute_redirect_uri(request))
         print(f"[OAUTH] callback redirect_uri = {redirect_uri}")
         token = await oauth.google.authorize_access_token(request, redirect_uri=redirect_uri)
