@@ -78,13 +78,14 @@ export function AuthProvider({ children }) {
       }
 
 
-      // Charge immédiatement l'utilisateur puis sort du loading
-      me()
-        .then(setUser)
-        .catch(() => {
-          // Si le token retourné par le backend n’est pas reconnu → on l’enlève proprement
-          localStorage.removeItem('apiKey');
+      // ⚠️ Bypass apiClient pour éviter le token "figé" avant refresh
+      fetch('/api/me', { headers: { 'X-API-Key': urlToken } })
+        .then(async (r) => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
         })
+        .then((u) => setUser(u))
+        .catch(() => { localStorage.removeItem('apiKey'); })
         .finally(() => setLoading(false));
       return; // stop ici (on ne fait pas la voie "token depuis localStorage")
     }
@@ -111,10 +112,14 @@ export function AuthProvider({ children }) {
    */
  const loginSuccess = (token) => {
    localStorage.setItem('apiKey', token);
-   // ⏩ charge l'utilisateur tout de suite (plus besoin de refresh)
-      me()
-     .then(setUser)
-     .catch(() => localStorage.removeItem('apiKey'));
+   // ⏩ Charge l'utilisateur tout de suite, en bypassant l’apiClient pour éviter le “stale token”
+  fetch('/api/me', { headers: { 'X-API-Key': token } })
+    .then(async (r) => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then((u) => setUser(u))
+    .catch(() => localStorage.removeItem('apiKey'));
  };
 
   /**

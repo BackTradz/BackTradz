@@ -55,7 +55,7 @@ export default function Navbar() {
     fetch("/api/admin/ping", { headers: { "X-API-Key": t } })
       .then(r => setAdminOK(r.ok))
       .catch(() => setAdminOK(false));
-  }, [user?.email]); // email change -> on re-ping
+   }, [user]); // dès que l'objet user change, on (re)ping
 
   // Responsive
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function Navbar() {
     { label: "À savoir", path: "/a-savoir" },
   ];
 
-  
+
   // Ajoute "Admin" si admin confirmé (ping) ou autres flags côté user
   const hookAdmin = (typeof useIsAdmin === 'function' ? useIsAdmin() : false);
   const isAdmin = adminOK || hookAdmin || (String(user?.role || '').toLowerCase() === 'admin') || !!user?.is_admin;
