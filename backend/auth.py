@@ -342,8 +342,8 @@ async def auth_google_callback(request: Request):
 
         redirect_uri = (GOOGLE_REDIRECT_URI or _compute_redirect_uri(request))
         print(f"[OAUTH] callback redirect_uri = {redirect_uri}")
-        token = await oauth.google.authorize_access_token(request, redirect_uri=redirect_uri)
-
+        token = await oauth.google.authorize_access_token(request)
+        
         user_info = token.get("userinfo") or {}
         # (fallback possible si besoin)
         # user_info = await oauth.google.parse_id_token(request, token)
