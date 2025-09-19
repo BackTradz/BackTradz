@@ -49,13 +49,22 @@ export default function Navbar() {
   const creditsText = safeCreditsText(user);
   const [adminOK, setAdminOK] = useState(false);
 
-  //🛡️ Recalcule admin quand le user change (login/OAuth)
+
   useEffect(() => {
-    const t = localStorage.getItem("apiKey");
-    if (!t) { setAdminOK(false); return; }
-    fetch(`${API_BASE}/api/admin/ping`, { headers: { "X-API-Key": t } })
-      .then(r => setAdminOK(r.ok))
+    // 1) Lis le token local de façon sûre
+    const t = localStorage.getItem("apiKey") || "";
+    if (!t) {
+      setAdminOK(false);
+      return;
+    }
+
+    // 2) Ping admin avec URL ABSOLUE + header correct
+    fetch(`${API_BASE}/api/admin/ping`, {
+      headers: { "X-API-Key": t },
+    })
+      .then((r) => setAdminOK(r.ok))
       .catch(() => setAdminOK(false));
+    // 3) Déclenche quand 'user' change (peu importe email/id)
   }, [user]);
 
   // Responsive

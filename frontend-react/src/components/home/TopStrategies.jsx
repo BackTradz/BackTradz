@@ -9,6 +9,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { formatStrategy } from "../../lib/labels";
+import { API_BASE } from "../sdk/apiClient"; // garde ton chemin actuel
 
 import SectionTitle from "../ui/SectionTitle";
 import "../../pages/home/Home.css";
@@ -61,7 +62,7 @@ export default function TopStrategies() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/top-strategy");
+        const res = await fetch(`${API_BASE}/api/top-strategy`);
         if (!res.ok) throw new Error("Aucune stratégie trouvée");
         const data = await res.json();
         setStrategies(Array.isArray(data) ? data.slice(0, 6) : []);
