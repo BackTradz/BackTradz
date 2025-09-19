@@ -2,28 +2,43 @@
 import os, smtplib, ssl
 from email.message import EmailMessage
 
-def _get_env(k, *alts, default=""):
-    for name in (k, *alts):
-        v = os.getenv(name)
-        if v is not None and str(v).strip() != "":
-            return str(v).strip()
-    return default
+
+def _env(k, default=""):
+    v = os.getenv(k)
+    return (v or "").strip() if v is not None else default
 
 def _cfg():
+    host   = _env("SMTP_HOST")           # DOIT venir de l'env
+    port_s = _env("SMTP_PORT", "587")
+    user   = _env("SMTP_USER") or _env("SMTP_USERNAME")
+    pwd    = _env("SMTP_PASS") or _env("SMTP_PASSWORD")
+    from_  = _env("SMTP_FROM") or user
+    secure = _env("SMTP_SECURE", "STARTTLS").upper()
+    debug  = _env("SMTP_DEBUG", "0") in ("1", "true", "TRUE")
+
+    # 🔒 Pas de fallback silencieux sur Namecheap.
+    # Si l'env n'est pas renseignée, on ne devine RIEN.
+    # MAIS: si l'utilisateur a mis l'identifiant Brevo, on “corrige” l’host si absent.
+    if not host and user.endswith("@smtp-brevo.com"):
+        host, secure = "smtp-relay.brevo.com", "STARTTLS"
+
+    # (Optionnel) si l’utilisateur a mis un host Brevo mais secure vide, on force STARTTLS
+    if host.endswith("smtp-relay.brevo.com") and not secure:
+        secure = "STARTTLS"
+
     return {
-        "host": _get_env("SMTP_HOST"),
-        "port": _get_env("SMTP_PORT"),  # string, on cast plus bas
-        "user": _get_env("SMTP_USER", "SMTP_USERNAME"),
-        "pwd":  _get_env("SMTP_PASS", "SMTP_PASSWORD"),
-        "from": _get_env("SMTP_FROM") or _get_env("SMTP_USER", "SMTP_USERNAME"),
-        "brand":_get_env("BRAND_NAME", default="BackTradz"),
-        "secure": (_get_env("SMTP_SECURE", default="STARTTLS")).upper(),  # STARTTLS | SSL | PLAIN | AUTO
-        "timeout": int(_get_env("SMTP_TIMEOUT", default="20")),
-        "debug": int(_get_env("SMTP_DEBUG", default="0")),
+        "host": host,
+        "port": int(port_s) if port_s else 587,
+        "user": user,
+        "pwd":  pwd,
+        "from": from_,
+        "secure": secure,   # STARTTLS | SSL | PLAIN
+        "timeout": int(_env("SMTP_TIMEOUT", "20")),
+        "debug": debug,
     }
 
-def _ready(c): return all([c["host"], c["user"], c["pwd"], c["from"]])
-
+def _ready(c):
+    return all([c["host"], c["user"], c["pwd"], c["from"]])
 def _send_once(c, mode, port, msg):
     if c["debug"]:
         print(f"[email_sender] Trying {mode} on {c['host']}:{port} ...")
