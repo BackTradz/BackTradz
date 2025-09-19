@@ -5,12 +5,12 @@ import App from './App';
 import { AuthProvider } from './auth/AuthContext';
 import "./index.css";
 
-// 🔗 Route tous les appels '/api/*' vers l'API en conservant le préfixe /api
+// 🔗 Route tous les appels '/api/*' vers l'API (sans jamais doubler /api)
 (function patchFetchBaseURL() {
   try {
-    const RAW  = (import.meta.env.VITE_API_URL || "https://api.backtradz.com/api").trim().replace(/\/+$/, "");
-    const BASE = /\/api$/i.test(RAW) ? RAW : RAW + "/api";  // ✅ force terminaison par /api
-    const _fetch  = window.fetch.bind(window);
+    const RAW   = (import.meta.env.VITE_API_URL || "https://api.backtradz.com/api").trim().replace(/\/+$/, "");
+    const ROOT  = RAW.replace(/\/api$/i, "");         // ✅ base SANS /api
+    const _fetch = window.fetch.bind(window);
     const ORIGIN = window.location.origin.replace(/\/+$/, "");
 
     window.fetch = (input, init) => {
@@ -18,19 +18,20 @@ import "./index.css";
         let url = typeof input === "string" ? input : input?.url;
         // 1) appels relatifs '/api/...'
         if (typeof url === "string" && url.startsWith("/api/")) {
-          const rewritten = BASE + url;                 // ✅ on NE retire plus /api
+          const rewritten = ROOT + url;               // ex: ROOT + '/api/xyz'
           input = typeof input === "string" ? rewritten : new Request(rewritten, input);
         }
-        // 2) appels absolus depuis le front 'https://www.backtradz.com/api/...'
+        // 2) appels absolus vers le front 'https://www.backtradz.com/api/...'
         else if (typeof url === "string" && url.startsWith(ORIGIN + "/api/")) {
-          const tail = url.slice(ORIGIN.length);        // conserve '/api/...'
-          const rewritten = BASE + tail;
+          const tail = url.slice(ORIGIN.length);      // garde '/api/...'
+          const rewritten = ROOT + tail;
           input = typeof input === "string" ? rewritten : new Request(rewritten, input);
         }
       } catch {}
       return _fetch(input, init);
     };
-    window.__API_BASE__ = BASE;
+    // Pour debug éventuel
+    window.__API_BASE__ = ROOT + "/api";
   } catch {}
 })();
 
