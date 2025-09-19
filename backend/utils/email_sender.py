@@ -8,21 +8,17 @@ def _env(k, default=""):
     return (v or "").strip() if v is not None else default
 
 def _cfg():
-    host   = _env("SMTP_HOST")           # DOIT venir de l'env
+    host   = _env("SMTP_HOST")
     port_s = _env("SMTP_PORT", "587")
     user   = _env("SMTP_USER") or _env("SMTP_USERNAME")
     pwd    = _env("SMTP_PASS") or _env("SMTP_PASSWORD")
     from_  = _env("SMTP_FROM") or user
     secure = _env("SMTP_SECURE", "STARTTLS").upper()
     debug  = _env("SMTP_DEBUG", "0") in ("1", "true", "TRUE")
+    brand  = _env("BRAND_NAME", "BackTradz")   # ✅ <— AJOUT
 
-    # 🔒 Pas de fallback silencieux sur Namecheap.
-    # Si l'env n'est pas renseignée, on ne devine RIEN.
-    # MAIS: si l'utilisateur a mis l'identifiant Brevo, on “corrige” l’host si absent.
     if not host and user.endswith("@smtp-brevo.com"):
         host, secure = "smtp-relay.brevo.com", "STARTTLS"
-
-    # (Optionnel) si l’utilisateur a mis un host Brevo mais secure vide, on force STARTTLS
     if host.endswith("smtp-relay.brevo.com") and not secure:
         secure = "STARTTLS"
 
@@ -32,13 +28,17 @@ def _cfg():
         "user": user,
         "pwd":  pwd,
         "from": from_,
-        "secure": secure,   # STARTTLS | SSL | PLAIN
+        "secure": secure,
         "timeout": int(_env("SMTP_TIMEOUT", "20")),
         "debug": debug,
+        "brand": brand,                          # ✅ <— AJOUT
     }
+
 
 def _ready(c):
     return all([c["host"], c["user"], c["pwd"], c["from"]])
+
+
 def _send_once(c, mode, port, msg):
     if c["debug"]:
         print(f"[email_sender] Trying {mode} on {c['host']}:{port} ...")
@@ -55,12 +55,17 @@ def _send_once(c, mode, port, msg):
                 s.starttls(context=context)
             s.login(c["user"], c["pwd"]); s.send_message(msg)
 
+
 def send_email_html(to_email: str, subject: str, html_body: str, text_fallback: str = "") -> bool:
     c = _cfg()
     if not _ready(c):
-        missing = [k for k in ["SMTP_HOST","SMTP_USER","SMTP_PASS","SMTP_FROM"] if not os.getenv(k)]
+        missing = []
+        for k in ["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "SMTP_FROM"]:
+            if not _env(k):
+                missing.append(k)
         print(f"[email_sender] SMTP non configuré. Manque: {', '.join(missing)}")
         return False
+
 
     msg = EmailMessage()
     msg["Subject"] = subject
