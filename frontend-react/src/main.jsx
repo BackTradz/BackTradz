@@ -5,11 +5,12 @@ import App from './App';
 import { AuthProvider } from './auth/AuthContext';
 import "./index.css";
 
-// 🔗 Route tous les appels '/api/*' directement vers l'API (prod)
+// 🔗 Route tous les appels '/api/*' vers l'API en conservant le préfixe /api
 (function patchFetchBaseURL() {
   try {
-    const BASE = (import.meta.env.VITE_API_URL || "https://api.backtradz.com/api").replace(/\/+$/, "");
-    const _fetch = window.fetch.bind(window);
+    const RAW  = (import.meta.env.VITE_API_URL || "https://api.backtradz.com/api").trim().replace(/\/+$/, "");
+    const BASE = /\/api$/i.test(RAW) ? RAW : RAW + "/api";  // ✅ force terminaison par /api
+    const _fetch  = window.fetch.bind(window);
     const ORIGIN = window.location.origin.replace(/\/+$/, "");
 
     window.fetch = (input, init) => {
@@ -17,23 +18,21 @@ import "./index.css";
         let url = typeof input === "string" ? input : input?.url;
         // 1) appels relatifs '/api/...'
         if (typeof url === "string" && url.startsWith("/api/")) {
-          const rewritten = BASE + url.replace(/^\/api/, "");
+          const rewritten = BASE + url;                 // ✅ on NE retire plus /api
           input = typeof input === "string" ? rewritten : new Request(rewritten, input);
         }
-        // 2) appels absolus vers le front 'https://www.backtradz.com/api/...'
+        // 2) appels absolus depuis le front 'https://www.backtradz.com/api/...'
         else if (typeof url === "string" && url.startsWith(ORIGIN + "/api/")) {
-          const tail = url.slice(ORIGIN.length).replace(/^\/api/, "");
+          const tail = url.slice(ORIGIN.length);        // conserve '/api/...'
           const rewritten = BASE + tail;
           input = typeof input === "string" ? rewritten : new Request(rewritten, input);
         }
       } catch {}
       return _fetch(input, init);
     };
-    // debug rapide
     window.__API_BASE__ = BASE;
   } catch {}
 })();
-
 
 // main.jsx
 const urlParams = new URLSearchParams(window.location.search);
