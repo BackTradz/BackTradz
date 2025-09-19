@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { formatStrategy } from "../../lib/labels";
-import { API_BASE } from "../sdk/apiClient"; // garde ton chemin actuel
+import { API_BASE } from "../../sdk/apiClient"; // garde ton chemin actuel
 
 import SectionTitle from "../ui/SectionTitle";
 import "../../pages/home/Home.css";
