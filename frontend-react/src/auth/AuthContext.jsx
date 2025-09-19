@@ -103,27 +103,23 @@ export function AuthProvider({ children }) {
    * - Persistant: enregistre 'apiKey' dans localStorage pour les prochains rafraîchissements/page loads.
    * - Note: on peut choisir d'appeler me() ici pour charger l'utilisateur immédiatement (non imposé ici).
    */
- const loginSuccess = (token) => {
-   // 1) Persiste le token
+
+  const loginSuccess = async (token) => {
    localStorage.setItem('apiKey', token);
-   // 2) Empêche RequireAuth de rediriger pendant l’hydratation
-   setLoading(true);
-   // 3) Hydrate l'utilisateur immédiatement (bypass + URL absolue)
-   fetch(`${API_BASE}/api/me`, { headers: { 'X-API-Key': token } })
-     .then((r) => {
-       if (!r.ok) throw new Error('HTTP ' + r.status);
-       return r.json();
-     })
-     .then((u) => setUser(u))
-     .catch(() => {
-       // si le /me échoue, on nettoie proprement
-       localStorage.removeItem('apiKey');
-       setUser(null);
-     })
-     .finally(() => {
-       // 4) Fin de la fenêtre critique → RequireAuth peut rendre sans te renvoyer /login
-       setLoading(false);
-     });
+   setLoading(true); // empêche RequireAuth/guards de rediriger en attendant
+   try {
+     const r = await fetch(`${API_BASE}/api/me`, { headers: { 'X-API-Key': token } });
+     if (!r.ok) throw new Error('HTTP ' + r.status);
+     const u = await r.json();
+     setUser(u);
+     return u; // ✅ on résout quand l'user est prêt
+   } catch (e) {
+     localStorage.removeItem('apiKey');
+     setUser(null);
+     throw e;
+  } finally {
+     setLoading(false);
+   }
  };
 
   /**

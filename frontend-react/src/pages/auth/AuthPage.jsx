@@ -37,14 +37,15 @@ export default function AuthPage() {
          // On reste sur la page actuelle, pas besoin de forcer /login ici
         } else if (apiKey) {
           // ✅ 1) Peuple le contexte tout de suite (Navbar voit les crédits sans refresh)
-          loginSuccess(apiKey);
-
-          // ✅ 2) Laisse AuthContext nettoyer l'URL (il supprime ?apiKey → voir patch 2)
-          //    Si tu veux afficher l’overlay succès 1 sec, tu peux le garder :
-          setShowSignupSuccess(true);
-         // ✅ 3) Redirige immédiatement (ou après 300ms) vers ta page cible
-         const t = setTimeout(() => navigate("/home", { replace: true }), 300);
-         return () => clearTimeout(t);
+          // ✅ attendre la fin de l’hydratation pour éviter le bounce
+          loginSuccess(apiKey)
+            .then(() => {
+              setShowSignupSuccess(true);
+              navigate("/home", { replace: true });
+            })
+            .catch(() => {
+              // en cas d’échec rarissime de /me, on reste sur /login et on affiche l’erreur si besoin
+            });
         }
       }
     } catch (e) {
