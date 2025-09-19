@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE } from "../../sdk/apiClient";
 
 /**
  * AdminKpiModal
@@ -39,7 +40,7 @@ export default function AdminKpiModal({ title, kpi, range, start, end, onClose }
         if (ss) q.append("start", ss);
         if (ee) q.append("end", ee);
       }
-      return { primary: `/api/admin/metrics/details/users_all?${q.toString()}`, alt: null };
+      return { primary: `${API_BASE}/api/admin/metrics/details/users_all?${q.toString()}`, alt: null };
     }
 
     // Autres KPIs (route générique + alt spécifiques)
@@ -49,12 +50,9 @@ export default function AdminKpiModal({ title, kpi, range, start, end, onClose }
       if (ee) q.append("end", ee);
     }
     return {
-      primary: `/api/admin/metrics/details?${q.toString()}`,
-      alt:
-        k === "sales"
-          ? `/api/admin/metrics/details/sales?${q.toString()}`
-          : k === "credits_offered"
-          ? `/api/admin/metrics/details/offered?${q.toString()}`
+      primary: `${API_BASE}/api/admin/metrics/details?${q.toString()}`,
+      alt: k === "sales" ? `${API_BASE}/api/admin/metrics/details/sales?${q.toString()}`
+       : k === "credits_offered" ? `${API_BASE}/api/admin/metrics/details/offered?${q.toString()}`
           : null,
     };
   }

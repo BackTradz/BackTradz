@@ -4,6 +4,7 @@
 // ------------------------------------------------------------
 import { useEffect, useState } from "react";
 import SectionTitle from "../ui/SectionTitle";
+import { API_BASE } from "../../sdk/apiClient";
 
 export default function UserTable() {
   const [users, setUsers] = useState([]);
@@ -16,9 +17,7 @@ export default function UserTable() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("/api/admin/get_users", {
-        headers: { "X-API-Key": token },
-      });
+       const res = await fetch(`${API_BASE}/api/admin/get_users`, { headers: { "X-API-Key": token } });
       const data = await res.json();
       if (!res.ok || !Array.isArray(data)) throw new Error("Erreur API");
       setUsers(data);
@@ -29,15 +28,13 @@ export default function UserTable() {
   };
 
   const loadHistory = async (user_id) => {
-    const res = await fetch(`/api/admin/user_history/${user_id}`, {
-      headers: { "X-API-Key": token },
-    });
+    const res = await fetch(`${API_BASE}/api/admin/user_history/${user_id}`, { headers: { "X-API-Key": token } });
     const data = await res.json();
     setHistory({ user_id, entries: data });
   };
 
   const action = async (route, user_id, amount = 1) => {
-    const res = await fetch(`/api/admin/${route}`, {
+    const res = await fetch(`${API_BASE}/api/admin/${route}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

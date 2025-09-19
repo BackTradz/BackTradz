@@ -64,7 +64,8 @@ export default function BacktestSummary() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/admin/stats/backtest_summary", {
+        const base = (import.meta.env.VITE_API_BASE?.replace(/\/+$/,'') || 'https://api.backtradz.com');
+        const res = await fetch(`${base}/api/admin/stats/backtest_summary`, {
           headers: { "X-API-Key": token },
         });
         const data = await res.json();

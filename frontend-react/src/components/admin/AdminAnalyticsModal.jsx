@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import { API_BASE } from "../../sdk/apiClient";
 /**
  * AdminAnalyticsModal
  * ------------------------------------------------------------------
@@ -30,6 +30,9 @@ import { useEffect, useState } from "react";
  * - Les clés "kind" côté backend doivent correspondre à celles utilisées ici.
  * - Timezone UI/Back cohérente pour interpréter les "hours".
  */
+
+
+
 export default function AdminAnalyticsModal({ title, kind, range = "day", onClose }) {
   const token = localStorage.getItem("apiKey");
 
@@ -69,7 +72,7 @@ export default function AdminAnalyticsModal({ title, kind, range = "day", onClos
       if (ss) q.append("start", ss);
       if (ee) q.append("end", ee);
     }
-    return `/api/admin/metrics/breakdown?${q.toString()}`;
+    return `${API_BASE}/api/admin/metrics/breakdown?${q.toString()}`;
   }
 
   async function fetchData(rr, ss, ee) {
@@ -114,7 +117,7 @@ export default function AdminAnalyticsModal({ title, kind, range = "day", onClos
         if (s) q.append("start", s);
         if (e) q.append("end", e);
       }
-      const res = await fetch(`/api/admin/metrics/details?${q.toString()}`, {
+      const res = await fetch(`${API_BASE}/api/admin/metrics/details?${q.toString()}`, {
         headers: { "X-API-Key": token },
       });
       const data = await res.json();

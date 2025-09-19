@@ -6,6 +6,7 @@
 // ------------------------------------------------------------
 import { useEffect, useState, useMemo } from "react";
 import SectionTitle from "../ui/SectionTitle";
+import { API_BASE } from "../../sdk/apiClient";
 
 export default function GlobalHistory() {
   const [history, setHistory] = useState([]); // liste d’achats (déjà triée desc côté back)
@@ -18,7 +19,7 @@ export default function GlobalHistory() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/admin/global_history", {
+        const res = await fetch(`${API_BASE}/api/admin/global_history`, {
           headers: { "X-API-Key": token },
         });
         const data = await res.json();
@@ -42,7 +43,7 @@ export default function GlobalHistory() {
             className="btn btn-warning"
             onClick={async () => {
               if (!confirm("Confirmer le reset de l’historique ? (abos/credits intacts)")) return;
-              const res = await fetch("/api/admin/history/reset", {
+              const res = await fetch(`${API_BASE}/api/admin/history/reset`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "X-API-Key": token },
                 body: JSON.stringify({ scope: "all" }) // ou "sales" / "backtests"
@@ -51,7 +52,7 @@ export default function GlobalHistory() {
               if (!res.ok) return alert(data?.detail || "Reset KO");
               alert("Historique réinitialisé");
               // recharger la liste
-              const r = await fetch("/api/admin/global_history", { headers: { "X-API-Key": token }});
+              const r = await fetch(`${API_BASE}/api/admin/global_history`, { headers: { "X-API-Key": token }});
               setHistory(await r.json());
             }}
           >

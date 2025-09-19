@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE } from "../../sdk/apiClient";
 
 /**
  * AdminBreakdownModal
@@ -36,7 +37,7 @@ export default function AdminBreakdownModal({ title, kind = "revenue_by_day", ra
       if (ss) q.append("start", ss);
       if (ee) q.append("end", ee);
     }
-    return `/api/admin/metrics/breakdown?${q.toString()}`;
+     return `${API_BASE}/api/admin/metrics/breakdown?${q.toString()}`;
   }
 
   // Fetch breakdown (avec garde d’erreur)

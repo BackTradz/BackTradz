@@ -11,7 +11,7 @@ import SectionTitle from "../ui/SectionTitle";
 import AdminKpiModal from "./AdminKpiModal";
 import AdminBreakdownModal from "./AdminBreakdownModal";
 import AdminAnalyticsModal from "./AdminAnalyticsModal";
-
+import { API_BASE } from "../../sdk/apiClient";
 // Formatters FR
 const nfInt  = new Intl.NumberFormat("fr-FR");
 const nfEuro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
@@ -32,7 +32,7 @@ export default function Stats() {
   // Charge overview pour un range donné (avec fallback legacy)
   async function load(rangeKey) {
     try {
-      const res = await fetch(`/api/admin/metrics/overview?range=${rangeKey}`, {
+      const res = await fetch(`${API_BASE}/api/admin/metrics/overview?range=${rangeKey}`, {
         headers: { "X-API-Key": token },
       });
       const data = await res.json();
@@ -42,7 +42,7 @@ export default function Stats() {
     } catch (err) {
       // fallback ancien endpoint
       try {
-        const r2 = await fetch("/api/admin/global_stats", { headers: { "X-API-Key": token }});
+        const r2 = await fetch(`${API_BASE}/api/admin/global_stats`, { headers: { "X-API-Key": token }});
         const d2 = await r2.json();
         if (!r2.ok) throw new Error(d2?.detail || "global_stats");
         setFallback(d2);
@@ -61,7 +61,7 @@ export default function Stats() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`/api/admin/metrics/overview?range=all`, {
+        const res = await fetch(`${API_BASE}/api/admin/metrics/overview?range=all`, {
           headers: { "X-API-Key": token },
         });
         const data = await res.json();
@@ -115,10 +115,7 @@ export default function Stats() {
 
 async function resetStats() {
   if (!window.confirm("Confirmer le reset des stats ? (aucun abonnement ne sera supprimé)")) return;
-  const res = await fetch("/api/admin/metrics/reset", {
-    method: "POST",
-    headers: { "X-API-Key": token }
-  });
+ const res = await fetch(`${API_BASE}/api/admin/metrics/reset`, { method: "POST", headers: { "X-API-Key": token } });
   const data = await res.json();
   if (!res.ok) return alert(data?.detail || "Reset KO");
   alert("✅ Stats remises à zéro (ledger purgé)");
@@ -127,10 +124,7 @@ async function resetStats() {
 
 async function rebuildStats() {
   if (!window.confirm("Reconstruire le ledger depuis users.json ?")) return;
-  const res = await fetch("/api/admin/metrics/rebuild_from_users", {
-    method: "POST",
-    headers: { "X-API-Key": token }
-  });
+  const res = await fetch(`${API_BASE}/api/admin/metrics/rebuild_from_users`, { method:"POST", headers:{ "X-API-Key": token }});
   const data = await res.json();
   if (!res.ok) return alert(data?.detail || "Rebuild KO");
   alert("✅ Ledger reconstruit depuis users.json");
