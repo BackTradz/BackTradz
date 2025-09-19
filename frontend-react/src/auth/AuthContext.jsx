@@ -66,27 +66,20 @@ export function AuthProvider({ children }) {
     const urlToken = pickTokenFromUrl();
     if (urlToken) {
       localStorage.setItem('apiKey', urlToken);
-      // Nettoie l'URL pour éviter de garder le token en clair dans l'historique
-      try {
-        const url = new URL(window.location.href);
-        url.searchParams.delete('apiKey');
-        url.searchParams.delete('token');
-        window.history.replaceState({}, document.title, url.toString());
-      } catch (e) {
-       void e; // calme ESLint (no-unused-vars)
-        // no-op
-      }
-
-
-      // ⚠️ Bypass apiClient pour éviter le token "figé" avant refresh
+      // ✅ Un seul fetch (bypass), puis nettoyage d'URL et fin de loading
       fetch(`${API_BASE}/api/me`, { headers: { 'X-API-Key': urlToken } })
-        .then(async (r) => {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.json();
-        })
+        .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then((u) => setUser(u))
-        .catch(() => { localStorage.removeItem('apiKey'); })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          // Nettoie les query params (apiKey/token) de l'URL courante
+          try {
+            const clean = new URL(window.location.href);
+            clean.searchParams.delete('apiKey');
+            clean.searchParams.delete('token');
+            window.history.replaceState({}, document.title, clean.pathname + clean.search + clean.hash);
+          } catch {}
+          setLoading(false);
+        });
       return; // stop ici (on ne fait pas la voie "token depuis localStorage")
     }
 

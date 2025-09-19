@@ -18,10 +18,11 @@ export default function AuthPage() {
   const [verifyUrl, setVerifyUrl] = useState("");
   const navigate = useNavigate(); // ✅ AJOUT
   const { loginSuccess } = useAuth(); // << récupère le helper du contexte
+  
+  
   // ✅ Remplace tout ton useEffect par celui-ci
   useEffect(() => {
     document.body.classList.add("auth-page");
-
     try {
       const params = new URLSearchParams(window.location.search);
       const provider = params.get("provider");
@@ -33,16 +34,17 @@ export default function AuthPage() {
           setOauthError(
             "Tu as déjà recréé un compte 3 fois avec cette adresse. Connecte-toi avec ton compte existant ou utilise un autre e-mail."
           );
-          window.history.replaceState({}, document.title, "/login");
+         // On reste sur la page actuelle, pas besoin de forcer /login ici
         } else if (apiKey) {
-          // 🔐 Peuple le contexte tout de suite (crédits en Navbar sans refresh)
+          // ✅ 1) Peuple le contexte tout de suite (Navbar voit les crédits sans refresh)
           loginSuccess(apiKey);
-          setShowSignupSuccess(true); // overlay OK
-          window.history.replaceState({}, document.title, "/login");
 
-          // (facultatif) redirection auto après 1.5s
-          const t = setTimeout(() => navigate("/home", { replace: true }), 1500);
-          return () => clearTimeout(t);
+          // ✅ 2) Laisse AuthContext nettoyer l'URL (il supprime ?apiKey → voir patch 2)
+          //    Si tu veux afficher l’overlay succès 1 sec, tu peux le garder :
+          setShowSignupSuccess(true);
+         // ✅ 3) Redirige immédiatement (ou après 300ms) vers ta page cible
+         const t = setTimeout(() => navigate("/home", { replace: true }), 300);
+         return () => clearTimeout(t);
         }
       }
     } catch (e) {
