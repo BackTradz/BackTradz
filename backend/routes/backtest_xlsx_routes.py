@@ -32,19 +32,19 @@ import os
 from datetime import datetime
 import math
 from backend.core.paths import ANALYSIS_DIR  # ✅ ajoute ceci
+from backend.core.admin import is_admin_user  # ✅ source of truth admin
 
-ADMIN_EMAIL = "BackTradz@outlook.com"
 
 router = APIRouter()
 
 # -------- Helpers: résolution du dossier/xlsx + contrôle d'accès --------
 def _is_admin(user) -> bool:
-    """Admin = même règle que partout (e-mail strict)."""
+    """
+    Délègue à backend.core.admin.is_admin_user pour rester cohérent
+    (email list, role, flag is_admin, etc.).
+    """
     try:
-        email = getattr(user, "email", None)
-        if email is None and isinstance(user, dict):
-            email = user.get("email")
-        return email == ADMIN_EMAIL
+        return is_admin_user(user)
     except Exception:
         return False
 
