@@ -50,13 +50,13 @@ export default function Navbar() {
   const [adminOK, setAdminOK] = useState(false);
 
   //🛡️ Recalcule admin quand le user change (login/OAuth)
- useEffect(() => {
+  useEffect(() => {
     const t = localStorage.getItem("apiKey");
     if (!t) { setAdminOK(false); return; }
-    fetch(`${API_BASE}/api/admin/ping`, { headers: { "X-API-Key": apiKey } })
+    fetch(`${API_BASE}/api/admin/ping`, { headers: { "X-API-Key": t } })
       .then(r => setAdminOK(r.ok))
       .catch(() => setAdminOK(false));
-   }, [user]); // dès que l'objet user change, on (re)ping
+  }, [user]);
 
   // Responsive
   useEffect(() => {
