@@ -368,9 +368,8 @@ async def auth_google_callback(request: Request):
         # --- utilisateur déjà existant → réutilise son token (clé du dict)
         for token_key, user in users.items():
             if str(user.get("email", "")).strip().lower() == email_norm:
-             # ⛔️ AVANT: f"{FRONTEND_URL}/?provider=google&apiKey={token_key}"
-                return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&apiKey={token_key}")
-
+            # ✅ MAINTENANT: vers Home (SPA), ton AuthContext lit ?apiKey=... et peuple user
+               return StarletteRedirect(f"{FRONTEND_URL}/?provider=google&apiKey={token_key}")
 
 
         # --- création d'un nouvel utilisateur
@@ -422,7 +421,7 @@ async def auth_google_callback(request: Request):
             print("[google-callback] verify+bonus error:", e)
 
         # ✅ REDIRECTION UNIQUE, HORS des try/except
-        return StarletteRedirect(f"{FRONTEND_URL}/login?provider=google&apiKey={new_token}")
+        return StarletteRedirect(f"{FRONTEND_URL}/?provider=google&apiKey={new_token}")
 
 
                     
