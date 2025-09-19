@@ -8,7 +8,7 @@ import BacktradzLogo from "../../components/ui/BacktradzLogo/BacktradzLogo";
 import SignupSuccessOverlay from "../../components/auth/SignupSuccessOverlay"; 
 import "./auth.css";
 import { login } from "../../sdk/authApi";
-
+import { useAuth } from "../../auth/AuthContext"; 
 
 export default function AuthPage() {
   const [isLoginActive, setIsLoginActive] = useState(true);
@@ -17,7 +17,7 @@ export default function AuthPage() {
   const [oauthError, setOauthError] = useState("");
   const [verifyUrl, setVerifyUrl] = useState("");
   const navigate = useNavigate(); // ✅ AJOUT
-
+  const { loginSuccess } = useAuth(); // << récupère le helper du contexte
   // ✅ Remplace tout ton useEffect par celui-ci
   useEffect(() => {
     document.body.classList.add("auth-page");
@@ -35,9 +35,9 @@ export default function AuthPage() {
           );
           window.history.replaceState({}, document.title, "/login");
         } else if (apiKey) {
-          // 🔐 Stocke + montre overlay succès OAuth
-          localStorage.setItem("apiKey", apiKey);
-          setShowSignupSuccess(true);
+          // 🔐 Peuple le contexte tout de suite (crédits en Navbar sans refresh)
+          loginSuccess(apiKey);
+          setShowSignupSuccess(true); // overlay OK
           window.history.replaceState({}, document.title, "/login");
 
           // (facultatif) redirection auto après 1.5s
@@ -68,8 +68,8 @@ export default function AuthPage() {
       });
       const data = await res.json();
       if (data.status === "success") {
-        localStorage.setItem("apiKey", data.token);
-        setShowSignupSuccess(true); // 👉 overlay
+        loginSuccess(data.token); // << idem : on peuple le contexte
+        setShowSignupSuccess(true);
       } else {
         alert(data.message || "Erreur lors de l'inscription");
       }
@@ -83,8 +83,8 @@ export default function AuthPage() {
     try {
       const data = await login(identifier, password);
       if (data?.token) {
-        localStorage.setItem("apiKey", data.token);
-        navigate("/home"); // redirige vers /home après login
+        loginSuccess(data.token);      // << met le user dans le contexte maintenant
+        navigate("/home");
       } else {
         alert(data.message || "Identifiants invalides");
       }
