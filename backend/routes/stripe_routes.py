@@ -44,6 +44,7 @@ from backend.utils.email_templates import (
     subscription_failed_html,
     subscription_failed_text,
 )
+from backend.models.users import USERS_FILE as USERS_JSON_PATH
 
 load_dotenv()
 
@@ -421,9 +422,7 @@ async def stripe_webhook(request: Request):
         billing_reason = invoice.get("billing_reason") # 'subscription_create' | 'subscription_cycle'...
 
         # Charger les users
-        USERS_FILE = Path("backend/database/users.json")
-        users = json.loads(USERS_FILE.read_text(encoding="utf-8")) if USERS_FILE.exists() else {}
-
+        users = json.loads(USERS_JSON_PATH.read_text(encoding="utf-8")) if USERS_JSON_PATH.exists() else {}
         # Finder: subscription_id -> customer_id (⚠️ pas de fallback email)
         user_id = None
         offer_id = None
@@ -467,7 +466,7 @@ async def stripe_webhook(request: Request):
             sub["failed_mail_sent"] = False; changed = True
 
         if changed:
-            USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
+            USERS_JSON_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
 
         # ✅ AJOUT DES CRÉDITS
         add_monthly_credits_after_invoice_paid(user_id, offer_id, billing_reason=billing_reason)
@@ -534,8 +533,7 @@ async def stripe_webhook(request: Request):
         last_err = (invoice.get("last_payment_error") or {}).get("message")
         pay_url = invoice.get("hosted_invoice_url") or f"{FRONTEND_URL}/billing"
 
-        USERS_FILE = Path("backend/database/users.json")
-        users = json.loads(USERS_FILE.read_text(encoding="utf-8")) if USERS_FILE.exists() else {}
+        users = json.loads(USERS_JSON_PATH.read_text(encoding="utf-8")) if USERS_JSON_PATH.exists() else {}
 
         user_id = None
         for uid, u in users.items():
@@ -566,7 +564,7 @@ async def stripe_webhook(request: Request):
             u = users[user_id]
             sub = u.setdefault("subscription", {})
             sub["pay_url"] = pay_url
-            USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
+            USERS_JSON_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
         except Exception as _e:
             logger.warning(f"[pay_url@invoice_failed] KO: {_e}")
 
@@ -585,7 +583,7 @@ async def stripe_webhook(request: Request):
                 u = users[user_id]
                 sub = u.setdefault("subscription", {})
                 sub["grace_deadline"] = cancel_ts
-                USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
+                USERS_JSON_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
             except Exception:
                 pass
         except Exception:
@@ -605,7 +603,7 @@ async def stripe_webhook(request: Request):
                         subscription_failed_text(pay_url)
                     )
                     sub["failed_mail_sent"] = True
-                    USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
+                    USERS_JSON_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
                     logger.info("📧 Email d'échec de renouvellement envoyé (unique).")
         except Exception as _e:
             logger.warning(f"[email@invoice.failed] KO: {_e}")
@@ -619,8 +617,7 @@ async def stripe_webhook(request: Request):
         sub_obj = event["data"]["object"]
         sub_id = sub_obj.get("id")  # sub_***
 
-        USERS_FILE = Path("backend/database/users.json")
-        users = json.loads(USERS_FILE.read_text(encoding="utf-8")) if USERS_FILE.exists() else {}
+        users = json.loads(USERS_JSON_PATH.read_text(encoding="utf-8")) if USERS_JSON_PATH.exists() else {}
 
         target_user_id = None
         for uid, u in users.items():
@@ -643,7 +640,7 @@ async def stripe_webhook(request: Request):
             sub["active"] = False
             sub["status"] = "canceled"
             sub["canceled_at"] = sub_obj.get("canceled_at") or sub_obj.get("ended_at")
-            USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
+            USERS_JSON_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
 
         logger.debug(f"🔁 Synced local cancel after Stripe deletion (user={target_user_id}).")
         return JSONResponse(content={"status": "success"})
@@ -656,8 +653,7 @@ async def stripe_webhook(request: Request):
         sub_id = invoice.get("subscription")
         pay_url = invoice.get("hosted_invoice_url") or f"{FRONTEND_URL}/billing"
 
-        USERS_FILE = Path("backend/database/users.json")
-        users = json.loads(USERS_FILE.read_text(encoding="utf-8")) if USERS_FILE.exists() else {}
+        users = json.loads(USERS_JSON_PATH.read_text(encoding="utf-8")) if USERS_JSON_PATH.exists() else {}
 
         user_id = None
         for uid, u in users.items():
@@ -688,7 +684,7 @@ async def stripe_webhook(request: Request):
             u = users[user_id]
             sub = u.setdefault("subscription", {})
             sub["pay_url"] = pay_url
-            USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
+            USERS_JSON_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
         except Exception as _e:
             logger.warning(f"[pay_url@finalization_failed] KO: {_e}")
 
@@ -706,7 +702,7 @@ async def stripe_webhook(request: Request):
                         subscription_failed_text(pay_url)
                     )
                     sub["failed_mail_sent"] = True
-                    USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
+                    USERS_JSON_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
                     logger.info("📧 Email d'échec (finalization_failed) envoyé (unique).")
         except Exception as _e:
             logger.warning(f"[email@finalization_failed] KO: {_e}")
@@ -721,8 +717,7 @@ async def stripe_webhook(request: Request):
         sub_id = sub_obj.get("id")
         status = sub_obj.get("status")  # 'active' | 'past_due' | 'unpaid' | 'canceled' | ...
 
-        USERS_FILE = Path("backend/database/users.json")
-        users = json.loads(USERS_FILE.read_text(encoding="utf-8")) if USERS_FILE.exists() else {}
+        users = json.loads(USERS_JSON_PATH.read_text(encoding="utf-8")) if USERS_JSON_PATH.exists() else {}
 
         user_id = None
         for uid, u in users.items():
@@ -756,7 +751,7 @@ async def stripe_webhook(request: Request):
                 s["active"] = False
                 s["status"] = "canceled"
                 s["canceled_at"] = sub_obj.get("canceled_at") or sub_obj.get("ended_at")
-                USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
+                USERS_JSON_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
 
         return JSONResponse(content={"status": "success"})
 
