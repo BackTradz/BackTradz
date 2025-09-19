@@ -2,17 +2,24 @@
 import os, smtplib, ssl
 from email.message import EmailMessage
 
+def _get_env(k, *alts, default=""):
+    for name in (k, *alts):
+        v = os.getenv(name)
+        if v is not None and str(v).strip() != "":
+            return str(v).strip()
+    return default
+
 def _cfg():
     return {
-        "host": os.getenv("SMTP_HOST"),
-        "port": os.getenv("SMTP_PORT"),  # str | None (on laisse choisir AUTO)
-        "user": os.getenv("SMTP_USER"),
-        "pwd":  os.getenv("SMTP_PASS"),
-        "from": os.getenv("SMTP_FROM") or os.getenv("SMTP_USER"),
-        "brand":os.getenv("BRAND_NAME", "BackTradz"),
-        "secure": (os.getenv("SMTP_SECURE") or "STARTTLS").upper(),  # STARTTLS | SSL | PLAIN | AUTO
-        "timeout": int(os.getenv("SMTP_TIMEOUT", "20")),
-        "debug": int(os.getenv("SMTP_DEBUG", "0")),
+        "host": _get_env("SMTP_HOST"),
+        "port": _get_env("SMTP_PORT"),  # string, on cast plus bas
+        "user": _get_env("SMTP_USER", "SMTP_USERNAME"),
+        "pwd":  _get_env("SMTP_PASS", "SMTP_PASSWORD"),
+        "from": _get_env("SMTP_FROM") or _get_env("SMTP_USER", "SMTP_USERNAME"),
+        "brand":_get_env("BRAND_NAME", default="BackTradz"),
+        "secure": (_get_env("SMTP_SECURE", default="STARTTLS")).upper(),  # STARTTLS | SSL | PLAIN | AUTO
+        "timeout": int(_get_env("SMTP_TIMEOUT", default="20")),
+        "debug": int(_get_env("SMTP_DEBUG", default="0")),
     }
 
 def _ready(c): return all([c["host"], c["user"], c["pwd"], c["from"]])

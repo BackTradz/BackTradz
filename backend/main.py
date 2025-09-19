@@ -205,6 +205,28 @@ def run_subscription_renewal() -> None:
     print("⏳ Vérification des abonnements...")
     renew_all_subscriptions()
 
+# --- DIAG SMTP (masqué du schema) ---
+
+@app.get("/api/_diag/smtp", include_in_schema=False)
+def _diag_smtp():
+    def mask(v):
+        if not v: return v
+        s = str(v)
+        return s[:2] + "****" + s[-2:] if len(s) > 4 else "****"
+
+    data = {
+        "SMTP_HOST": os.getenv("SMTP_HOST"),
+        "SMTP_PORT": os.getenv("SMTP_PORT"),
+        "SMTP_SECURE": os.getenv("SMTP_SECURE"),
+        "SMTP_FROM": os.getenv("SMTP_FROM"),
+        "SMTP_USER": mask(os.getenv("SMTP_USER") or os.getenv("SMTP_USERNAME")),
+        "SMTP_PASS": mask(os.getenv("SMTP_PASS") or os.getenv("SMTP_PASSWORD")),
+        "SMTP_DEBUG": os.getenv("SMTP_DEBUG"),
+    }
+    ok = all([data["SMTP_HOST"], data["SMTP_PORT"], data["SMTP_SECURE"],
+              data["SMTP_FROM"], data["SMTP_USER"], data["SMTP_PASS"]])
+    return JSONResponse({"ok": ok, "seen": data})
+
 # --- plus bas, à côté de tes autres routes ---
 @app.get("/api/_env_check", include_in_schema=False)
 def _env_check(request: Request):
