@@ -413,7 +413,7 @@ async def stripe_webhook(request: Request):
     # =========================================================
     # B) INVOICE PAYMENT SUCCEEDED  (1er paiement + renouvellements)
     # =========================================================
-    if evt_type == "invoice.payment_succeeded":
+    if evt_type in ("invoice.payment_succeeded", "invoice.paid"):
         invoice = event["data"]["object"]
 
         sub_id = invoice.get("subscription")           # sub_***
