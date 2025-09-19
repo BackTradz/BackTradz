@@ -19,7 +19,7 @@ export default function RequireAdmin() {
       setReady(true); // pas de token -> on laissera rediriger /login
       return;
     }
-    fetch(`${API_BASE}/admin/ping`, { headers: { "X-API-Key": apiKey } })
+     fetch(`${API_BASE}/api/admin/ping`, { headers: { "X-API-Key": apiKey } })
       .then(r => setIsAdmin(r.ok))
       .catch(() => setIsAdmin(false))
       .finally(() => setReady(true));
