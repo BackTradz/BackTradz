@@ -53,7 +53,7 @@ export default function Navbar() {
  useEffect(() => {
     const t = localStorage.getItem("apiKey");
     if (!t) { setAdminOK(false); return; }
-    fetch(`${API_BASE}/api/admin/ping`, { headers: { "X-API-Key": t } })
+    fetch(`${API_BASE}/api/admin/ping`, { headers: { "X-API-Key": apiKey } })
       .then(r => setAdminOK(r.ok))
       .catch(() => setAdminOK(false));
    }, [user]); // dès que l'objet user change, on (re)ping
