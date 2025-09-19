@@ -104,15 +104,26 @@ export function AuthProvider({ children }) {
    * - Note: on peut choisir d'appeler me() ici pour charger l'utilisateur immédiatement (non imposé ici).
    */
  const loginSuccess = (token) => {
+   // 1) Persiste le token
    localStorage.setItem('apiKey', token);
-   // ⏩ Charge l'utilisateur tout de suite, en bypassant l’apiClient pour éviter le “stale token”
-  fetch(`${API_BASE}/api/me`, { headers: { 'X-API-Key': token } })
-    .then(async (r) => {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then((u) => setUser(u))
-    .catch(() => localStorage.removeItem('apiKey'));
+   // 2) Empêche RequireAuth de rediriger pendant l’hydratation
+   setLoading(true);
+   // 3) Hydrate l'utilisateur immédiatement (bypass + URL absolue)
+   fetch(`${API_BASE}/api/me`, { headers: { 'X-API-Key': token } })
+     .then((r) => {
+       if (!r.ok) throw new Error('HTTP ' + r.status);
+       return r.json();
+     })
+     .then((u) => setUser(u))
+     .catch(() => {
+       // si le /me échoue, on nettoie proprement
+       localStorage.removeItem('apiKey');
+       setUser(null);
+     })
+     .finally(() => {
+       // 4) Fin de la fenêtre critique → RequireAuth peut rendre sans te renvoyer /login
+       setLoading(false);
+     });
  };
 
   /**
