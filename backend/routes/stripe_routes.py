@@ -474,6 +474,19 @@ async def stripe_webhook(request: Request):
         history = u.setdefault("purchase_history", [])
 
         if any(it.get("transaction_id") == txn_id for it in history):
+            logger.info(f"[invoice webhook] duplicate (history) {txn_id} → ignore.")
+            return JSONResponse(content={"status": "duplicate_ignored"})
+
+        # 1) si déjà traité → on ignore immédiatement
+        if sub.get("last_credited_invoice_id") == txn_id:
+            logger.info(f"[invoice webhook] invoice {txn_id} déjà traitée → ignore.")
+            return JSONResponse(content={"status": "duplicate_ignored"})
+
+        # 2) on pose le verrou et on SAUVE tout de suite (write-through)
+        sub["last_credited_invoice_id"] = txn_id
+        USERS_JSON_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
+
+        if any(it.get("transaction_id") == txn_id for it in history):
             logger.info(f"[invoice webhook] duplicate invoice {txn_id} → ignored (no double credit).")
             return JSONResponse(content={"status": "duplicate_ignored"})
 
