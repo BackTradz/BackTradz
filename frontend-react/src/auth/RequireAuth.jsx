@@ -20,6 +20,11 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 export default function RequireAuth() {
+  // ⛑️ Anti-bounce: si on arrive avec ?apiKey=... dans l’URL, laisse 1 tick que main.jsx l’écrive.
+  const hasApiKeyInUrl = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("apiKey");
+  if (hasApiKeyInUrl) {
+    return <div style={{padding:16}}>Connexion en cours…</div>;
+  }
   const { loading } = useAuth(); // [BTZ] 'loading' = vérification initiale en cours ?
 
   // [BTZ] Pendant la vérification initiale du token, afficher un indicateur visuel

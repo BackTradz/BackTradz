@@ -365,12 +365,12 @@ async def auth_google_callback(request: Request):
             except json.JSONDecodeError:
                 users = {}
 
-        # --- utilisateur déjà existant → réutilise son token (clé du dict)
+        # --- utilisateur existant ---
         for token_key, user in users.items():
             if str(user.get("email", "")).strip().lower() == email_norm:
-            # ✅ MAINTENANT: vers Home (SPA), ton AuthContext lit ?apiKey=... et peuple user
-               return StarletteRedirect(f"{FRONTEND_URL}/?provider=google&apiKey={token_key}")
-
+                target = f"{FRONTEND_URL}/?provider=google&apiKey={token_key}"
+                print(f"[OAUTH] CALLBACK → EXISTING → {target}")  # 🔎
+                return StarletteRedirect(target)
 
         # --- création d'un nouvel utilisateur
         # 🔒 Limite de 3 (créations) par adresse e-mail
@@ -420,18 +420,19 @@ async def auth_google_callback(request: Request):
         except Exception as e:
             print("[google-callback] verify+bonus error:", e)
 
-        # ✅ REDIRECTION UNIQUE, HORS des try/except
-        return StarletteRedirect(f"{FRONTEND_URL}/?provider=google&apiKey={new_token}")
+        # ----- Nouvelle utilisateur -----
+        target = f"{FRONTEND_URL}/?provider=google&apiKey={new_token}"
+        print(f"[OAUTH] CALLBACK → NEW → {target}")  # 🔎
+        return StarletteRedirect(target)
 
 
                     
+    # --- erreur globale ---
     except Exception as e:
-        # En cas d'erreur globale → retour sur /login avec message
-        # (ne surtout pas renvoyer une variable non définie)
         msg = str(e).replace(" ", "+")
-        return StarletteRedirect(
-            f"{FRONTEND_URL}/login?provider=google&error={msg}"
-        )
+        target = f"{FRONTEND_URL}/login?provider=google&error={msg}"
+        print(f"[OAUTH] CALLBACK → ERROR → {target}")  # 🔎
+        return StarletteRedirect(target)
 
 
 async def get_current_user_optional(request: Request) -> dict | None:
