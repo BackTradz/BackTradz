@@ -31,6 +31,7 @@ import json
 import os
 from datetime import datetime
 import math
+from backend.core.paths import ANALYSIS_DIR  # ✅ ajoute ceci
 
 ADMIN_EMAIL = "BackTradz@outlook.com"
 
@@ -49,7 +50,9 @@ def _is_admin(user) -> bool:
 
 
 def _analysis_base() -> Path:
-    return Path(os.path.dirname(__file__)).parent / "data" / "analysis"
+    # Utilise le disque Render (/var/data/backtradz/analysis) comme partout ailleurs
+    # Cf. backend/core/paths.py → ANALYSIS_DIR
+    return ANALYSIS_DIR
 
 def _folder_path(folder: str) -> Path:
     return _analysis_base() / folder
