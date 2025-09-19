@@ -67,15 +67,44 @@ def _brand_logo_html() -> str:
     )
 
 def _btn_html(label: str, url: str) -> str:
-    """Bouton CTA (gradient bleu, arrondi)."""
-    return (
-        f'<a href="{url}" target="_blank" '
-        'style="display:inline-block;'
-        f'background:linear-gradient(90deg,{GRAD_FROM},{GRAD_TO});'
-        'color:#0b1220;text-decoration:none;font-weight:700;'
-        'border-radius:12px;padding:12px 22px;">'
-        f"{label}</a>"
-    )
+    """
+    Bouton CTA compatible Outlook.
+    - Clients modernes : <a> avec gradient
+    - Outlook (moteur Word) : VML <v:roundrect> + bgcolor de fallback
+    """
+    solid = GRAD_TO  # couleur pleine de secours pour Outlook/VML
+
+    return f"""
+    <!--[if mso]>
+    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml"
+        href="{url}"
+        arcsize="10%" stroke="f" fillcolor="{solid}"
+        style="height:44px;v-text-anchor:middle;width:280px;">
+      <w:anchorlock/>
+      <center style="color:#0b1220;font-family:Segoe UI,Arial,sans-serif;
+                     font-size:16px;font-weight:700;">
+        {label}
+      </center>
+    </v:roundrect>
+    <![endif]-->
+
+    <!--[if !mso]><!-- -->
+    <a href="{url}" target="_blank" style="text-decoration:none;display:inline-block;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td bgcolor="{solid}"
+              style="background:{solid};
+                     background:linear-gradient(90deg,{GRAD_FROM},{GRAD_TO});
+                     color:#0b1220;font-weight:700;border-radius:12px;
+                     padding:12px 22px;">
+            {label}
+          </td>
+        </tr>
+      </table>
+    </a>
+    <!--<![endif]-->
+    """
+
 
 def _footer_html() -> str:
     """Footer standard (copyright + liens optionnels)."""
