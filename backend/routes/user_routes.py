@@ -202,139 +202,6 @@ async def get_me(user: User = Depends(get_current_user)):
     }
 
 
-@router.post("/register")
-async def register_user(request: Request):
-    """
-    📥 Inscription d'un nouvel utilisateur :
-    - Vérifie les doublons (email / username).
-    - Hash le mot de passe.
-    - Génère un token unique.
-    - Enregistre le tout dans users.json.
-    """
-    data = await request.json()
-    email = (data.get("email") or "").strip().lower()
-    username = data.get("username")
-    password = data.get("password")  # ✅ Important : récupérer le mot de passe
-    # 🔒 limite 3 créations par email
-    counts = _load_json_safe(RECREATE_FILE)
-    if int(counts.get(email, 0)) >= 3:
-        return JSONResponse({"status": "error", "message": "Limite de recréation atteinte pour cet email."}, status_code=403)
-    
-    # Chargement des utilisateurs existants
-    users = {}
-    if USERS_FILE.exists():
-        users = json.loads(USERS_FILE.read_text())
-
-    # Vérification de doublons
-    if any(u.get("email") == email or u.get("username") == username for u in users.values()):
-        return JSONResponse({"status": "error", "message": "Email ou nom d’utilisateur déjà utilisé."}, status_code=400)
-
-    # Création du token unique
-    token = str(uuid.uuid4())
-
-    # ✅ Hash du mot de passe
-    hashed_pw = hash_password(password)
-
-    # Création du profil utilisateur
-    new_user = {
-        "email": email,
-        "username": username,
-        "password": hashed_pw,
-        "first_name": data.get("first_name"),
-        "last_name": data.get("last_name"),
-        "credits": 0,
-        "token": token,
-        "plan": "free",
-        "purchase_history": [],
-        "subscription": {
-            "type": None,
-            "start_date": None,
-            "renew_date": None,
-            "active": False
-        },
-        "priority_backtest": False,
-        "has_discount": False
-    }
-
-        # Enregistrement
-    users[token] = new_user
-    USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
-
-    # ✅ incrémente le compteur de créations
-    try:
-        counts[email] = int(counts.get(email, 0)) + 1
-        # réutilise ton helper plus bas si tu préfères; ici on écrit direct
-        RECREATE_FILE.write_text(json.dumps(counts, indent=2), encoding="utf-8")
-    except Exception:
-        pass
-    
-    # --- Email verification with 60s cooldown (no change to users.py) ---
-    emailed = False
-    verify_token = None
-    verify_path = None
-
-    # Récupère l'état courant de l'utilisateur (pour lire token + sent_at)
-    try:
-        u = get_user_by_token(token)
-    except Exception:
-        u = None
-
-    # Calcul cooldown
-    # Calcul cooldown (tolérant dict / objet)
-    can_send = True
-    last_sent = None
-    if u is not None:
-        last_sent = (u.get("email_verification_sent_at") if isinstance(u, dict)
-                    else getattr(u, "email_verification_sent_at", None))
-    if last_sent:
-        try:
-            from datetime import datetime
-            last_dt = datetime.fromisoformat(last_sent)
-            delta = datetime.now(last_dt.tzinfo) - last_dt
-            can_send = delta.total_seconds() >= 60
-        except Exception:
-            can_send = True
-
-    # Si pas encore de token => première init (définit aussi sent_at)
-    has_token = False
-    if u is not None:
-        has_token = (
-            u.get("email_verification_token") if isinstance(u, dict)
-            else bool(getattr(u, "email_verification_token", None))
-        )
-
-    if not has_token:
-        verify_token = init_email_verification(token, pending_bonus=2)
-    else:
-        verify_token = (
-            u["email_verification_token"] if isinstance(u, dict)
-            else getattr(u, "email_verification_token")
-        )
-
-    # Envoi mail une seule fois si cooldown OK
-    if can_send:
-        try:
-            verify_abs = _abs_backend_url(request, verify_path)
-            subj = verification_subject()
-            html = verification_html(verify_abs)
-            text = verification_text(verify_abs)
-            emailed = send_email_html(new_user["email"], subj, html, text)
-            # NOTE: init_email_verification a déjà mis sent_at à "maintenant".
-            # On n'appelle rien d'autre pour respecter ta contrainte "users.py inchangé".
-        except Exception as e:
-            print("[register] envoi email vérif KO:", e)
-
-    # Réponse API : front a tout ce qu'il faut (emailed + verifyUrl fallback)
-    return {
-        "status": "success",
-        "apiKey": token,
-        "token": token,
-        "verifyUrl": verify_path,
-        "emailed": bool(emailed),
-    }
-
-
-
 # backend/routes/user_routes.py
 
 @router.post("/profile/update")
@@ -578,10 +445,13 @@ async def register_user(request: Request):
             else getattr(u, "email_verification_token")
         )
 
+    # ✅ Construire l'URL de vérification (relative + absolue) AVANT l'envoi d'email
+    verify_path = f"/api/auth/verify-email?token={verify_token}"
+    verify_abs  = _abs_backend_url(request, verify_path)
+
     # Envoi mail une seule fois si cooldown OK
     if can_send:
         try:
-            verify_abs = _abs_backend_url(request, verify_path)
             subj = verification_subject()
             html = verification_html(verify_abs)
             text = verification_text(verify_abs)
@@ -596,7 +466,8 @@ async def register_user(request: Request):
         "status": "success",
         "apiKey": token,
         "token": token,
-        "verifyUrl": verify_path,
+        # ✅ on renvoie l'URL ABSOLUE (utile pour l’overlay / tests)
+        "verifyUrl": verify_abs,
         "emailed": bool(emailed),
     }
 
