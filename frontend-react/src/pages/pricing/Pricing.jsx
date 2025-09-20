@@ -6,7 +6,7 @@
 // ============================================================
 import { useEffect, useState } from "react";
 import "./pricing.css";
-import posthog from '../analytics/posthog';
+import posthog from '../../analytics/posthog';
 
 import OfferCard from "../../components/pricing/OfferCard";
 import SuccessOverlay from "../../components/pricing/SuccessOverlay";
