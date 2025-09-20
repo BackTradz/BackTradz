@@ -971,7 +971,7 @@ def admin_get_email_recreate(request: Request):
     return {"ok": True, "counts": _load_json_safe(RECREATE_FILE)}
 
 @router.post("/admin/reset-email-recreate")
-def admin_reset_email_recreate(request: Request, payload: dict | None = None):
+def admin_reset_email_recreate(request: Request, payload: dict | None = Body(None)):
     """
     Reset du compteur de créations d'email.
     - payload={"email":"x@y.com"} -> supprime cette entrée uniquement
