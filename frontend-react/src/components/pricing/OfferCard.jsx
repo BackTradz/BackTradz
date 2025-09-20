@@ -53,83 +53,88 @@ export default function OfferCard({
 
   // Désactivation Crypto si prix < seuil (ex: pack 5€), SAUF pour CREDIT_10
   const cryptoDisabled = !isSub && Number(base) < Number(minCryptoEur) && of.id !== "CREDIT_10";
+  
   return (
-    <div
-      className={[
-        "pr-card",
-        highlighted ? "is-highlight" : "",
-        isSub ? "is-sub" : "is-credit",
-        showDiscount ? "with-discount" : "",
-      ].join(" ").trim()}
-    >
-      <div className="pr-card-head">
-        <div className="pr-card-title">
-          {of.label}
-          {isSub && (
+  <div
+    className={[
+      "pr-card",
+      highlighted ? "is-highlight" : "",
+      isSub ? "is-sub" : "is-credit",
+      showDiscount ? "with-discount" : "",
+    ].join(" ").trim()}
+  >
+    <div className="pr-card-head">
+      <div className="pr-card-title">
+        {of.label}
+        {isSub && (
+          <>
+            <span className="pr-badge pr-badge-muted">Mensuel</span>
+            {/* ✅ badge "Abonné" uniquement sur la carte du plan courant */}
+            {isCurrentPlan && <span className="pr-badge pr-badge-green">Abonné</span>}
+          </>
+        )}
+      </div>
+
+      <ul className="pr-list">
+        {lines.map((t) => <li key={t}>{t}</li>)}
+      </ul>
+    </div>
+
+    <div className="pr-price-row">
+      <div className="pr-price">{isSub ? `${euro(base)}/mois` : euro(base)}</div>
+      {!isSub && isSubscriber && (
+        <div className="text-[12px] opacity-80 mt-1">
+          bonus abonné : <b>+10% crédits</b>
+        </div>
+      )}
+    </div>
+
+    {/* Boutons en colonne */}
+    <div className="pr-actions pr-actions-col">
+      {/* Si c'est le plan courant : pas de moyens de paiement */}
+      {isSub && isCurrentPlan ? (
+        <>
+          <button className="btn-brand btn-current" disabled>Déjà abonné</button>
+          <a className="btn-brand btn-ghost" href="/profile">Gérer mon abonnement</a>
+        </>
+      ) : (
+        <>
+          {/* ✅ ABONNEMENTS : Stripe UNIQUEMENT */}
+          {isSub ? (
+            <StripeButton onClick={() => onStripe(of.id)}>{primaryLabel}</StripeButton>
+          ) : (
             <>
-              <span className="pr-badge pr-badge-muted">Mensuel</span>
-              {/* ✅ badge "Abonné" uniquement sur la carte du plan courant */}
-              {isCurrentPlan && <span className="pr-badge pr-badge-green">Abonné</span>}
+              {/* ✅ ONE-SHOT : Stripe + Crypto */}
+              <StripeButton onClick={() => onStripe(of.id)}>{primaryLabel}</StripeButton>
+
+              {cryptoDisabled ? (
+                <>
+                  <button
+                    className="btn"
+                    disabled
+                    title={`Crypto disponible à partir de ${Number(minCryptoEur).toFixed(2)} €`}
+                  >
+                    Crypto (min {Number(minCryptoEur).toFixed(2)} €)
+                  </button>
+                  <div className="text-[12px] opacity-70 mt-1">
+                    Paiement crypto disponible à partir de {Number(minCryptoEur).toFixed(2)} €.
+                  </div>
+                </>
+              ) : (
+                <>
+                  <CryptoTrxButton onClick={() => onCrypto(of.id)} />
+                  {of.id === "CREDIT_10" && (
+                    <div className="text-[12px] opacity-80 mt-1">
+                      Crypto <b>10,50 €</b> (min) — {isSubscriber ? <b>+2 crédits</b> : <b>+1 crédit</b>}
+                    </div>
+                  )}
+                </>
+              )}
             </>
           )}
-        </div>
-
-           <ul className="pr-list">
-            {lines.map((t) => <li key={t}>{t}</li>)}
-           </ul>
-
-        </div>
-      <div className="pr-price-row">
-        <div className="pr-price">{isSub ? `${euro(base)}/mois` : euro(base)}</div>
-        {!isSub && isSubscriber && (
-          <div className="text-[12px] opacity-80 mt-1">bonus abonné : <b>+10% crédits</b></div>
-        )}
-      </div>
-
-      {/* Boutons en colonne */}
-      <div className="pr-actions pr-actions-col">
-        {/* Si c'est le plan courant : pas de moyens de paiement */}
-        {isSub && isCurrentPlan ? (
-          <>
-            <button className="btn-brand btn-current" disabled>Déjà abonné</button>
-            <a className="btn-brand btn-ghost" href="/profile">Gérer mon abonnement</a>
-          </>
-        ) : (
-          <>
-            {/* ✅ ABONNEMENTS : Stripe UNIQUEMENT */}
-            {isSub ? (
-              <StripeButton onClick={() => onStripe(of.id)}>{primaryLabel}</StripeButton>
-            ) : (
-              <>
-                {/* ✅ ONE-SHOT : Stripe + PayPal + Crypto */}
-                <StripeButton onClick={() => onStripe(of.id)}>{primaryLabel}</StripeButton>
-
-                {cryptoDisabled ? (
-                  <>
-                    <button
-                      className="btn"
-                      disabled
-                      title={`Crypto disponible à partir de ${Number(minCryptoEur).toFixed(2)} €`}
-                    >
-                      Crypto (min {Number(minCryptoEur).toFixed(2)} €)
-                    </button>
-                    <div className="text-[12px] opacity-70 mt-1">
-                      Paiement crypto disponible pour {Number(minCryptoEur).toFixed(2)} € et plus.
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <CryptoTrxButton onClick={() => onCrypto(of.id)} />
-                    {of.id === "CREDIT_10" && (
-                      <div className="text-[12px] opacity-80 mt-1">
-                        Crypto <b>10,50 €</b> (min) — {isSubscriber ? <b>+2 crédits</b> : <b>+1 crédit</b>}
-                      </div>
-                    )}
-                  </>
-                )}
-          </>
-        )}
-      </div>
+        </>
+      )}
     </div>
-  );
+  </div>
+);
 }
