@@ -16,7 +16,8 @@ Notes:
 """
 
 
-
+# en haut de fichier (si pas déjà importé)
+from fastapi import Body
 from backend.core.paths import DB_DIR
 from backend.core.paths import OUTPUT_DIR, ANALYSIS_DIR, USERS_JSON
 from backend.core.paths import DATA_ROOT
@@ -959,7 +960,7 @@ def _load_json_safe(path):
     except Exception:
         return {}
 
-@router.get("/email-recreate")
+@router.get("/admin/email-recreate")
 def admin_get_email_recreate(request: Request):
     """Retourne le contenu actuel du compteur (clé email -> nb tentatives)."""
     require_admin(request)
@@ -967,7 +968,7 @@ def admin_get_email_recreate(request: Request):
         return {"ok": True, "counts": {}}
     return {"ok": True, "counts": _load_json_safe(RECREATE_FILE)}
 
-@router.post("/reset-email-recreate")
+@router.post("/admin/reset-email-recreate")
 def admin_reset_email_recreate(request: Request, payload: dict | None = None):
     """
     Reset du compteur de créations d'email.
