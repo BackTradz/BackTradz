@@ -26,7 +26,8 @@ export default function OfferCard({
   const isSub = of.type === "subscription";
   const base = of.price_eur ?? 0;
 
-  const showDiscount = !isSub && hasDiscount;
+  // On n’affiche plus de réduction de prix : bonus crédits uniquement
+  const showDiscount = false; // ❌ plus de prix barré
   const discounted = showDiscount ? Math.round(base * 90) / 100 : base;
 
   const lines = useMemo(() => {
@@ -79,14 +80,9 @@ export default function OfferCard({
 
         </div>
       <div className="pr-price-row">
-        {showDiscount ? (
-          <div className="pr-price">
-            <span className="pr-price-old">{euro(base)}</span>
-            <span>{euro(discounted)}</span>
-            <span className="pr-discount-tag">–10% abonné</span>
-          </div>
-        ) : (
-          <div className="pr-price">{isSub ? `${euro(base)}/mois` : euro(base)}</div>
+        <div className="pr-price">{isSub ? `${euro(base)}/mois` : euro(base)}</div>
+        {!isSub && isSubscriber && (
+          <div className="text-[12px] opacity-80 mt-1">bonus abonné : <b>+10% crédits</b></div>
         )}
       </div>
 
@@ -123,18 +119,14 @@ export default function OfferCard({
                   </>
                 ) : (
                   <>
-                    <CryptoTrxButton onClick={() => onCrypto(of.id)}>
-                      {/* On peut garder le bouton image; le hint textuel est juste en dessous */}
-                    </CryptoTrxButton>
+                    <CryptoTrxButton onClick={() => onCrypto(of.id)} />
                     {of.id === "CREDIT_10" && (
-                      <div className="text-[12px] opacity-70 mt-1">
-                        Crypto <b>10,50 €</b> (min) → <b>+1 crédit</b>
+                      <div className="text-[12px] opacity-80 mt-1">
+                        Crypto <b>10,50 €</b> (min) — {isSubscriber ? <b>+2 crédits</b> : <b>+1 crédit</b>}
                       </div>
                     )}
                   </>
                 )}
-              </>
-            )}
           </>
         )}
       </div>

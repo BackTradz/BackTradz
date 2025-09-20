@@ -43,7 +43,7 @@ def update_user_after_payment(
 
         user = users[user_id]
         price = offer["price_eur"]
-        discount_str = "0%"
+        discount_str = "None"
         total_credits = 0
 
         # ⛔️ Vérif anti-double si PayPal
@@ -61,10 +61,9 @@ def update_user_after_payment(
         # 🎁 Cas achat one_shot → ajout de crédits
         if offer["type"] == "one_shot":
             base_credits = offer["credits"]
-            bonus = round(base_credits * 0.10) if discount_str == "10%" else 0
-            total_credits = base_credits + bonus
-             # 🎁 intègre le bonus explicite (ex: +1 pour CREDIT_10 en crypto)
-            total_credits = base_credits + bonus + int(bonus_credits or 0)
+            # ✅ bonus abonné : +10% crédits si has_discount
+            bonus_from_sub = int(round(base_credits * 0.10)) if bool(user.get("has_discount")) else 0
+            total_credits = base_credits + bonus_from_sub + int(bonus_credits or 0)
             user["credits"] += total_credits
 
         # 🔄 Cas abonnement → changement de plan + ajout crédits mensuels
@@ -88,7 +87,7 @@ def update_user_after_payment(
             "price_paid": price,
             "date": datetime.utcnow().isoformat(),
             "method": method,
-            "discount_applied": discount_str
+            "discount_applied": ("10% credits" if bool(user.get("has_discount")) else "None")
         }
         if order_id:
             tx["order_id"] = order_id

@@ -76,15 +76,9 @@ export default function Pricing() {
         // indépendamment de hasDiscount.
         let user = null;
         try { user = await me(); } catch {}
-        const userHasDiscount = !!(user?.has_discount ||
-          (typeof user?.plan === "string" && (user.plan === "SUB_9" || user.plan === "SUB_25")));
-
-        // Helper pour calculer le prix local si la capture ne renvoie pas le montant
-        const resolvePaidLocal = (offer) => {
-          const isCredit = offer?.type === "one_shot";
-          const base = offer?.price_eur ?? 0;
-          return isCredit && userHasDiscount ? round2(base * 0.9) : base;
-        };
+       
+        // Helper fallback : on n’applique plus aucune remise prix
+        const resolvePaidLocal = (offer) => (offer?.price_eur ?? 0);
 
         // ---- PAYPAL ----
         if (payment === "paypal" && status === "success") {

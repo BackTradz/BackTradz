@@ -85,10 +85,6 @@ async def create_crypto_order(request: Request):
     if price_eur + 1e-9 < NOW_MIN_CRYPTO_EUR and offer_id != "CREDIT_10":
         raise HTTPException(400, detail=f"Montant trop bas pour le paiement crypto (min {NOW_MIN_CRYPTO_EUR:.2f} €).")
 
-    # Remise éventuelle (-10%) uniquement sur one-shot (si tu le souhaites)
-    # NB: même avec remise, on doit respecter le min crypto
-    if user and getattr(user, "has_discount", False) and offer.get("type") in ("one_shot", "credit"):
-        price_eur = round(price_eur * 0.9, 2)
 
     # Cas spécial : pack 10€ en crypto → facturer 10,50 € (et on donnera +1 crédit au webhook)
     if offer_id == "CREDIT_10":
