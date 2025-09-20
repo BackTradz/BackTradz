@@ -17,8 +17,8 @@ router = APIRouter()
 RESET_FILE = DB_DIR / "reset_tokens.json"
 RESET_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-# ✅ URL front nettoyée (même logique que la vérif e-mail)
-wd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# ✅ Hash bcrypt (cohérent avec le reste)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # -- utils JSON (écriture atomique pour éviter toute corruption) -------------
 def _load_json(path: Path) -> dict:
@@ -57,7 +57,7 @@ def _purge_expired(tokens: dict) -> int:
 def _hash_password(pw: str) -> str:
     return pwd_context.hash(pw)
 
-@router.post("/auth/generate-reset-token")
+@router.post("/generate-reset-token")
 async def generate_reset_token(request: Request):
     """
     Génère un token de reset (validité 2h), le stocke dans reset_tokens.json
@@ -105,7 +105,7 @@ async def generate_reset_token(request: Request):
     return {"status": "success", "emailed": bool(emailed), "reset_token": reset_token}
 
 
-@router.post("/auth/reset-password/{reset_token}")
+@router.post("/reset-password/{reset_token}")
 async def reset_password(reset_token: str, request: Request):
     """
     Vérifie le token, remplace le mot de passe par un hash bcrypt, puis purge
