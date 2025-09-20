@@ -76,6 +76,13 @@ footer.footer {
 }
 
 
+/* === Réservation d'espace pour le footer FIXE === */
+/* Le main du layout garde un padding-bottom égal à la hauteur du footer */
+.app-layout > main {
+  padding-bottom: var(--ft-h, 72px); /* desktop 72px, mobile 96px via @media */
+}
+
+
 /* .page-skeleton-guard => stabilise la hauteur du bloc principal avant l’arrivée des cartes*/
 .page-skeleton-guard {
   min-height: clamp(320px, 60vh, 900px);

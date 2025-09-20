@@ -8,6 +8,7 @@
 
 /* 🎛️ THEME / TOKENS (reprend les valeurs de l’existant) */
 :root{
+  --ft-h:          72px;           /* ✅ hauteur logique du footer (desktop) */
   --ft-bg:           #0f172a;       /* fond footer */
   --ft-text:         #ffffff;       /* couleur du texte */
   --ft-muted:        #cbd5e1;       /* texte atténué (gauche/droite) */
@@ -29,6 +30,11 @@
   color: var(--ft-text);
   padding: var(--ft-pad-y) 0;       /* vertical only (pas de marge latérale ici) */
   font-size: var(--ft-font-size);
+  /* ✅ Footer collé en bas partout */
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  width: 100%;
+  z-index: 20;
 }
 
 /* 📦 Conteneur interne : grille 3 colonnes, full width */
@@ -75,6 +81,8 @@
 
 /* 📱 Responsive : on empile et on centre tout */
 @media (max-width: 640px) {
+  /* ✅ En mobile le footer est plus haut : on ajuste la variable */
+  :root{ --ft-h: 96px; }
   .footer-inner {
     grid-template-columns: 1fr;     /* 1 seule colonne */
     gap: 6px;
