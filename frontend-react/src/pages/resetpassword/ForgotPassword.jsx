@@ -1,5 +1,6 @@
 // src/pages/auth/ForgotPassword.jsx
 import React, { useState, useEffect } from "react";
+import { api } from "../../sdk/apiClient";
 import { Link, useNavigate } from "react-router-dom";
 import BacktradzLogo from "../../components/ui/BacktradzLogo/BacktradzLogo";
 import CTAButton from "../../components/ui/button/CTAButton";
@@ -21,13 +22,14 @@ export default function ForgotPassword() {
     if (!email) return;
     try {
       setLoading(true);
-      const res = await fetch("/api/auth/generate-reset-token", {
+      await api("/api/auth/generate-reset-token", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: { email },
+        auth: false, // pas besoin d'API key ici
       });
-      await res.json(); // réponse générique
       setDone(true);
+      // petite redirection douce vers /login
+      setTimeout(() => { window.location.href = "/login?reset_link=sent"; }, 1000);
     } catch (err) {
       console.error(err);
       setDone(true); // on reste générique côté UX

@@ -1,5 +1,6 @@
 // src/pages/auth/ResetPassword.jsx
 import React, { useEffect, useState } from "react";
+import { api } from "../../sdk/apiClient";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import BacktradzLogo from "../../components/ui/BacktradzLogo/BacktradzLogo";
 import CTAButton from "../../components/ui/button/CTAButton"
@@ -27,16 +28,15 @@ export default function ResetPassword() {
 
     try {
       setLoading(true);
-      const res = await fetch(`/api/auth/reset-password/${token}`, {
+      const data = await api(`/api/auth/reset-password/${token}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ new_password: pw }),
+        body: { new_password: pw },
+        auth: false,
       });
-      const data = await res.json();
-      if (res.ok && data.status === "success") {
+      if (data?.status === "success") {
         setOk(true);
-      } else {
-        setErrMsg(data.detail || data.message || "Token invalide ou expiré.");
+        // redirection automatique vers /login
+        setTimeout(() => { window.location.href = "/login?reset=1"; }, 1200);
       }
     } catch (e) {
       console.error(e);
