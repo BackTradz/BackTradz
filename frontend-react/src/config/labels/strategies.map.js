@@ -248,7 +248,7 @@ const STRATEGIES_MAP = {
   englobante_entry: {
     label: "Englobante",
     short: "Pattern 3 bougies",
-    description: "Englobante (3 bougies) : entrée a sur la bougie après l'englobante confirmée.",
+    description: "Englobante (3 bougies) : entrée sur la bougie après une englobante confirmée.",
     paramsOverride: {},
   },
   englobante_entry_ema: {
