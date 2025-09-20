@@ -326,20 +326,31 @@ def download_csv_by_path(
             raise HTTPException(status_code=404, detail="Utilisateur introuvable")
 
         users[user.id]["credits"] -= 1
-        users[user.id].setdefault("purchase_history", []).append({
-            "label": "Téléchargement CSV",   # ✅ ancien libellé attendu par le front
-            "price_paid": -1,
-            "method": "credits",
-            "type": "Téléchargement",        # ✅ ancien type attendu par le front
-            "filename": file_path.name,
-            # on garde ce champ additionnel, il ne casse rien et sert pour Mes CSV
-            "relative_path": str(
+        # === Normalisation des chemins pour l’historique ===
+        try:
+            rel_out = str(
                 file_path.resolve().relative_to(OUTPUT_DIR.resolve())
-            ).replace("\\","/"),
-            "date": datetime.now().isoformat(),
-        })
-        f.seek(0); json.dump(users, f, indent=2); f.truncate()
+            ).replace("\\", "/")
+        except Exception:
+            # si le fichier n'est pas sous OUTPUT_DIR (rare), on log sans rel_out
+            rel_out = ""
 
+        entry = {
+            "label": "Téléchargement CSV",   # ⬅️ libellé legacy que lit ton front
+            "price_paid": -1,                # ⬅️ -1 crédit
+            "method": "credits",
+            "type": "Téléchargement",        # ⬅️ type legacy
+            "filename": file_path.name,
+            "date": datetime.now().isoformat(),
+        }
+        # Chemins compatibles avec toutes tes consommations côté front
+        if rel_out:
+            entry["relative_path"] = rel_out                 # ex: BTC-USD/2025-08/...
+            entry["path"] = f"backend/{rel_out}"             # ex: backend/BTC-USD/2025-08/...
+
+        users[user.id].setdefault("purchase_history", []).append(entry)
+
+        f.seek(0); json.dump(users, f, indent=2, ensure_ascii=False); f.truncate()
     return FileResponse(file_path, filename=file_path.name, media_type="text/csv")
 
 
