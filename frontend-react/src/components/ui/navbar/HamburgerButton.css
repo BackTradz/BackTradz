@@ -12,6 +12,8 @@
 }
 
 .bar {
+  display: block;        /* ✅ nécessaire sur iOS Safari */
+  width: 100%;           /* ✅ prend la largeur du bouton */
   height: 3px;
   background-color: #e5e7eb;
   border-radius: 2px;
