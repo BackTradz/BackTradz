@@ -48,10 +48,16 @@ export default function App() {
         {/* ✅ Alias explicite : /home pointe vers la même Home (utile car tu y vas manuellement) */}
         <Route path="/home" element={<Home />} />
       </Route>
-
       <Route path="/login" element={<AuthPage />} />
+      
+      {/* ✅ Nouvelles routes canoniques (match les liens des emails) */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+      {/* ♻️ Alias legacy pour ne rien casser si d'anciens liens existent */}
       <Route path="/resetpassword/forgot-password" element={<ForgotPassword />} />
-      <Route path="/resetpassword//reset-password/:token" element={<ResetPassword />} />
+      <Route path="/resetpassword/reset-password/:token" element={<ResetPassword />} />
+
       <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
       <Route path="/legal/cgu" element={<ConditionsGenerales />} />
       <Route path="/legal/politique-confidentialite" element={<PolitiqueConfidentialite />} />
