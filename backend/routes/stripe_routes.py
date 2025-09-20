@@ -128,8 +128,6 @@ async def create_stripe_session(request: Request):
         elif isinstance(user, dict):
             has_discount = bool(user.get("has_discount", False))
 
-    if has_discount and offer.get("type") in ["one_shot", "credit"]:
-        price *= 0.9
 
     unit_amount = int(price * 100)  # Stripe attend un montant en centimes
 
