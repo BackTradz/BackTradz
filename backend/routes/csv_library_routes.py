@@ -320,37 +320,50 @@ def download_csv_by_path(
     if user.credits < 1:
         raise HTTPException(status_code=403, detail="Pas assez de crédits")
 
+    # --- après avoir validé le token et résolu file_path, AVANT le FileResponse ---
+    # Débit + historique (format legacy attendu par le front)
     with open(USERS_FILE, "r+", encoding="utf-8") as f:
         users = json.load(f)
         if user.id not in users:
             raise HTTPException(status_code=404, detail="Utilisateur introuvable")
 
-        users[user.id]["credits"] -= 1
-        # === Normalisation des chemins pour l’historique ===
-        try:
-            rel_out = str(
-                file_path.resolve().relative_to(OUTPUT_DIR.resolve())
-            ).replace("\\", "/")
-        except Exception:
-            # si le fichier n'est pas sous OUTPUT_DIR (rare), on log sans rel_out
-            rel_out = ""
+        u = users[user.id]
+        u.setdefault("credits", 0)
+        u.setdefault("purchase_history", [])
 
+        if int(u["credits"]) < 1:
+            raise HTTPException(status_code=403, detail="Pas assez de crédits")
+
+        # 1) décrémente
+        u["credits"] = int(u["credits"]) - 1
+
+        # 2) normalise un chemin relatif propre pour l’historique
+        try:
+            rel_out = str(file_path.resolve().relative_to(OUTPUT_DIR.resolve())).replace("\\", "/")
+        except Exception:
+            rel_out = ""  # si pas sous OUTPUT_DIR (ex: output_live), on laisse vide
+
+        # 3) ajoute l’entrée EXACTEMENT comme avant (legacy)
         entry = {
-            "label": "Téléchargement CSV",   # ⬅️ libellé legacy que lit ton front
-            "price_paid": -1,                # ⬅️ -1 crédit
+            "label": "Téléchargement CSV",
+            "price_paid": -1,
             "method": "credits",
-            "type": "Téléchargement",        # ⬅️ type legacy
+            "type": "Téléchargement",
             "filename": file_path.name,
             "date": datetime.now().isoformat(),
         }
-        # Chemins compatibles avec toutes tes consommations côté front
         if rel_out:
-            entry["relative_path"] = rel_out                 # ex: BTC-USD/2025-08/...
-            entry["path"] = f"backend/{rel_out}"             # ex: backend/BTC-USD/2025-08/...
+            entry["relative_path"] = rel_out
+            entry["path"] = f"backend/{rel_out}"
 
-        users[user.id].setdefault("purchase_history", []).append(entry)
+        u["purchase_history"].append(entry)
 
-        f.seek(0); json.dump(users, f, indent=2, ensure_ascii=False); f.truncate()
+        # 4) persiste (écrase le fichier proprement)
+        users[user.id] = u
+        f.seek(0)
+        json.dump(users, f, indent=2, ensure_ascii=False)
+        f.truncate()
+
     return FileResponse(file_path, filename=file_path.name, media_type="text/csv")
 
 
