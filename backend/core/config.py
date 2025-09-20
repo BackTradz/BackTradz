@@ -36,3 +36,12 @@ PUBLIC_API_URL = _first_url(
 # === NOWPayments ===
 NOWPAYMENTS_API_KEY   = os.getenv("NOWPAYMENTS_API_KEY", "").strip()
 NOWPAYMENTS_IPN_SECRET = os.getenv("NOWPAYMENTS_IPN_SECRET", "").strip()
+
+ # === NOWPayments - seuil minimum en EUR pour payer en crypto ===
+def _to_float(s, default):
+    try:
+        return float(s)
+    except Exception:
+        return default
+ 
+NOW_MIN_CRYPTO_EUR = _to_float(os.getenv("NOW_MIN_CRYPTO_EUR", "10.01"), 10.01)

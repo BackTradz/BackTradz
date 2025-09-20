@@ -21,6 +21,7 @@ export default function OfferCard({
   isSubscriber = false,
   isCurrentPlan = false,
   isUpgrade = false,
+  minCryptoEur = 10.01, // ← seuil d’activation du bouton Crypto
 }) {
   const isSub = of.type === "subscription";
   const base = of.price_eur ?? 0;
@@ -48,6 +49,9 @@ export default function OfferCard({
   const primaryLabel = isSub
     ? (isUpgrade ? "Améliorer votre plan" : "S’abonner par carte")
     : "Payer par carte";
+
+  // Désactivation Crypto si prix < seuil (ex: pack 5€)
+  const cryptoDisabled = !isSub && Number(base) < Number(minCryptoEur);
 
   return (
     <div
@@ -105,7 +109,22 @@ export default function OfferCard({
                 {/* ✅ ONE-SHOT : Stripe + PayPal + Crypto */}
                 <StripeButton onClick={() => onStripe(of.id)}>{primaryLabel}</StripeButton>
 
-                <CryptoTrxButton onClick={() => onCrypto(of.id)} />
+                {cryptoDisabled ? (
+                  <>
+                    <button
+                      className="btn"
+                      disabled
+                      title={`Crypto disponible à partir de ${Number(minCryptoEur).toFixed(2)} €`}
+                    >
+                      Crypto (min {Number(minCryptoEur).toFixed(2)} €)
+                    </button>
+                    <div className="text-[12px] opacity-70 mt-1">
+                      Paiement crypto disponible pour {Number(minCryptoEur).toFixed(2)} € et plus.
+                    </div>
+                  </>
+                ) : (
+                  <CryptoTrxButton onClick={() => onCrypto(of.id)} />
+                )}
               </>
             )}
           </>

@@ -14,7 +14,11 @@ Security:
 """
 
 import json
-from backend.core.config import FRONTEND_URL, PUBLIC_API_URL, NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET
+from backend.core.config import (
+    FRONTEND_URL, PUBLIC_API_URL,
+    NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET,
+    NOW_MIN_CRYPTO_EUR
+)
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
 from backend.utils.invoice_generator import create_invoice
@@ -75,7 +79,15 @@ async def create_crypto_order(request: Request):
 
     user = get_user_by_token(user_token)
 
-    price = offer["price_eur"]
+    price_eur = round(float(offer["price_eur"]), 2)
+
+    # 🔒 règle passerelle: minimum crypto (ex. 10.005€ chez NOW → on met 10.01)
+    if price_eur + 1e-9 < NOW_MIN_CRYPTO_EUR:
+        raise HTTPException(400, detail=f"Montant trop bas pour le paiement crypto (min {NOW_MIN_CRYPTO_EUR:.2f} €).")
+
+    # Cas bord : pack 10.00€ → on le pousse à 10.01€ pour franchir le seuil NOW (10.005)
+    if price_eur < NOW_MIN_CRYPTO_EUR:
+        price_eur = NOW_MIN_CRYPTO_EUR
     if user and user.has_discount and offer["type"] in ["one_shot", "credit"]:
         price *= 0.9
 

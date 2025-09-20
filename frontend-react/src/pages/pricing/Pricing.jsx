@@ -213,6 +213,8 @@ export default function Pricing() {
     } catch (e) { setMsg(e.message); }
   };
 
+  // Seuil côté UI (aligné sur le backend qui force 10.01€ pour NOWPayments)
+  const MIN_CRYPTO_EUR = 10.01;
 
   return (
     <main className="pr-page">
@@ -245,6 +247,7 @@ export default function Pricing() {
               isSubscriber={isSubscriber}         // info globale (user est abonné)
               isCurrentPlan={isCurrentPlan}       // ✅ carte = plan courant ?
               isUpgrade={isUpgrade}         // ← libellé “Améliorer votre plan”
+              minCryptoEur={MIN_CRYPTO_EUR}
               onStripe={payStripe}
               onPayPal={payPayPal}
               onCrypto={payCrypto}
