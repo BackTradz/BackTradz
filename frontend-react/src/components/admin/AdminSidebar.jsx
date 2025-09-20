@@ -13,6 +13,7 @@ export default function AdminSidebar({ active, onChange }) {
     { key: "history", label: "📜 Historique" },
     { key: "stats", label: "📈 Statistiques" },
     { key: "backtests", label: "📊 Backtests" },
+    { key: "maintenance", label: "🧰 Maintenance" },
   ];
 
   return (

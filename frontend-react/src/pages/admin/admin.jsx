@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import "./admin.css"; // ✅ CSS dédié admin
+import AdminMaintenance from "../../components/admin/AdminMaintenance"; // 👈 AJOUT
 
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import UserTable from "../../components/admin/UserTable";
@@ -27,6 +28,7 @@ export default function AdminDashboard() {
         {tab === "history" && <GlobalHistory />}
         {tab === "stats" && <Stats />}
         {tab === "backtests" && <BacktestSummary />}
+        {tab === "maintenance"  && <AdminMaintenance />} 
       </main>
     </div>
   );
