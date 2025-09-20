@@ -56,20 +56,23 @@ function buildDownloadUrlForLibrary(filename) {
   } else {
     rel = `output_live/${meta.symbol}/${meta.timeframe}/${filename}`;
   }
-  // ✅ même comportement que CSVShop : pas de query ?token ; CsvCard mettra X-API-Key
+      // ✅ même comportement que CSVShop : pas de query ?token ; CsvCard mettra X-API-Key
   return downloadCsvByPathUrl(rel);
 }
-
 // “backend/…” -> “…”
 function stripBackendPrefix(p) {
   let x = String(p || "").replaceAll("\\", "/");
   return x.toLowerCase().startsWith("backend/") ? x.slice(8) : x;
 }
+
 function buildDownloadUrlFromRelativePath(relativePath) {
   const rel = stripBackendPrefix(relativePath);
-  // ✅ idem : URL “propre”, l’API key passe via header dans CsvCard
-  return downloadCsvByPathUrl(rel);
-}
+  // ✅ même logique que pour la librairie & CSV Shop : URL signée avec ?token=…
+  const rawUser = localStorage.getItem("user");
+  const user = rawUser ? JSON.parse(rawUser) : {};
+  const token = localStorage.getItem("apiKey") || user?.token || "";
+  return `${downloadCsvByPathUrl(rel)}?token=${encodeURIComponent(token)}`;
+ }
 
 /* ---------- Component ---------- */
 

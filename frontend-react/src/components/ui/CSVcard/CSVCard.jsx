@@ -54,54 +54,6 @@ export default function CsvCard(props) {
   const cn = `dashboard-card csv-card${props.className ? ` ${props.className}` : ""}`;
   const isLive = String(source).toLowerCase() === "live";
 
-    // ===== Download via header X-API-Key (évite "Token invalide") =====
-  async function handleDownload(e) {
-    e.preventDefault();
-    try {
-      // 1) Récupère la clé API comme sur le reste du site
-      const rawUser = localStorage.getItem("user");
-      const user = rawUser ? JSON.parse(rawUser) : {};
-      const token =
-        localStorage.getItem("apiKey") ||
-        user?.token ||
-        "";
-      if (!token) {
-        alert("Session expirée : reconnecte-toi pour télécharger le fichier.");
-        return;
-      }
-
-      // 2) Appel authentifié
-      const res = await fetch(downloadUrl, {
-        method: "GET",
-        headers: { "X-API-Key": token },
-      });
-      if (!res.ok) {
-        const msg = await res.text().catch(() => "");
-        alert(`Téléchargement impossible (${res.status}). ${msg || ""}`.trim());
-        return;
-      }
-
-      // 3) Récupère le nom du fichier (Content-Disposition ou fallback URL)
-      const cd = res.headers.get("Content-Disposition") || "";
-      const m = /filename\*?=(?:UTF-8''|")?([^";]+)/i.exec(cd);
-      const fallbackName = String(downloadUrl).split("/").pop() || "data.csv";
-      const filename = m ? decodeURIComponent(m[1]) : fallbackName;
-
-      // 4) Déclenche le download (blob)
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("CSV download error:", err);
-      alert("Erreur lors du téléchargement.");
-    }
-  }
   return (
     <div className={cn}>
       {/* header */}
@@ -135,9 +87,8 @@ export default function CsvCard(props) {
        <div className="csv-actions">
         {downloadUrl ? (
           <CTAButton
-            as="button"                 /* ⬅️ évite l’ouverture directe */
-            type="button"
-            onClick={handleDownload}    /* ⬅️ fetch + X-API-Key */
+            as="a"                    /* ✅ lien direct comme avant */
+            href={downloadUrl}       /* ✅ inclut ?token=... (voir CsvList.jsx ci-dessous) */
             title={downloadTitle}
             fullWidth
             leftIcon={downloadIcon}
@@ -145,8 +96,8 @@ export default function CsvCard(props) {
             {downloadLabel}
           </CTAButton>
         ) : (
-          <CTAButton disabled fullWidth>Indisponible</CTAButton>
-        )}
+                     <CTAButton disabled fullWidth>Indisponible</CTAButton>
+         )}
         {props.actionsRight ? <div className="csv-actions-right">{props.actionsRight}</div> : null}
       </div>
     </div>
