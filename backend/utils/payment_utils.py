@@ -60,9 +60,10 @@ def update_user_after_payment(
 
         # 🎁 Cas achat one_shot → ajout de crédits
         if offer["type"] == "one_shot":
+            import math
             base_credits = offer["credits"]
-            # ✅ bonus abonné : +10% crédits si has_discount
-            bonus_from_sub = int(round(base_credits * 0.10)) if bool(user.get("has_discount")) else 0
+            # +10% si abonné, arrondi AU SUPÉRIEUR (ex: 25 -> +3)
+            bonus_from_sub = math.ceil(base_credits * 0.10) if add_subscriber_bonus else 0
             total_credits = base_credits + bonus_from_sub + int(bonus_credits or 0)
             user["credits"] += total_credits
 
