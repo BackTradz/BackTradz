@@ -300,6 +300,10 @@ def _atomic_write_json(path: Path, data: dict) -> None:
 def load_users() -> dict:
     return read_json(USERS_FILE, {})
 
+
+# après def load_users(): ...
+_load_users = load_users  # alias compat
+
 def save_users(users: dict) -> None:
     lock = DB_DIR / "users.json.lock"
     with file_lock(lock):
