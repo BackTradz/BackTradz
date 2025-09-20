@@ -485,10 +485,9 @@ async def verify_email(token: str):
     - Si token invalide/expiré -> redirige vers /login?verify_error=1
     - Si token valide        -> marque l'e-mail vérifié (+bonus idempotent) puis /login?verified=1
     """
-    FRONTEND_URL = os.getenv("FRONTEND_URL", "https://www.backtradz.com").rstrip("/")
-    LOGIN_OK  = f"{FRONTEND_URL}/login?verified=1"
-    LOGIN_ERR = f"{FRONTEND_URL}/login?verify_error=1"
-
+    FRONT = FRONTEND_URL  # déjà nettoyé par config._first_url()
+    LOGIN_OK  = f"{FRONT}/login?verified=1"
+    LOGIN_ERR = f"{FRONT}/login?verify_error=1"
     uid = get_user_id_by_verification_token(token)  # ta fonction existante
     if not uid:
         return RedirectResponse(url=LOGIN_ERR, status_code=303, headers={"Cache-Control": "no-store"})
