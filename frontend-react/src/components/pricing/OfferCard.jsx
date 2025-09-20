@@ -87,8 +87,8 @@ export default function OfferCard({
         {creditLine && <li key="credits" className="pr-li-anim">{creditLine}</li>}
 
         {/* 2) paiement unique */}
-        <li key="unique">Paiement unique, sans engagement</li>  
-        
+        <li key="unique" className="pr-li-anim">Paiement unique, sans engagement</li>
+
           {/* 3) crypto: 
         - pack 10€ => "Crypto 10,50 € (min) — +1/+2 crédits"
         - pack 5€ (ou tout prix < min) => "Paiement crypto disponible à partir de 10.01 €." */}
