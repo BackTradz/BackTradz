@@ -61,3 +61,8 @@ html, body, #root { height: 100%; }
 footer.footer {          /* ta classe footer existante */
    margin-top: auto;
  }
+
+/* .page-skeleton-guard => stabilise la hauteur du bloc principal avant l’arrivée des cartes*/
+.page-skeleton-guard {
+  min-height: clamp(320px, 60vh, 900px);
+}

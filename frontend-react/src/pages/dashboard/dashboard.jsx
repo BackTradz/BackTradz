@@ -27,8 +27,9 @@ export default function Dashboard() {
     })();
   }, []);
 
-  return (
-    <div className="dash-container dash-wide dash-flat">
+   return (
+    // ⛳ Garde anti-sursaut : réserve ~60vh pendant le chargement des listes
+    <div className="dash-container dash-wide dash-flat page-skeleton-guard">
       {/* Onglets */}
       <div className="row-center row-top">
         <PillTabs

@@ -214,8 +214,8 @@ export default function CSVShop() {
     <>
       {/* Barre de chargement globale */}
       <TopProgress active={loading} />
-
-      <div className="csvshop-container">
+      {/* ⛳ Garde anti-sursaut : réserve ~60vh pendant le chargement */}
+      <div className="csvshop-container page-skeleton-guard">
         <h2 className="csvshop-title">CSV de trading disponibles</h2>
         <p className="csvshop-description">
           Données CSV <b>propres</b> et <b>normalisés</b> (OHLCV + indicateurs), prêts à l’emploi pour vos
@@ -278,6 +278,7 @@ export default function CSVShop() {
                   />
                 ))}
             </div>
+          
           )
         )}
       </div>
