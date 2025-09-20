@@ -14,7 +14,7 @@ Security:
 """
 
 import json
-from backend.core.config import FRONTEND_URL, PUBLIC_API_URL
+from backend.core.config import FRONTEND_URL, PUBLIC_API_URL, NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
 from backend.utils.invoice_generator import create_invoice
@@ -28,19 +28,17 @@ import hmac
 import hashlib
 
 router = APIRouter()
-NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY")
 NOWPAYMENTS_API_BASE = "https://api.nowpayments.io/v1"
 
 
 
 
-def verify_nowpayments_signature(raw_body: bytes, signature: str, api_key: str) -> bool:
-    """
-    Vérifie que la signature HMAC reçue est correcte.
-    """
-    computed_sig = hmac.new(api_key.encode(), raw_body, hashlib.sha512).hexdigest()
+def verify_nowpayments_signature(raw_body: bytes, signature: str, ipn_secret: str) -> bool:
+    """Vérifie la signature HMAC (NOWPayments IPN) avec le **IPN_SECRET** (pas la clé API)."""
+    if not ipn_secret:
+        return False
+    computed_sig = hmac.new(ipn_secret.encode(), raw_body, hashlib.sha512).hexdigest()
     return hmac.compare_digest(computed_sig, signature)
-
 
 @router.post("/payment/crypto/create-order")
 async def create_crypto_order(request: Request):
@@ -84,9 +82,11 @@ async def create_crypto_order(request: Request):
     price = round(price, 2)
 
     headers = {
-        "x-api-key": NOWPAYMENTS_API_KEY,
+        "x-api-key": NOWPAYMENTS_API_KEY or "",
         "Content-Type": "application/json"
     }
+    if not NOWPAYMENTS_API_KEY:
+        raise HTTPException(500, detail="NOWPayments non configuré (NOWPAYMENTS_API_KEY).")
 
     payload = {
         "price_amount": price,
@@ -117,41 +117,44 @@ async def nowpayments_webhook(request: Request):
     signature = headers.get("x-nowpayments-sig")
 
     # ✅ Vérification de la signature
-    if not signature or not verify_nowpayments_signature(raw_body, signature, NOWPAYMENTS_API_KEY):
+    if not signature or not verify_nowpayments_signature(raw_body, signature, NOWPAYMENTS_IPN_SECRET):
         logger.warning("🚨 Signature NowPayments invalide ou manquante")
         raise HTTPException(status_code=403, detail="Signature invalide")
 
     # ✅ Décodage JSON après validation
     body = json.loads(raw_body)
-    order_id = body.get("order_id")
-    payment_status = body.get("payment_status")
+    order_id        = body.get("order_id")
+    payment_status  = (body.get("payment_status") or "").lower()
+    payment_id      = str(body.get("payment_id") or "")
+    price_amount    = body.get("price_amount")
+    price_currency  = (body.get("price_currency") or "EUR").upper()
 
     logger.debug(f"📨 Webhook reçu pour order_id={order_id}, status={payment_status}")
 
-    if payment_status != "finished":
-        return {"status": "waiting"}
+    # Accepte finished (reco). Si tu veux accepter "confirmed", ajoute-le dans le set.
+    if payment_status not in {"finished"}:
+        return {"status": "waiting", "seen": payment_status}
 
     # ✅ Traitement du paiement validé
     try:
-        user_token, offer_id = order_id.split("_", 1)
+        user_token, offer_id = (order_id or "").split("_", 1)
         from backend.models.users import get_user_by_token
         from backend.utils.payment_utils import update_user_after_payment
         user = get_user_by_token(user_token)
 
         if user:
-            update_user_after_payment(user.id, offer_id, method="Crypto")
+            #idempotence → passe payment_id en transaction_id
+            update_user_after_payment(user.id, offer_id, method="Crypto", transaction_id=payment_id)
             # === Génération de la facture (Crypto / NowPayments) ===
             try:
                 # Dans ton create-order, tu envoies price_currency="eur" et price_amount=EUR.
                 # Le webhook renvoie normalement ces champs dans le body.
                 offer = get_offer_by_id(offer_id) or {}
 
+                # Montant payé en EUR (fallback sur le prix catalogue si absent)
                 paid_eur = None
-                try:
-                    # Priorité: price_amount côté webhook (EUR)
-                    paid_eur = float(body.get("price_amount"))
-                except Exception:
-                    paid_eur = None
+                try: paid_eur = float(price_amount)
+                except Exception: paid_eur = None
 
                 # Fallback si manquant
                 if paid_eur is None:
@@ -164,22 +167,21 @@ async def nowpayments_webhook(request: Request):
                     "unit_amount": paid_eur
                 }]
 
-                if user:
-                    create_invoice(
-                        user_id=user.id,
-                        email=user.email,
-                        full_name=(getattr(user, "full_name", None) or f"{user.first_name} {user.last_name}".strip()),
-                        method="Crypto",
-                        transaction_id=str(body.get("payment_id") or order_id),
-                        amount=paid_eur,
-                        currency=(body.get("price_currency", "EUR") or "EUR").upper(),
-                        items=items,
-                        created_at=None,
-                        billing_address=None,
-                        tax=None,
-                        project_config=None
-                    )
-                    logger.info("🧾 Facture Crypto générée.")
+                create_invoice(
+                    user_id=user.id,
+                    email=user.email,
+                    full_name=(getattr(user, "full_name", None) or f"{user.first_name} {user.last_name}".strip()),
+                    method="Crypto",
+                    transaction_id=payment_id or order_id or "crypto",
+                    amount=paid_eur,
+                    currency=price_currency or "EUR",
+                    items=items,
+                    created_at=None,
+                    billing_address=None,
+                    tax=None,
+                    project_config=None
+                )
+                logger.info("🧾 Facture Crypto générée.")
             except Exception as _e:
                 logger.warning(f"[invoice] Crypto KO: {_e}")
 

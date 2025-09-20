@@ -1,4 +1,6 @@
 import os
+from os import getenv
+
 
 def _first_url(env_value: str, default: str) -> str:
     """
@@ -30,3 +32,7 @@ PUBLIC_API_URL = _first_url(
     os.getenv("PUBLIC_API_URL"),
     "https://api.backtradz.com",
 )
+
+# === NOWPayments ===
+NOWPAYMENTS_API_KEY   = os.getenv("NOWPAYMENTS_API_KEY", "").strip()
+NOWPAYMENTS_IPN_SECRET = os.getenv("NOWPAYMENTS_IPN_SECRET", "").strip()
