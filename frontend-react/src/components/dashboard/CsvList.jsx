@@ -48,7 +48,6 @@ function parsePurchaseFilename(filename) {
 // output/output_live selon filename (achats lib)
 function buildDownloadUrlForLibrary(filename) {
   const meta = parsePurchaseFilename(filename);
-  const token = localStorage.getItem("apiKey") || "";
   if (meta.ext !== "csv") return ""; // on ne propose pas d’XLSX ici
 
   let rel;
@@ -57,7 +56,8 @@ function buildDownloadUrlForLibrary(filename) {
   } else {
     rel = `output_live/${meta.symbol}/${meta.timeframe}/${filename}`;
   }
-  return `${downloadCsvByPathUrl(rel)}?token=${encodeURIComponent(token)}`;
+  // ✅ même comportement que CSVShop : pas de query ?token ; CsvCard mettra X-API-Key
+  return downloadCsvByPathUrl(rel);
 }
 
 // “backend/…” -> “…”
@@ -67,8 +67,8 @@ function stripBackendPrefix(p) {
 }
 function buildDownloadUrlFromRelativePath(relativePath) {
   const rel = stripBackendPrefix(relativePath);
-  const token = localStorage.getItem("apiKey") || "";
-  return `${downloadCsvByPathUrl(rel)}?token=${encodeURIComponent(token)}`;
+  // ✅ idem : URL “propre”, l’API key passe via header dans CsvCard
+  return downloadCsvByPathUrl(rel);
 }
 
 /* ---------- Component ---------- */
@@ -121,7 +121,7 @@ export default function CsvList() {
             period: p.period || meta.period,
             purchased_at: p.purchased_at || p.date || null,
             id: filename || `lib_${p.purchased_at || Date.now()}`,
-            download_url: buildDownloadUrlForLibrary(filename), // CSV only
+            downloadUrl: buildDownloadUrlForLibrary(filename), // ✅ prop unifiée
           };
         });
 
@@ -133,7 +133,7 @@ export default function CsvList() {
           timeframe: f.timeframe || "—",
           period: f.start_date && f.end_date ? `${f.start_date}→${f.end_date}` : "",
           purchased_at: f.created_at || null,
-          download_url: buildDownloadUrlFromRelativePath(f.relative_path),
+          downloadUrl: buildDownloadUrlFromRelativePath(f.relative_path),  // ✅
           id: f.relative_path || `${f.symbol}_${f.created_at}`,
           delete_path: String(f.relative_path || "")
             .replaceAll("\\", "/")
@@ -210,7 +210,15 @@ export default function CsvList() {
           <div className="csv-page">
             <div className="csv-grid">
               {visible.map((it, i) => (
-                <CsvCard key={it.id || i} item={it} downloadLabel="Télécharger" />
+                <CsvCard
+                  key={it.id || i}
+                  source={it.source === "library" ? "Librairie BackTradz" : "Extraction privée"}
+                  symbol={it.symbol}
+                  timeframe={it.timeframe}
+                  period={it.period}
+                  downloadUrl={it.downloadUrl}   // ✅ comme dans CSVShop
+                  downloadLabel="Télécharger"
+                />
               ))}
             </div>
           </div>
