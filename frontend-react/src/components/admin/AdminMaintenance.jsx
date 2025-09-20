@@ -1,6 +1,6 @@
 // AdminMaintenance.jsx
 import { useEffect, useState } from "react";
-import api from "../../sdk/apiClient"; // ton client axios/fetch déjà configuré
+import { api } from "../../sdk/apiClient";
 
 export default function AdminMaintenance() {
   const [loading, setLoading] = useState(false);
@@ -13,8 +13,8 @@ export default function AdminMaintenance() {
     setLoading(true);
     setErr(null);
     try {
-      const { data } = await api.get("/api/admin/email-recreate");
-      setCounts(data.counts || {});
+      const data = await api("/api/admin/email-recreate");
+      setCounts(data?.counts || {});
     } catch (e) {
       setErr("Impossible de charger les données.");
     } finally {
@@ -27,7 +27,7 @@ export default function AdminMaintenance() {
   const resetAll = async () => {
     setErr(null); setMsg(null);
     try {
-      const { data } = await api.post("/api/admin/reset-email-recreate", {});
+      const data = await api("/api/admin/reset-email-recreate", { method: "POST", body: {} });
       setMsg("Compteur réinitialisé.");
       setCounts({});
     } catch (e) {
@@ -38,9 +38,9 @@ export default function AdminMaintenance() {
   const resetOne = async (targetEmail) => {
     setErr(null); setMsg(null);
     try {
-      const { data } = await api.post("/api/admin/reset-email-recreate", { email: targetEmail });
+      const data = await api("/api/admin/reset-email-recreate", { method: "POST", body: { email: targetEmail } });
       setMsg(`Entrée supprimée pour ${targetEmail}.`);
-      setCounts(data.left || {});
+      setCounts(data?.left || {});
     } catch (e) {
       setErr("Échec de la suppression ciblée.");
     }
