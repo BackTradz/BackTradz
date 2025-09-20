@@ -633,3 +633,76 @@ tr:hover > td { background: rgba(255,255,255,0.02); }
   .admin-sidebar::-webkit-scrollbar { height: 6px; }
   .admin-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 999px; }
 }
+
+
+/* =======================================================================
+   🧰 Admin — Maintenance
+   - Styles dédiés à la carte "Réinitialiser email_recreate.json"
+   - S’appuie sur les variables et patterns déjà définis plus haut.
+   - 0 régression: n’affecte que .maint-*
+   ======================================================================= */
+
+.maint { /* conteneur local de la page Maintenance (optionnel) */ }
+
+.maint-card {
+  background: var(--c-card);
+  border: 1px solid var(--c-stroke);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-1);
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.maint-title {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 1.05rem; color: var(--c-text);
+  margin-bottom: 6px;
+}
+.maint-desc {
+  color: var(--c-text-soft);
+  font-size: .92rem;
+  margin-bottom: 14px;
+}
+
+/* Actions (reset global + reset ciblé) */
+.maint-actions {
+  display: flex; flex-wrap: wrap; gap: 10px 12px;
+  align-items: center; margin-bottom: 12px;
+}
+
+/* Input compact cohérent avec l’admin */
+.maint-input {
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--c-stroke);
+  color: var(--c-text);
+  height: 40px;
+  border-radius: var(--r-lg);
+  padding: 0 12px;
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.maint-input:focus {
+  border-color: rgba(96,165,250,.45);
+  box-shadow: var(--ring-primary);
+}
+
+/* Bouton primaire (gradient bleu) — réutilisable */
+.btn-primary {
+  background: linear-gradient(90deg, #22d3ee, var(--c-primary-600));
+  color: white;
+  border: 1px solid rgba(96,165,250,.35);
+  box-shadow: 0 6px 18px rgba(37,99,235,.35);
+}
+.btn-primary:hover { filter: brightness(1.06); }
+
+/* Messages d’état */
+.maint-msg {
+  margin-top: 4px; font-size: .9rem; color: #86efac; /* vert */
+}
+.maint-err {
+  margin-top: 4px; font-size: .9rem; color: #fca5a5; /* rouge */
+}
+
+/* Tableau des entrées: on réutilise le duo .admin-table + .table-clean.
+   On ajoute juste un petit wrapper pour l’espacement local. */
+.maint-table { margin-top: 6px; }
