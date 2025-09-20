@@ -63,6 +63,19 @@ export default function Pricing() {
   useEffect(() => {
     let cancelled = false;
     const round2 = (n) => Math.round(n * 100) / 100;
+    const calcAddedCredits = (of, isSub, method) => {
+      if (!of) return 0;
+      let add = Number(of.credits ?? of.credits_monthly ?? 0);
+      // +10% crédits pour abonnés sur les one_shot/credit
+      if (of.type === "one_shot" && isSub) {
+        add += Math.ceil((Number(of.credits || 0)) * 0.10);
+      }
+      // Bonus crypto pack 10 €
+      if (method === "Crypto" && of.id === "CREDIT_10") {
+        add += isSub ? 2 : 1;
+      }
+      return add;
+    };
 
     (async () => {
       const url = new URL(window.location.href);
@@ -110,7 +123,7 @@ export default function Pricing() {
             setSuccessData({
               offer: of?.label || offer_id || "Paiement PayPal",
               method: "PayPal",
-              credits: of?.credits ?? of?.credits_monthly ?? 0,
+              credits: calcAddedCredits(of, isSubscriber, "PayPal"),
               price: paid,
             });
             setShowSuccess(true);
@@ -127,7 +140,7 @@ export default function Pricing() {
             setSuccessData({
               offer: of?.label || "Commande crypto",
               method: "Crypto",
-              credits: of?.credits ?? of?.credits_monthly ?? 0,
+              credits: calcAddedCredits(of, isSubscriber, "Crypto"),
               price: paid,
             });
             setShowSuccess(true);
@@ -144,7 +157,7 @@ export default function Pricing() {
             setSuccessData({
               offer: of?.label || offer_id || "Paiement Stripe",
               method: "Stripe",
-              credits: of?.credits ?? of?.credits_monthly ?? 0,
+              credits: calcAddedCredits(of, isSubscriber, "Stripe"),
               price: paid,
             });
             setShowSuccess(true);

@@ -53,16 +53,13 @@ def update_user_after_payment(
                     print(f"⚠️ Paiement PayPal déjà enregistré — {order_id}")
                     return False  # doublon détecté
 
-        # ✅ Appliquer réduction -10% si applicable
-        if user.get("has_discount") and offer["type"] in ["one_shot", "credit"]:
-            price = round(price * 0.9, 2)
-            discount_str = "10%"
 
         # 🎁 Cas achat one_shot → ajout de crédits
         if (offer.get("type") in ("one_shot", "credit")):
             import math
             base_credits = offer["credits"]
             # +10% si abonné, arrondi AU SUPÉRIEUR (ex: 25 -> +3)
+            add_subscriber_bonus = bool(user.get("has_discount"))
             bonus_from_sub = math.ceil(base_credits * 0.10) if add_subscriber_bonus else 0
             total_credits = base_credits + bonus_from_sub + int(bonus_credits or 0)
             user["credits"] += total_credits
