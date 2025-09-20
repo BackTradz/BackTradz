@@ -30,7 +30,7 @@ export default function OfferCard({
   const bonusForSubscriber = (!isSub && isSubscriber) ? Math.ceil(credits * 0.10) : 0;
   const creditLine =
     credits > 0
-      ? `${credits} crédits inclus${bonusForSubscriber ? ` (+${bonusForSubscriber} pour abonnés)` : ""}`
+      ? `${credits} crédits inclus${bonusForSubscriber ? ` (+${bonusForSubscriber} crédits pour abonnés)` : ""}`
       : null;
 
   // On n’affiche plus de réduction de prix : bonus crédits uniquement
@@ -84,7 +84,7 @@ export default function OfferCard({
 
       <ul className="pr-list">
         {/* 1) crédits inclus (+bonus abo) */}
-        {creditLine && <li key="credits">{creditLine}</li>}
+        {creditLine && <li key="credits" className="pr-li-anim">{creditLine}</li>}
 
         {/* 2) paiement unique */}
         <li key="unique">Paiement unique, sans engagement</li>  
@@ -93,7 +93,7 @@ export default function OfferCard({
         - pack 10€ => "Crypto 10,50 € (min) — +1/+2 crédits"
         - pack 5€ (ou tout prix < min) => "Paiement crypto disponible à partir de 10.01 €." */}
           {!isSub && of.id === "CREDIT_10" && (
-            <li key="crypto10">
+            <li key="crypto10" className="pr-li-anim">
               Crypto 10,50 € (min) — {isSubscriber ? "+2 crédits" : "+1 crédit"}
             </li>
           )}
@@ -104,7 +104,7 @@ export default function OfferCard({
       <div className="pr-price">
         {isSub ? `${euro(base)}/mois` : euro(base)}
         {!isSub && isSubscriber && (
-          <span className="ml-2 text-[12px] opacity-80 align-middle">+10% crédits</span>
+          <span className="pr-bonus ml-2 align-middle">+10% crédits</span>
         )}
       </div>
     </div>
