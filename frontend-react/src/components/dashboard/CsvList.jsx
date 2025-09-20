@@ -63,28 +63,19 @@ function getApiToken() {
   }
 }
 
-// output/output_live selon filename (achats lib)
-function buildDownloadUrlForLibrary(filename) {
-  const meta = parsePurchaseFilename(filename);
-  if (meta.ext !== "csv") return ""; // on ne propose pas d’XLSX ici
-
-  let rel;
-  if (meta.kind === "csv_month") {
-    rel = `output/${meta.symbol}/${meta.period}/${filename}`;
-  } else {
-    rel = `output_live/${meta.symbol}/${meta.timeframe}/${filename}`;
-  }
- 
+// Build final download URL à partir d’un chemin RELATIF donné par l’API
+function buildSignedUrlFromPath(relPath) {
+  if (!relPath) return "";
+  const raw = downloadCsvByPathUrl(stripBackendPrefix(relPath)); // ⬅️ même helper que CSV Shop
+  // Ajoute ?token=… uniquement si absent (Shop peut déjà l’ajouter)
+  if (/\btoken=/.test(raw)) return raw;
   const token = getApiToken();
-  return `${downloadCsvByPathUrl(rel)}?token=${encodeURIComponent(token)}`;
+  return `${raw}${raw.includes("?") ? "&" : "?"}token=${encodeURIComponent(token)}`;
 }
 
 // ====== BUILDERS D’URL (toujours avec ?token=...) ======
 function buildDownloadUrlFromRelativePath(relativePath) {
-  const rel = stripBackendPrefix(relativePath);
-  // ✅ même logique que pour la librairie & CSV Shop : URL signée avec ?token=…
-  const token = getApiToken();
-  return `${downloadCsvByPathUrl(rel)}?token=${encodeURIComponent(token)}`;
+  return buildSignedUrlFromPath(relativePath);
 }
 
 /* ---------- Component ---------- */
@@ -126,10 +117,18 @@ export default function CsvList() {
             }));
         }
 
-        // Normalise achats -> items
+        // Normalise achats -> items (PRIORITÉ au 'path' renvoyé par l’API)
         const libItems = purchased.map(p => {
           const filename = p.filename || p.name || "";
           const meta = parsePurchaseFilename(filename);
+          const pathFromApi = p.path || p.relative_path || p.rel || ""; // ← si dispo, identique au Shop
+          const downloadUrl = pathFromApi
+            ? buildSignedUrlFromPath(pathFromApi)
+            : buildSignedUrlFromPath( // Fallback si ancien historique sans 'path'
+                meta.kind === "csv_month"
+                  ? `output/${meta.symbol}/${meta.period}/${filename}`
+                  : `output_live/${meta.symbol}/${meta.timeframe}/${filename}`
+              );
           return {
             source: "library",
             symbol: p.symbol || meta.symbol,
@@ -137,7 +136,7 @@ export default function CsvList() {
             period: p.period || meta.period,
             purchased_at: p.purchased_at || p.date || null,
             id: filename || `lib_${p.purchased_at || Date.now()}`,
-            downloadUrl: buildDownloadUrlForLibrary(filename), // ✅ prop unifiée
+            downloadUrl,
           };
         });
 
@@ -149,7 +148,7 @@ export default function CsvList() {
           timeframe: f.timeframe || "—",
           period: f.start_date && f.end_date ? `${f.start_date}→${f.end_date}` : "",
           purchased_at: f.created_at || null,
-          downloadUrl: buildDownloadUrlFromRelativePath(f.relative_path),  // ✅
+          downloadUrl: buildSignedUrlFromPath(f.relative_path || f.path || ""),  // ✅ même logique que Shop
           id: f.relative_path || `${f.symbol}_${f.created_at}`,
           delete_path: String(f.relative_path || "")
             .replaceAll("\\", "/")
