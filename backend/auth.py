@@ -479,54 +479,27 @@ def _safe_next(next_url: str | None) -> str | None:
 
 
 @router.get("/auth/verify-email")
-async def verify_email(token: str, next: str | None = None):
+async def verify_email(token: str):
     """
-    STATLESS: ne lit/écrit aucun cookie, ne log-in personne.
-    Valide l'utilisateur par le token, crédite si nécessaire,
-    puis renvoie une page neutre (ou redirige vers une URL publique 'next').
+    Stateless: ne lit/écrit aucun cookie et ne log-in personne.
+    - Si token invalide/expiré -> redirige vers /login?verify_error=1
+    - Si token valide        -> marque l'e-mail vérifié (+bonus idempotent) puis /login?verified=1
     """
-    uid = get_user_id_by_verification_token(token)
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "https://www.backtradz.com").rstrip("/")
+    LOGIN_OK  = f"{FRONTEND_URL}/login?verified=1"
+    LOGIN_ERR = f"{FRONTEND_URL}/login?verify_error=1"
+
+    uid = get_user_id_by_verification_token(token)  # ta fonction existante
     if not uid:
-        # après avoir validé l'email
-        html = f"""
-        <!doctype html>
-        <html><body style="background:#0b1220;color:#e6f0ff;text-align:center;padding:48px">
-        <div style="max-width:560px;margin:0 auto;background:#121a2b;border:1px solid #22304a;border-radius:16px;padding:32px">
-            <h1 style="margin:0 0 8px">Back <span style="color:#5cc4ff">tradz</span></h1>
-            <h2 style="margin:0 0 16px">E-mail vérifié ✅</h2>
-            <p>Tu peux maintenant revenir sur BackTradz.</p>
-            <a href="{FRONTEND_URL}"
-            style="display:inline-block;background:linear-gradient(90deg,#3aa2ff,#5cc4ff);
-                    color:#0b1220;text-decoration:none;font-weight:700;border-radius:12px;
-                    padding:12px 22px;margin-top:16px">Ouvrir BackTradz</a>
-        </div>
-        </body></html>
-        """
-        return HTMLResponse(content=html, status_code=200)
+        return RedirectResponse(url=LOGIN_ERR, status_code=303, headers={"Cache-Control": "no-store"})
 
-    # crédite une seule fois si pas déjà fait
-    changed = mark_email_verified_and_grant_pending_bonus(uid)
+    # crédite une seule fois si pas déjà fait (ta fonction existante ; ignore l'erreur si déjà appliqué)
+    try:
+        mark_email_verified_and_grant_pending_bonus(uid)
+    except Exception:
+        pass
 
-    # si un 'next' public est passé, on y va (sans cookie, sans session)
-    safe = _safe_next(next)
-    if safe:
-        return RedirectResponse(url=safe, status_code=307, headers={"Cache-Control": "no-store"})
-
-    # sinon, page neutre (pas de redirection automatique)
-    html = """
-    <!doctype html><meta charset="utf-8"><title>E-mail vérifié</title>
-    <body style="margin:0;background:#0b1220;color:#e6f0ff;font-family:Segoe UI,Roboto,Arial,sans-serif">
-      <div style="max-width:640px;margin:8vh auto;padding:24px;background:#121a2b;border:1px solid #22304a;border-radius:14px;text-align:center;box-shadow:0 6px 30px rgba(0,0,0,.35)">
-        <div style="font-size:24px;font-weight:800;margin-bottom:8px">
-          <span style="color:#cfe4ff">Back</span> <span style="color:#5cc4ff">tradz</span>
-        </div>
-        <h2 style="margin:10px 0 6px">E-mail vérifié ✅</h2>
-        <p style="opacity:.8;margin:0 0 12px">Tu peux maintenant revenir sur BackTradz.</p>
-        <a href="https://www.backtradz.com" style="display:inline-block;background:linear-gradient(90deg,#3aa2ff,#5cc4ff);color:#0b1220;text-decoration:none;font-weight:700;border-radius:12px;padding:10px 18px;">Ouvrir BackTradz</a>
-        <p style="opacity:.6;font-size:12px;margin-top:16px">Tu peux fermer cet onglet en toute sécurité.</p>
-      </div>
-    </body>"""
-    return HTMLResponse(content=html, headers={"Cache-Control": "no-store"})
+    return RedirectResponse(url=LOGIN_OK, status_code=303, headers={"Cache-Control": "no-store"})
 
 @router.post("/auth/resend-verification")
 async def resend_verification(user: User = Depends(get_current_user), request: Request = None):
