@@ -98,11 +98,12 @@ export default function OfferCard({
             </li>
           )}
         {!isSub && Number(base) < Number(minCryptoEur) && (
-    <li key="cryptomin">
-      Paiement crypto disponible à partir de {Number(minCryptoEur).toFixed(2)} €.
-    </li>
-  )}
-</ul>
+          <li key="cryptomin">
+            Paiement crypto disponible à partir de {Number(minCryptoEur).toFixed(2)} €.
+          </li>
+        )}
+      </ul>
+      </div> {/* ferme .pr-card-head */}
 
     <div className="pr-price-row">
       <div className="pr-price">
@@ -140,9 +141,6 @@ export default function OfferCard({
                   >
                     Crypto (min {Number(minCryptoEur).toFixed(2)} €)
                   </button>
-                  <div className="text-[12px] opacity-70 mt-1">
-                    Paiement crypto disponible à partir de {Number(minCryptoEur).toFixed(2)} €.
-                  </div>
                 </>
               ) : (
                 <>
