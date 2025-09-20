@@ -124,10 +124,11 @@ export default function CsvList() {
           const pathFromApi = p.path || p.relative_path || p.rel || ""; // ← si dispo, identique au Shop
           const downloadUrl = pathFromApi
             ? buildSignedUrlFromPath(pathFromApi)
-            : buildSignedUrlFromPath( // Fallback si ancien historique sans 'path'
+            : buildSignedUrlFromPath(
+                // ✅ Fallback SANS préfixe "output/" (le serveur le rajoute déjà)
                 meta.kind === "csv_month"
-                  ? `output/${meta.symbol}/${meta.period}/${filename}`
-                  : `output_live/${meta.symbol}/${meta.timeframe}/${filename}`
+                  ? `${meta.symbol}/${meta.period}/${filename}`
+                  : `${meta.symbol}/${meta.timeframe}/${filename}` // (rare ici; on garde propre)
               );
           return {
             source: "library",
