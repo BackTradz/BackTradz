@@ -48,3 +48,16 @@ html, body, #root {
 * {
   box-sizing: border-box;
 }
+
+/* === Sticky footer site-wide (iOS/Android/desktop safe) === */
+html, body, #root { height: 100%; }
+ #root {
+   min-height: 100svh;   /* mobile viewport “small” */
+   min-height: 100dvh;   /* dynamic viewport si dispo */
+   display: flex;
+   flex-direction: column;
+ }
+/* Le contenu pousse le footer en bas */
+footer.footer {          /* ta classe footer existante */
+   margin-top: auto;
+ }
