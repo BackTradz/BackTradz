@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./support.css";
 import { Section } from "../../components/a_savoir/Section";
-
+import { api } from "../../sdk/apiClient";
 // ⚠️ ajuste le chemin si besoin suivant ton projet
 import PillTabs from "../../components/ui/switchonglet/PillTabs";
 // ⚠️ ajuste le chemin si besoin suivant ton projet
@@ -18,14 +18,6 @@ export default function SupportPage() {
     { id: "contact",  label: "Assistance & questions", icon: "💬" },
     { id: "feedback", label: "Améliorations & bugs",   icon: "🛠️" },
   ];
-
-  // ===== API helper: lit VITE_API_BASE ou VITE_BACKEND_URL =====
-  const API_BASE = (import.meta.env?.VITE_API_BASE || import.meta.env?.VITE_BACKEND_URL || "")
-    .replace(/\/+$/, ""); // supprime trailing slashes
-  const api = (path) => {
-    const p = path.startsWith("/") ? path : `/${path}`;
-    return API_BASE ? `${API_BASE}${p}` : p;
-  };
 
   // ===== Submit handler (unique pour les 2 onglets) =====
   async function handleSubmit(e, kind /* 'contact' | 'feedback' */) {
@@ -55,21 +47,7 @@ export default function SupportPage() {
 
 
     try {
-      const res = await fetch(api("/api/support"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        let reason = "Envoi impossible. Réessayez dans un instant.";
-        try {
-          const data = await res.json();
-          if (data?.detail) reason = data.detail;
-        } catch {}
-        throw new Error(reason);
-      }
-
+      await api("/api/support", { method: "POST", body: payload, auth: false });
       // succès
       form.reset();
       setSent(true);                     // active l'état visuel "succès"

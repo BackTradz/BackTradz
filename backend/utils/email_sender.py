@@ -56,7 +56,13 @@ def _send_once(c, mode, port, msg):
             s.login(c["user"], c["pwd"]); s.send_message(msg)
 
 
-def send_email_html(to_email: str, subject: str, html_body: str, text_fallback: str = "") -> bool:
+def send_email_html(
+     to_email: str,
+     subject: str,
+     html_body: str,
+     text_fallback: str = "",
+     reply_to: str | None = None
+ ) -> bool:
     c = _cfg()
     if not _ready(c):
         missing = []
@@ -71,6 +77,8 @@ def send_email_html(to_email: str, subject: str, html_body: str, text_fallback: 
     msg["Subject"] = subject
     msg["From"]    = f"{c['brand']} <{c['from']}>"
     msg["To"]      = to_email
+    if reply_to:
+        msg["Reply-To"] = reply_to
     if text_fallback: msg.set_content(text_fallback)
     msg.add_alternative(html_body, subtype="html")
 

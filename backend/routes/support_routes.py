@@ -7,24 +7,18 @@ Support / Feedback endpoint
 - Tags Resend "slugifiés" (ASCII, _, -) pour éviter les 502
 """
 
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr, Field
 from typing import Literal, Optional, Dict
 import os
 import re
 import unicodedata
-import resend
+from backend.utils.email_sender import send_email_html
+from backend.utils.email_templates import BRAND_NAME  # pour le sujet
 
-# ========= Config =========
-RESEND_API_KEY = os.getenv("RESEND_API_KEY")
-SUPPORT_INBOX  = os.getenv("SUPPORT_INBOX")
-SUPPORT_FROM   = os.getenv("SUPPORT_FROM", SUPPORT_INBOX)  # fallback
-
-if RESEND_API_KEY:
-  resend.api_key = RESEND_API_KEY
-
+SUPPORT_INBOX = os.getenv("SUPPORT_INBOX")  # ex: support@backtradz.com
 router = APIRouter(prefix="/support", tags=["support"])
-
 
 # ========= Payload =========
 class SupportPayload(BaseModel):
@@ -46,7 +40,7 @@ def _build_subject(p: SupportPayload) -> str:
   label, emoji = _label_and_emoji(p.type)
   first = (p.firstName or "").strip()
   last  = (p.lastName  or "").strip()
-  return f"{emoji} [BackTradz • {label}] {last} {first}".strip()
+  return f"{emoji} [{BRAND_NAME} • {label}] {last} {first}".strip()
 
 _slug_re = re.compile(r"[^a-z0-9_-]+")
 def _slugify_tag(value: str) -> str:
@@ -81,55 +75,38 @@ Meta : {meta_str}
 """.strip()
 
 
-# ========= Endpoint =========
+# ========= Endpoint support  =========
 @router.post("", summary="Envoi d’un message de support/feedback", response_model=dict)
 def send_support(payload: SupportPayload):
   # Pré-conditions (env)
   if not SUPPORT_INBOX:
-    raise HTTPException(500, "Support indisponible : adresse de réception manquante (SUPPORT_INBOX).")
-  if not RESEND_API_KEY:
-    raise HTTPException(500, "Support indisponible : RESEND_API_KEY manquante (provider email).")
+    raise HTTPException(500, "Support indisponible : SUPPORT_INBOX manquant.")
 
   subject   = _build_subject(payload)
   body_text = _build_text_body(payload)
+  body_html = f"""
+    <div style="font-family:Segoe UI,Arial,sans-serif;font-size:14px;line-height:1.6">
+      <div><b>Formulaire :</b> {_label_and_emoji(payload.type)[0]}</div>
+      <div><b>Nom :</b> {payload.lastName}</div>
+      <div><b>Prénom :</b> {payload.firstName}</div>
+      <div><b>Email :</b> {payload.email}</div>
+      <hr style="border:none;border-top:1px solid #ddd;margin:12px 0" />
+      <div style="white-space:pre-wrap">{payload.message}</div>
+      <hr style="border:none;border-top:1px solid #eee;margin:12px 0" />
+      <div style="opacity:.7"><b>Meta :</b> {payload.meta or {}}</div>
+    </div>
+  """.strip()
 
-  # Tags Resend **valides**
-  label, _ = _label_and_emoji(payload.type)
-  tags = [
-    {"name": "form",  "value": _slugify_tag(payload.type)},   # "contact" | "feedback"
-    {"name": "label", "value": _slugify_tag(label)},          # "assistance" | "ameliorations-bug"
-  ]
-
-  try:
-    resend.Emails.send({
-      "from": SUPPORT_FROM,
-      "to": [SUPPORT_INBOX],
-      "reply_to": payload.email,
-      "subject": subject,
-      "text": body_text,
-      "tags": tags,  # ✅ ASCII only
-    })
-    return {"ok": True}
-
-  except Exception as e:
-    # Si l’erreur vient des tags (ex: "Tags should only contain…"), on retente SANS tags.
-    detail = (getattr(e, "message", None) or str(e) or "").lower()
-    try_tags_failed = "tags" in detail and "contain" in detail
-    if try_tags_failed:
-      try:
-        resend.Emails.send({
-          "from": SUPPORT_FROM,
-          "to": [SUPPORT_INBOX],
-          "reply_to": payload.email,
-          "subject": subject,
-          "text": body_text,
-          # no tags
-        })
-        return {"ok": True, "warn": "tags_removed"}
-      except Exception as e2:
-        _raise_email_error(e2)
-
-    _raise_email_error(e)
+  ok = send_email_html(
+    to_email=SUPPORT_INBOX,
+    subject=subject,
+    html_body=body_html,
+    text_fallback=body_text,
+    reply_to=str(payload.email)
+  )
+  if not ok:
+    raise HTTPException(502, "Envoi impossible : configuration SMTP invalide ou indisponible.")
+  return {"ok": True}
 
 
 def _raise_email_error(exc: Exception) -> None:
