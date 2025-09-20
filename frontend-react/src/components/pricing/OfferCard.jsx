@@ -23,8 +23,15 @@ export default function OfferCard({
   isUpgrade = false,
   minCryptoEur = 10.01, // ← seuil d’activation du bouton Crypto
 }) {
+
   const isSub = of.type === "subscription";
   const base = of.price_eur ?? 0;
+  const credits = Number(of.credits ?? 0);
+  const bonusForSubscriber = (!isSub && isSubscriber) ? Math.ceil(credits * 0.10) : 0;
+  const creditLine =
+    credits > 0
+      ? `${credits} crédits inclus${bonusForSubscriber ? ` (+${bonusForSubscriber} pour abonnés)` : ""}`
+      : null;
 
   // On n’affiche plus de réduction de prix : bonus crédits uniquement
   const showDiscount = false; // ❌ plus de prix barré
@@ -53,7 +60,7 @@ export default function OfferCard({
 
   // Désactivation Crypto si prix < seuil (ex: pack 5€), SAUF pour CREDIT_10
   const cryptoDisabled = !isSub && Number(base) < Number(minCryptoEur) && of.id !== "CREDIT_10";
-  
+
   return (
   <div
     className={[
@@ -76,17 +83,23 @@ export default function OfferCard({
       </div>
 
       <ul className="pr-list">
-        {lines.map((t) => <li key={t}>{t}</li>)}
+        {creditLine && <li key="credits">{creditLine}</li>}
+        <li key="unique">Paiement unique, sans engagement</li>
+        {/* Hint Crypto (dans la liste), uniquement pour l’offre 10 € */}
+        {!isSub && of.id === "CREDIT_10" && (
+          <li key="crypto-hint">
+            Crypto 10,50 € (min) — {isSubscriber ? "+2 crédits" : "+1 crédit"}
+          </li>
+        )}
       </ul>
-    </div>
 
     <div className="pr-price-row">
-      <div className="pr-price">{isSub ? `${euro(base)}/mois` : euro(base)}</div>
-      {!isSub && isSubscriber && (
-        <div className="text-[12px] opacity-80 mt-1">
-          bonus abonné : <b>+10% crédits</b>
-        </div>
-      )}
+      <div className="pr-price">
+        {isSub ? `${euro(base)}/mois` : euro(base)}
+        {!isSub && isSubscriber && (
+          <span className="ml-2 text-[12px] opacity-80 align-middle">+10% crédits</span>
+        )}
+      </div>
     </div>
 
     {/* Boutons en colonne */}
