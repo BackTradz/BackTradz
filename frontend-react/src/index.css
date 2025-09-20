@@ -49,18 +49,32 @@ html, body, #root {
   box-sizing: border-box;
 }
 
-/* === Sticky footer site-wide (iOS/Android/desktop safe) === */
+/* === GLOBAL STICKY LAYOUT === */
 html, body, #root { height: 100%; }
- #root {
-   min-height: 100svh;   /* mobile viewport “small” */
-   min-height: 100dvh;   /* dynamic viewport si dispo */
-   display: flex;
-   flex-direction: column;
- }
-/* Le contenu pousse le footer en bas */
-footer.footer {          /* ta classe footer existante */
-   margin-top: auto;
- }
+
+#root {
+  min-height: 100dvh;          /* couvre toujours l'écran */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Le wrapper AppLayout devient la colonne principale */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;          /* évite tout gap au chargement */
+}
+
+/* Le contenu prend la place restante même vide (avant fetch) */
+.app-layout > main {
+  flex: 1 0 auto;
+}
+
+/* Le footer colle en bas tant que la page < 100vh */
+footer.footer {
+  margin-top: auto;
+}
+
 
 /* .page-skeleton-guard => stabilise la hauteur du bloc principal avant l’arrivée des cartes*/
 .page-skeleton-guard {

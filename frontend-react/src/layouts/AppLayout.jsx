@@ -8,7 +8,7 @@ import TopProgress from "../components/ui/progressbar/TopProgress";
     
     return ( 
     
-    <div className="flex flex-col min-h-[100svh] md:min-h-screen bg-bg text-textMain">
+    <div className="app-layout flex flex-col min-h-[100svh] md:min-h-screen bg-bg text-textMain">
        <Navbar /> 
        <main className="flex-grow w-full max-w-7xl mx-auto px-4 py-6"> 
         <Outlet /> 
