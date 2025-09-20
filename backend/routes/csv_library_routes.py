@@ -18,6 +18,8 @@ from fastapi.responses import FileResponse
 from backend.models.users import get_user_by_token, update_user, decrement_credits
 from backend.utils.data_loader import load_data_or_extract
 import json
+from backend.models.users import USERS_FILE, get_user_by_token
+
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 import os
@@ -303,16 +305,89 @@ def download_csv_by_path(
 
         users[user.id]["credits"] -= 1
         users[user.id].setdefault("purchase_history", []).append({
-            "label": "Téléchargement CSV",
+            "label": "Achat CSV",
             "price_paid": -1,
             "method": "credits",
-            "type": "Téléchargement",
+            "type": "Achat",
             "filename": file_path.name,
+            "relative_path": str(file_path.resolve().relative_to(OUTPUT_DIR.resolve())).replace("\\","/"),
             "date": datetime.now().isoformat()
         })
         f.seek(0); json.dump(users, f, indent=2); f.truncate()
 
     return FileResponse(file_path, filename=file_path.name, media_type="text/csv")
+
+
+@router.get("/download_owned_csv_by_path/{path:path}")
+def download_owned_csv_by_path(
+    path: str,
+    x_api_key: str = Header(None),
+    token: str = Query(None),
+):
+    """
+    Télécharge un CSV déjà acquis par l'utilisateur (0 crédit).
+   Autorisé si:
+     - présent dans purchase_history (filename ou relative_path),
+      - OU présent dans my_recent_extractions (TTL 48h).
+    """
+
+    # Résolution chemin disque (dans OUTPUT_DIR/OUTPUT_LIVE_DIR)
+    file_path = Path(path)
+    if not file_path.is_absolute():
+       file_path = (OUTPUT_DIR / path).resolve()
+    allowed_roots = [OUTPUT_DIR.resolve(), OUTPUT_LIVE_DIR.resolve()]
+    if not any(r in file_path.parents or file_path == r for r in allowed_roots):
+        raise HTTPException(status_code=400, detail="Chemin hors stockage autorisé")
+    # Auth
+    api_key = x_api_key or token
+    user = get_user_by_token(api_key)
+    if not user:
+        raise HTTPException(status_code=401, detail="Token invalide")
+
+    # Vérif "déjà acquis"
+    filename = file_path.name
+    rel_from_output = str(file_path.resolve().relative_to(OUTPUT_DIR.resolve())).replace("\\","/")
+    with open(USERS_FILE, "r+", encoding="utf-8") as f:
+        users = json.load(f)
+        u = users.get(user.id)
+        if not u:
+            raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+
+        ph = u.get("purchase_history", [])
+        owned = any(
+            (r.get("filename") == filename) or
+            (r.get("relative_path") == rel_from_output)
+            for r in ph
+        )
+
+    # Sinon: vérifie dans les extractions récentes (TTL 48h)
+    if not owned:
+        rows = _load_recent_extractions(user)
+        owned = any(
+            (r.get("filename") == filename) or
+            (r.get("relative_path") == f"backend/{rel_from_output}")
+            for r in rows
+        )
+        if not owned:
+            raise HTTPException(status_code=403, detail="Non autorisé (fichier non acquis)")
+
+    # Historique (trace non débitable)
+    with open(USERS_FILE, "r+", encoding="utf-8") as f:
+        users = json.load(f)
+        users[user.id].setdefault("purchase_history", []).append({
+            "label": "Téléchargement (déjà acquis)",
+            "price_paid": 0,
+            "method": "none",
+            "type": "Téléchargement",
+            "filename": filename,
+            "relative_path": rel_from_output,
+            "date": datetime.now().isoformat()
+        })
+        f.seek(0); json.dump(users, f, indent=2); f.truncate()
+
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Fichier introuvable")
+    return FileResponse(file_path, filename=filename, media_type="text/csv")
 
 # --- AJOUT --- (à la fin du fichier)
 from fastapi import Query

@@ -30,5 +30,14 @@ export const downloadCsvByPathUrl = (relativePath) => {
   return `${API_BASE}/api/download_csv_by_path/${encoded}?token=${encodeURIComponent(token)}`;
 };
 
+// ✅ Téléchargement 0 crédit (pour "Mes CSV")
+export const downloadOwnedCsvByPathUrl = (relativePath) => {
+  let rel = String(relativePath || "").replaceAll("\\", "/");
+  if (rel.toLowerCase().startsWith("backend/")) rel = rel.substring(8);
+  const encoded = rel.split("/").map(encodeURIComponent).join("/");
+  const token = localStorage.getItem("apiKey") || "";
+  return `${API_BASE}/api/download_owned_csv_by_path/${encoded}?token=${encodeURIComponent(token)}`;
+};
+
 // Extractions récentes (TTL 48h) pour l'utilisateur courant
 export const myRecentExtractions = () => api("/api/my_recent_extractions");

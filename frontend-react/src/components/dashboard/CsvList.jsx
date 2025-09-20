@@ -5,8 +5,7 @@ import CsvCard from "../ui/CSVcard/CSVCard";
 
 import { myPurchasedCSVs } from "../../sdk/userApi";
 import { me } from "../../sdk/authApi";
-import { myRecentExtractions, downloadCsvByPathUrl } from "../../sdk/catalogApi";
-
+import { myRecentExtractions, downloadOwnedCsvByPathUrl } from "../../sdk/catalogApi";
 //import reutilisable//
 import Select from "../ui/select/Select";
 import TopProgress from "../ui/progressbar/TopProgress";
@@ -66,7 +65,7 @@ function getApiToken() {
 // Build final download URL à partir d’un chemin RELATIF donné par l’API
 function buildSignedUrlFromPath(relPath) {
   if (!relPath) return "";
-  const raw = downloadCsvByPathUrl(stripBackendPrefix(relPath)); // ⬅️ même helper que CSV Shop
+  const raw = downloadOwnedCsvByPathUrl(stripBackendPrefix(relPath));  // ✅ 0 crédit
   // Ajoute ?token=… uniquement si absent (Shop peut déjà l’ajouter)
   if (/\btoken=/.test(raw)) return raw;
   const token = getApiToken();
