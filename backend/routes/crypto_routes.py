@@ -104,7 +104,7 @@ async def create_crypto_order(request: Request):
     if not NOWPAYMENTS_API_KEY:
         raise HTTPException(500, detail="NOWPayments non configuré (NOWPAYMENTS_API_KEY).")
 
-     payload = {
+    payload = {
         "price_amount": price_eur,
         "price_currency": "eur",
         "pay_currency": currency,
