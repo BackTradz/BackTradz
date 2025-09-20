@@ -45,6 +45,24 @@ function parsePurchaseFilename(filename) {
   return { symbol, timeframe, period: "", ext: (/\.(\w+)$/i.exec(f)?.[1] || "").toLowerCase(), kind: "unknown" };
 }
 
+// “backend/…” -> “…”
+function stripBackendPrefix(p) {
+  let x = String(p || "").replaceAll("\\", "/");
+  return x.toLowerCase().startsWith("backend/") ? x.slice(8) : x;
+}
+
+
+ // 🔐 Récupère la clé API stockée (même logique que le reste du site)
+function getApiToken() {
+  try {
+    const raw = localStorage.getItem("user");
+    const user = raw ? JSON.parse(raw) : {};
+    return localStorage.getItem("apiKey") || user?.token || "";
+  } catch {
+    return localStorage.getItem("apiKey") || "";
+  }
+}
+
 // output/output_live selon filename (achats lib)
 function buildDownloadUrlForLibrary(filename) {
   const meta = parsePurchaseFilename(filename);
@@ -56,23 +74,18 @@ function buildDownloadUrlForLibrary(filename) {
   } else {
     rel = `output_live/${meta.symbol}/${meta.timeframe}/${filename}`;
   }
-      // ✅ même comportement que CSVShop : pas de query ?token ; CsvCard mettra X-API-Key
-  return downloadCsvByPathUrl(rel);
-}
-// “backend/…” -> “…”
-function stripBackendPrefix(p) {
-  let x = String(p || "").replaceAll("\\", "/");
-  return x.toLowerCase().startsWith("backend/") ? x.slice(8) : x;
+ 
+  const token = getApiToken();
+  return `${downloadCsvByPathUrl(rel)}?token=${encodeURIComponent(token)}`;
 }
 
+// ====== BUILDERS D’URL (toujours avec ?token=...) ======
 function buildDownloadUrlFromRelativePath(relativePath) {
   const rel = stripBackendPrefix(relativePath);
   // ✅ même logique que pour la librairie & CSV Shop : URL signée avec ?token=…
-  const rawUser = localStorage.getItem("user");
-  const user = rawUser ? JSON.parse(rawUser) : {};
-  const token = localStorage.getItem("apiKey") || user?.token || "";
+  const token = getApiToken();
   return `${downloadCsvByPathUrl(rel)}?token=${encodeURIComponent(token)}`;
- }
+}
 
 /* ---------- Component ---------- */
 
