@@ -1,6 +1,6 @@
 // AdminMaintenance.jsx
 import { useEffect, useState } from "react";
-import api from "../apiClient"; // ton client axios/fetch déjà configuré
+import api from "../../sdk/apiClient"; // ton client axios/fetch déjà configuré
 
 export default function AdminMaintenance() {
   const [loading, setLoading] = useState(false);
