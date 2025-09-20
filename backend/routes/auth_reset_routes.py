@@ -8,15 +8,17 @@ from backend.utils.email_sender import send_email_html
 from backend.utils.email_templates import (
     reset_subject, reset_html, reset_text
 )
-
-
+from backend.core.config import FRONTEND_URL
+from backend.core.paths import USERS_JSON as USERS_FILE, DB_DIR
 
 router = APIRouter()
-USERS_FILE = Path("backend/database/users.json")
-RESET_FILE = Path("backend/database/reset_tokens.json")
+# ✅ Disque/chemins cohérents avec toute l’app (Render /var/...)
+
+RESET_FILE = DB_DIR / "reset_tokens.json"
 RESET_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# ✅ URL front nettoyée (même logique que la vérif e-mail)
+wd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # -- utils JSON (écriture atomique pour éviter toute corruption) -------------
 def _load_json(path: Path) -> dict:
@@ -55,7 +57,7 @@ def _purge_expired(tokens: dict) -> int:
 def _hash_password(pw: str) -> str:
     return pwd_context.hash(pw)
 
-@router.post("/generate-reset-token")
+@router.post("/auth/generate-reset-token")
 async def generate_reset_token(request: Request):
     """
     Génère un token de reset (validité 2h), le stocke dans reset_tokens.json
@@ -89,9 +91,7 @@ async def generate_reset_token(request: Request):
         _atomic_write_json(RESET_FILE, tokens)
 
         # lien FRONT
-        frontend = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
-        reset_url = f"{frontend}/reset-password/{reset_token}"
-
+        reset_url = f"{FRONTEND_URL}/reset-password/{reset_token}"
         # email simple (dark) — tu peux le styler plus tard
 
         subject = reset_subject()
@@ -101,10 +101,11 @@ async def generate_reset_token(request: Request):
             emailed = send_email_html(email, subject, html, text)
         except Exception:
             emailed = False
-
+    
     return {"status": "success", "emailed": bool(emailed), "reset_token": reset_token}
 
-@router.post("/reset-password/{reset_token}")
+
+@router.post("/auth/reset-password/{reset_token}")
 async def reset_password(reset_token: str, request: Request):
     """
     Vérifie le token, remplace le mot de passe par un hash bcrypt, puis purge
