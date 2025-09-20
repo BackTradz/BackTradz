@@ -77,6 +77,7 @@ export default function Pricing() {
       return add;
     };
 
+
     (async () => {
       const url = new URL(window.location.href);
       const payment = url.searchParams.get("payment");
@@ -89,6 +90,8 @@ export default function Pricing() {
         // indépendamment de hasDiscount.
         let user = null;
         try { user = await me(); } catch {}
+        const subFlag = !!(user?.plan === "SUB_9" || user?.plan === "SUB_25" || user?.has_discount);
+
        
         // Helper fallback : on n’applique plus aucune remise prix
         const resolvePaidLocal = (offer) => (offer?.price_eur ?? 0);
@@ -123,7 +126,7 @@ export default function Pricing() {
             setSuccessData({
               offer: of?.label || offer_id || "Paiement PayPal",
               method: "PayPal",
-              credits: calcAddedCredits(of, isSubscriber, "PayPal"),
+              credits: calcAddedCredits(of, subFlag, "PayPal"),
               price: paid,
             });
             setShowSuccess(true);
@@ -140,7 +143,7 @@ export default function Pricing() {
             setSuccessData({
               offer: of?.label || "Commande crypto",
               method: "Crypto",
-              credits: calcAddedCredits(of, isSubscriber, "Crypto"),
+              credits: calcAddedCredits(of, subFlag, "Crypto"),
               price: paid,
             });
             setShowSuccess(true);
@@ -157,7 +160,7 @@ export default function Pricing() {
             setSuccessData({
               offer: of?.label || offer_id || "Paiement Stripe",
               method: "Stripe",
-              credits: calcAddedCredits(of, isSubscriber, "Stripe"),
+              credits: calcAddedCredits(of, subFlag, "Stripe"),
               price: paid,
             });
             setShowSuccess(true);
