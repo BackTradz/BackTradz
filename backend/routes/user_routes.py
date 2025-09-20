@@ -253,7 +253,7 @@ async def set_password(payload: SetPasswordPayload, user: User = Depends(get_cur
     - Si aucun mot de passe n'était défini (compte Google), on autorise le set direct.
     - Sinon, on exige current_password correct.
     """
-    users = _load_users()
+    users = load_users()
     u = users.get(user.id)
     if not u:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
@@ -358,7 +358,7 @@ async def register_user(request: Request):
         return JSONResponse({"status": "error", "message": "Limite de recréation atteinte pour cet email."}, status_code=403)
     username_norm = payload.username.strip()
 
-    users = _load_users()
+    users = load_users()
 
     # Doublons insensibles à la casse
     for u in users.values():
