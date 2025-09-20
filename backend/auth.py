@@ -40,6 +40,8 @@ from backend.utils.email_templates import verification_subject, verification_htm
 from backend.core.paths import USERS_JSON, DB_DIR
 from backend.utils.logger import logger
 
+# --- helpers redirect publics (à placer au-dessus du handler) ---
+from urllib.parse import urlparse
 
 from passlib.context import CryptContext
 
@@ -343,7 +345,7 @@ async def auth_google_callback(request: Request):
         redirect_uri = (GOOGLE_REDIRECT_URI or _compute_redirect_uri(request))
         print(f"[OAUTH] callback redirect_uri = {redirect_uri}")
         token = await oauth.google.authorize_access_token(request)
-        
+
         user_info = token.get("userinfo") or {}
         # (fallback possible si besoin)
         # user_info = await oauth.google.parse_id_token(request, token)
@@ -458,32 +460,68 @@ async def get_current_user_optional(request: Request) -> dict | None:
     return user
 
 
+# --- helpers redirect publics---
+
+ALLOWED_REDIRECTS = {
+    "https://www.backtradz.com",
+    "https://backtradz.com",
+}
+
+def _safe_next(next_url: str | None) -> str | None:
+    if not next_url:
+        return None
+    try:
+        u = urlparse(next_url)
+        base = f"{u.scheme}://{u.netloc}"
+        return next_url if base in ALLOWED_REDIRECTS else None
+    except Exception:
+        return None
+
+
 @router.get("/auth/verify-email")
-async def verify_email(token: str = Query(..., description="Token de vérification reçu")):
+async def verify_email(token: str, next: str | None = None):
+    """
+    STATLESS: ne lit/écrit aucun cookie, ne log-in personne.
+    Valide l'utilisateur par le token, crédite si nécessaire,
+    puis renvoie une page neutre (ou redirige vers une URL publique 'next').
+    """
     uid = get_user_id_by_verification_token(token)
-    frontend = FRONTEND_URL
-
     if not uid:
-        target = f"{frontend}/profile?verified=error"
-    else:
-        changed = mark_email_verified_and_grant_pending_bonus(uid)
-        flag = "1" if changed else "0"
-        target = f"{frontend}/profile?verified={flag}"
+        # page neutre d'erreur (pas de redirection)
+        html = """
+        <!doctype html><meta charset="utf-8"><title>Token invalide</title>
+        <body style="margin:0;background:#0b1220;color:#e6f0ff;font-family:Segoe UI,Roboto,Arial,sans-serif">
+          <div style="max-width:640px;margin:8vh auto;padding:24px;background:#121a2b;border:1px solid #22304a;border-radius:14px;text-align:center">
+            <h2 style="margin:10px 0 6px">Lien invalide ou expiré</h2>
+            <p style="opacity:.8">Demande un nouvel e-mail de vérification depuis ton profil.</p>
+            <a href="https://www.backtradz.com" style="display:inline-block;background:linear-gradient(90deg,#3aa2ff,#5cc4ff);color:#0b1220;text-decoration:none;font-weight:700;border-radius:12px;padding:10px 18px;">Retour au site</a>
+          </div>
+        </body>"""
+        return HTMLResponse(content=html, headers={"Cache-Control": "no-store"}, status_code=400)
 
-    html = f"""<!doctype html>
-<html lang="fr"><head>
-<meta charset="utf-8">
-<title>Redirection…</title>
-<meta http-equiv="refresh" content="0; url={target}">
-<style>body{{background:#0b1220;color:#e6f0ff;font-family:system-ui,Segoe UI,Roboto,Arial}}.wrap{{max-width:640px;margin:12vh auto;padding:24px;border:1px solid #22304a;border-radius:16px;background:#121a2b}}</style>
-</head><body>
-<div class="wrap">
-  <h1>Redirection…</h1>
-  <p>Si vous n’êtes pas redirigé automatiquement, <a href="{target}">cliquez ici</a>.</p>
-</div>
-<script>try{{window.location.replace("{target}");}}catch(e){{window.location="{target}";}}</script>
-</body></html>"""
-    return HTMLResponse(content=html, status_code=200)
+    # crédite une seule fois si pas déjà fait
+    changed = mark_email_verified_and_grant_pending_bonus(uid)
+
+    # si un 'next' public est passé, on y va (sans cookie, sans session)
+    safe = _safe_next(next)
+    if safe:
+        return RedirectResponse(url=safe, status_code=307, headers={"Cache-Control": "no-store"})
+
+    # sinon, page neutre (pas de redirection automatique)
+    html = """
+    <!doctype html><meta charset="utf-8"><title>E-mail vérifié</title>
+    <body style="margin:0;background:#0b1220;color:#e6f0ff;font-family:Segoe UI,Roboto,Arial,sans-serif">
+      <div style="max-width:640px;margin:8vh auto;padding:24px;background:#121a2b;border:1px solid #22304a;border-radius:14px;text-align:center;box-shadow:0 6px 30px rgba(0,0,0,.35)">
+        <div style="font-size:24px;font-weight:800;margin-bottom:8px">
+          <span style="color:#cfe4ff">Back</span> <span style="color:#5cc4ff">tradz</span>
+        </div>
+        <h2 style="margin:10px 0 6px">E-mail vérifié ✅</h2>
+        <p style="opacity:.8;margin:0 0 12px">Tu peux maintenant revenir sur BackTradz.</p>
+        <a href="https://www.backtradz.com" style="display:inline-block;background:linear-gradient(90deg,#3aa2ff,#5cc4ff);color:#0b1220;text-decoration:none;font-weight:700;border-radius:12px;padding:10px 18px;">Ouvrir BackTradz</a>
+        <p style="opacity:.6;font-size:12px;margin-top:16px">Tu peux fermer cet onglet en toute sécurité.</p>
+      </div>
+    </body>"""
+    return HTMLResponse(content=html, headers={"Cache-Control": "no-store"})
 
 @router.post("/auth/resend-verification")
 async def resend_verification(user: User = Depends(get_current_user), request: Request = None):
