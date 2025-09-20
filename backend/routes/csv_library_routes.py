@@ -33,6 +33,7 @@ RECENT_STORE_DIR = Path("backend/storage/extractions")
 RECENT_TTL_HOURS = 48  # TTL 48h
 RECENT_MAX_RETURN = 10
 
+
 def _ensure_store_dir():
     RECENT_STORE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -94,6 +95,25 @@ def _load_recent_extractions(user):
     rows.sort(key=lambda r: r.get("created_at", ""), reverse=True)
     return rows[:RECENT_MAX_RETURN]
 
+# --- utils chemin: renvoie (file_path_absolu, root_utilisé, rel_pour_history) ---
+def _resolve_storage_path_for_download(raw_path: str):
+    p = str(raw_path or "").replace("\\", "/").lstrip("/")
+    if p.lower().startswith("backend/"):
+        p = p[8:]
+
+    root = OUTPUT_DIR
+    if p.lower().startswith("output_live/"):
+        root = OUTPUT_LIVE_DIR
+        rel = p[len("output_live/"):]
+    elif p.lower().startswith("output/"):
+        root = OUTPUT_DIR
+        rel = p[len("output/"):]
+    else:
+        # cas fallback: on considère que p est déjà relatif à OUTPUT_DIR
+        rel = p
+
+    file_path = (root / rel).resolve()
+    return file_path, root.resolve(), rel  # rel = chemin relatif (pour history)
 
 @router.get("/list_csv_library")
 def list_csv_library():
@@ -294,7 +314,9 @@ def download_csv_by_path(
     user = get_user_by_token(api_key)
     if not user:
         raise HTTPException(status_code=401, detail="Token invalide")
-
+    
+    # ✅ Résolution robuste du chemin (évite /output/output/)
+    file_path, root_used, rel_for_history = _resolve_storage_path_for_download(path)
     if user.credits < 1:
         raise HTTPException(status_code=403, detail="Pas assez de crédits")
 
