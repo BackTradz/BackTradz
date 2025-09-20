@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { StripeButton, CryptoTrxButton } from "./BrandButtons";
-import posthog from '../analytics/posthog';
+import posthog from '../../analytics/posthog';
 
 const euro = (n) =>
   new Intl.NumberFormat("fr-FR", {
