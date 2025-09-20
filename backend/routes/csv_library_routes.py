@@ -327,13 +327,16 @@ def download_csv_by_path(
 
         users[user.id]["credits"] -= 1
         users[user.id].setdefault("purchase_history", []).append({
-            "label": "Achat CSV",
+            "label": "Téléchargement CSV",   # ✅ ancien libellé attendu par le front
             "price_paid": -1,
             "method": "credits",
-            "type": "Achat",
+            "type": "Téléchargement",        # ✅ ancien type attendu par le front
             "filename": file_path.name,
-            "relative_path": str(file_path.resolve().relative_to(OUTPUT_DIR.resolve())).replace("\\","/"),
-            "date": datetime.now().isoformat()
+            # on garde ce champ additionnel, il ne casse rien et sert pour Mes CSV
+            "relative_path": str(
+                file_path.resolve().relative_to(OUTPUT_DIR.resolve())
+            ).replace("\\","/"),
+            "date": datetime.now().isoformat(),
         })
         f.seek(0); json.dump(users, f, indent=2); f.truncate()
 
