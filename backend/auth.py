@@ -487,17 +487,22 @@ async def verify_email(token: str, next: str | None = None):
     """
     uid = get_user_id_by_verification_token(token)
     if not uid:
-        # page neutre d'erreur (pas de redirection)
-        html = """
-        <!doctype html><meta charset="utf-8"><title>Token invalide</title>
-        <body style="margin:0;background:#0b1220;color:#e6f0ff;font-family:Segoe UI,Roboto,Arial,sans-serif">
-          <div style="max-width:640px;margin:8vh auto;padding:24px;background:#121a2b;border:1px solid #22304a;border-radius:14px;text-align:center">
-            <h2 style="margin:10px 0 6px">Lien invalide ou expiré</h2>
-            <p style="opacity:.8">Demande un nouvel e-mail de vérification depuis ton profil.</p>
-            <a href="https://www.backtradz.com" style="display:inline-block;background:linear-gradient(90deg,#3aa2ff,#5cc4ff);color:#0b1220;text-decoration:none;font-weight:700;border-radius:12px;padding:10px 18px;">Retour au site</a>
-          </div>
-        </body>"""
-        return HTMLResponse(content=html, headers={"Cache-Control": "no-store"}, status_code=400)
+        # après avoir validé l'email
+        html = f"""
+        <!doctype html>
+        <html><body style="background:#0b1220;color:#e6f0ff;text-align:center;padding:48px">
+        <div style="max-width:560px;margin:0 auto;background:#121a2b;border:1px solid #22304a;border-radius:16px;padding:32px">
+            <h1 style="margin:0 0 8px">Back <span style="color:#5cc4ff">tradz</span></h1>
+            <h2 style="margin:0 0 16px">E-mail vérifié ✅</h2>
+            <p>Tu peux maintenant revenir sur BackTradz.</p>
+            <a href="{FRONTEND_URL}"
+            style="display:inline-block;background:linear-gradient(90deg,#3aa2ff,#5cc4ff);
+                    color:#0b1220;text-decoration:none;font-weight:700;border-radius:12px;
+                    padding:12px 22px;margin-top:16px">Ouvrir BackTradz</a>
+        </div>
+        </body></html>
+        """
+        return HTMLResponse(content=html, status_code=200)
 
     # crédite une seule fois si pas déjà fait
     changed = mark_email_verified_and_grant_pending_bonus(uid)
