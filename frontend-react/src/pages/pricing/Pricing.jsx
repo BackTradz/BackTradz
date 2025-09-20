@@ -6,6 +6,7 @@
 // ============================================================
 import { useEffect, useState } from "react";
 import "./pricing.css";
+import posthog from '../analytics/posthog';
 
 import OfferCard from "../../components/pricing/OfferCard";
 import SuccessOverlay from "../../components/pricing/SuccessOverlay";
@@ -41,6 +42,11 @@ export default function Pricing() {
   const [userPlan, setUserPlan] = useState(null);  // "SUB_9" | "SUB_25" | null
   const [isSubscriber, setIsSubscriber] = useState(false);
   const [loadingInit, setLoadingInit] = useState(true);
+
+
+  useEffect(() => {
+    posthog?.capture?.('view_pricing');
+  }, []);
 
 
   useEffect(() => {

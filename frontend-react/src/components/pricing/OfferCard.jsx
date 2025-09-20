@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { StripeButton, CryptoTrxButton } from "./BrandButtons";
+import posthog from '../analytics/posthog';
 
 const euro = (n) =>
   new Intl.NumberFormat("fr-FR", {
@@ -125,7 +126,19 @@ export default function OfferCard({
           ) : (
             <>
               {/* ✅ ONE-SHOT : Stripe + Crypto */}
-              <StripeButton onClick={() => onStripe(of.id)}>{primaryLabel}</StripeButton>
+              <StripeButton onClick={() => {
+                try {
+                  posthog.capture('pricing_click', {
+                    offer_id: of.id,
+                    offer_label: of.label,
+                    type: isSub ? 'subscription' : 'credit',
+                    method: 'stripe',
+                    price_eur: base,
+                    is_subscriber: !!isSubscriber,
+                  });
+                } catch {}
+                onStripe(of.id);
+              }}>{primaryLabel}</StripeButton>
 
               {cryptoDisabled ? (
                 <>
@@ -139,8 +152,20 @@ export default function OfferCard({
                 </>
               ) : (
                 <>
-                  <CryptoTrxButton onClick={() => onCrypto(of.id)} />
-                </>
+                  <CryptoTrxButton onClick={() => {
+                    try {
+                      posthog.capture('pricing_click', {
+                        offer_id: of.id,
+                        offer_label: of.label,
+                        type: 'credit',
+                        method: 'crypto',
+                        price_eur: base,
+                        is_subscriber: !!isSubscriber,
+                      });
+                    } catch {}
+                    onCrypto(of.id);
+                  }} />
+                                  </>
               )}
             </>
           )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import posthog from '../analytics/posthog';
 
 const Success = () => {
   const [searchParams] = useSearchParams();
@@ -15,6 +16,20 @@ const Success = () => {
 
     setSuccessData({ offer, method, credits, price });
   }, [searchParams]);
+
+  
+  // capture une seule fois quand on a les données
+  useEffect(() => {
+    if (!successData) return;
+    try {
+      posthog.capture('purchase_success', {
+        offer_id: successData.offer,
+        method: successData.method,      // 'Stripe' | 'Crypto'
+        price_eur: Number(successData.price || 0),
+        credits_added: Number(successData.credits || 0),
+      });
+    } catch {}
+  }, [successData]);
 
   if (!successData) return <p>Chargement...</p>;
 

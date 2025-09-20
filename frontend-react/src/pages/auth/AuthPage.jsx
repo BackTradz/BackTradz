@@ -9,6 +9,7 @@ import SignupSuccessOverlay from "../../components/auth/SignupSuccessOverlay";
 import "./auth.css";
 import { login } from "../../sdk/authApi";
 import { useAuth } from "../../auth/AuthContext"; 
+import posthog from '../../analytics/posthog';
 
 export default function AuthPage() {
   const [isLoginActive, setIsLoginActive] = useState(true);
@@ -40,6 +41,7 @@ export default function AuthPage() {
           // ✅ attendre la fin de l’hydratation pour éviter le bounce
           loginSuccess(apiKey)
             .then(() => {
+              try { posthog.capture('login_success', { provider: 'google' }); } catch {}
               setShowSignupSuccess(true);
               navigate("/home", { replace: true });
             })

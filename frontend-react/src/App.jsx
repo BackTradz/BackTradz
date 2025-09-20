@@ -16,6 +16,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import RequireAuth from "./auth/RequireAuth";
 import RequireAdmin from "./auth/RequireAdmin";
 import AppLayout from "./layouts/AppLayout";
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import posthog from './analytics/posthog';
 
 // Pages publiques
 import Home from "./pages/home/Home";
@@ -40,6 +43,12 @@ import ASavoir from "./pages/asavoir/a_savoir";
 import Success from "./pages/Success";
 
 export default function App() {
+  const loc = useLocation();
+
+  useEffect(() => {
+    posthog?.capture?.('$pageview');
+  }, [loc.pathname]);
+
   return (
       <Routes>
       {/* === PUBLIC === */}
@@ -49,7 +58,7 @@ export default function App() {
         <Route path="/home" element={<Home />} />
       </Route>
       <Route path="/login" element={<AuthPage />} />
-      
+
       {/* ✅ Nouvelles routes canoniques (match les liens des emails) */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
