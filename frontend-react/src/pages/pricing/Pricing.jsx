@@ -54,6 +54,13 @@ export default function Pricing() {
       try {
         const u = await me(); // contient plan / has_discount
         const sub = u?.plan === "SUB_9" || u?.plan === "SUB_25";
+        // 👇 lie les events à l'id du user si présent
+        if (u?.id) {
+          posthog.identify(String(u.id), {
+            is_subscriber: sub,
+            plan: u?.plan || null,
+          });
+        }
         setHasDiscount(Boolean(u?.has_discount || sub));
         // ➜ on stocke le plan et le statut d’abonnement
         setUserPlan(sub ? u.plan : null);     // "SUB_9" | "SUB_25" | null
