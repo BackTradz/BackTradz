@@ -92,6 +92,7 @@ export default function OfferCard({
           </li>
         )}
       </ul>
+    </div> 
 
     <div className="pr-price-row">
       <div className="pr-price">
@@ -136,11 +137,6 @@ export default function OfferCard({
               ) : (
                 <>
                   <CryptoTrxButton onClick={() => onCrypto(of.id)} />
-                  {of.id === "CREDIT_10" && (
-                    <div className="text-[12px] opacity-80 mt-1">
-                      Crypto <b>10,50 €</b> (min) — {isSubscriber ? <b>+2 crédits</b> : <b>+1 crédit</b>}
-                    </div>
-                  )}
                 </>
               )}
             </>
