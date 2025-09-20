@@ -81,17 +81,21 @@ async def create_crypto_order(request: Request):
 
     price_eur = round(float(offer["price_eur"]), 2)
 
-    # 🔒 règle passerelle: minimum crypto (ex. 10.005€ chez NOW → on met 10.01)
-    if price_eur + 1e-9 < NOW_MIN_CRYPTO_EUR:
+    # 🔒 règle passerelle : blocage des offres < min, sauf cas spécial CREDIT_10
+    if price_eur + 1e-9 < NOW_MIN_CRYPTO_EUR and offer_id != "CREDIT_10":
         raise HTTPException(400, detail=f"Montant trop bas pour le paiement crypto (min {NOW_MIN_CRYPTO_EUR:.2f} €).")
 
-    # Cas bord : pack 10.00€ → on le pousse à 10.01€ pour franchir le seuil NOW (10.005)
-    if price_eur < NOW_MIN_CRYPTO_EUR:
-        price_eur = NOW_MIN_CRYPTO_EUR
-    if user and user.has_discount and offer["type"] in ["one_shot", "credit"]:
-        price *= 0.9
+    # Remise éventuelle (-10%) uniquement sur one-shot (si tu le souhaites)
+    # NB: même avec remise, on doit respecter le min crypto
+    if user and getattr(user, "has_discount", False) and offer.get("type") in ("one_shot", "credit"):
+        price_eur = round(price_eur * 0.9, 2)
 
-    price = round(price, 2)
+    # Cas spécial : pack 10€ en crypto → facturer 10,50 € (et on donnera +1 crédit au webhook)
+    if offer_id == "CREDIT_10":
+        price_eur = max(10.50, price_eur)
+    elif price_eur < NOW_MIN_CRYPTO_EUR:
+        # autres packs proches du min (sécurité)
+        price_eur = NOW_MIN_CRYPTO_EUR
 
     headers = {
         "x-api-key": NOWPAYMENTS_API_KEY or "",
@@ -100,8 +104,8 @@ async def create_crypto_order(request: Request):
     if not NOWPAYMENTS_API_KEY:
         raise HTTPException(500, detail="NOWPayments non configuré (NOWPAYMENTS_API_KEY).")
 
-    payload = {
-        "price_amount": price,
+     payload = {
+        "price_amount": price_eur,
         "price_currency": "eur",
         "pay_currency": currency,
         "order_id": f"{user_token}_{offer_id}",
@@ -155,8 +159,14 @@ async def nowpayments_webhook(request: Request):
         user = get_user_by_token(user_token)
 
         if user:
-            #idempotence → passe payment_id en transaction_id
-            update_user_after_payment(user.id, offer_id, method="Crypto", transaction_id=payment_id)
+            # idempotence → passe payment_id en transaction_id
+            # + bonus +1 crédit pour l’offre 10€ payée en crypto
+            update_user_after_payment(
+                user.id, offer_id,
+                method="Crypto",
+                transaction_id=payment_id,
+                bonus_credits=(1 if offer_id == "CREDIT_10" else 0)
+            )
             # === Génération de la facture (Crypto / NowPayments) ===
             try:
                 # Dans ton create-order, tu envoies price_currency="eur" et price_amount=EUR.
@@ -178,6 +188,14 @@ async def nowpayments_webhook(request: Request):
                     "qty": 1,
                     "unit_amount": paid_eur
                 }]
+                if offer_id == "CREDIT_10":
+                    # ligne informative sur la facture (bonus crédit)
+                    items.append({
+                        "sku": "CRYPTO_MIN_BONUS",
+                        "label": "Bonus crypto (seuil minimum)",
+                        "qty": 1,
+                        "unit_amount": 0.00
+                    })
 
                 create_invoice(
                     user_id=user.id,

@@ -6,8 +6,14 @@ from backend.models.offers import get_offer_by_id
 
 
 # 💳 Mettre à jour un utilisateur après un paiement
-def update_user_after_payment(user_id: str, offer_id: str, method: str = "unknown",
-                              order_id: str = None, transaction_id: str = None):
+def update_user_after_payment(
+    user_id: str,
+    offer_id: str,
+    method: str,
+    transaction_id: str | None = None,
+    bonus_credits: int = 0,
+    order_id: str | None = None,   # ✅ param optionnel pour PayPal et dédup
+):
     """
     Applique les effets d’un paiement :
     - Ajoute des crédits si achat one_shot
@@ -57,6 +63,8 @@ def update_user_after_payment(user_id: str, offer_id: str, method: str = "unknow
             base_credits = offer["credits"]
             bonus = round(base_credits * 0.10) if discount_str == "10%" else 0
             total_credits = base_credits + bonus
+             # 🎁 intègre le bonus explicite (ex: +1 pour CREDIT_10 en crypto)
+            total_credits = base_credits + bonus + int(bonus_credits or 0)
             user["credits"] += total_credits
 
         # 🔄 Cas abonnement → changement de plan + ajout crédits mensuels
@@ -86,6 +94,8 @@ def update_user_after_payment(user_id: str, offer_id: str, method: str = "unknow
             tx["order_id"] = order_id
         if transaction_id:
             tx["transaction_id"] = transaction_id
+        if bonus_credits:
+            tx["bonus_credits"] = int(bonus_credits)
 
         user.setdefault("purchase_history", []).append(tx)
 

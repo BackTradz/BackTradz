@@ -50,9 +50,8 @@ export default function OfferCard({
     ? (isUpgrade ? "Améliorer votre plan" : "S’abonner par carte")
     : "Payer par carte";
 
-  // Désactivation Crypto si prix < seuil (ex: pack 5€)
-  const cryptoDisabled = !isSub && Number(base) < Number(minCryptoEur);
-
+  // Désactivation Crypto si prix < seuil (ex: pack 5€), SAUF pour CREDIT_10
+  const cryptoDisabled = !isSub && Number(base) < Number(minCryptoEur) && of.id !== "CREDIT_10";
   return (
     <div
       className={[
@@ -123,7 +122,16 @@ export default function OfferCard({
                     </div>
                   </>
                 ) : (
-                  <CryptoTrxButton onClick={() => onCrypto(of.id)} />
+                  <>
+                    <CryptoTrxButton onClick={() => onCrypto(of.id)}>
+                      {/* On peut garder le bouton image; le hint textuel est juste en dessous */}
+                    </CryptoTrxButton>
+                    {of.id === "CREDIT_10" && (
+                      <div className="text-[12px] opacity-70 mt-1">
+                        Crypto <b>10,50 €</b> (min) → <b>+1 crédit</b>
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}
