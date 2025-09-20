@@ -14,6 +14,10 @@ Notes:
   - Aucune modification de logique: uniquement docstrings/commentaires.
   - À terme, remplacer les JSON par une base (SQLite/Postgres) et mettre un RBAC propre.
 """
+
+
+
+from backend.core.paths import DB_DIR
 from backend.core.paths import OUTPUT_DIR, ANALYSIS_DIR, USERS_JSON
 from backend.core.paths import DATA_ROOT
 from fastapi import APIRouter
@@ -946,3 +950,39 @@ def reset_history(request: Request, scope: str = Body("all")):
             json.dump(users, f, ensure_ascii=False, indent=2)
 
     return {"status": "ok", "changed_users": changed}
+
+RECREATE_FILE = (DB_DIR / "email_recreate.json")
+
+def _load_json_safe(path):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+@router.post("/admin/reset-email-recreate")
+def admin_reset_email_recreate(request: Request, payload: dict = None):
+    """
+    Reset du compteur de créations d'email (limite anti-abus).
+    - Si payload = {"email": "x@y.com"} => supprime uniquement cette clé
+    - Si payload vide/None => vide complètement le fichier
+    """
+    require_admin(request)  # 🔐 bloque si pas admin
+
+    if not RECREATE_FILE.exists():
+        # rien à faire
+        return {"ok": True, "message": "Fichier inexistant (déjà vide)."}
+
+    counts = _load_json_safe(RECREATE_FILE)
+    email = (payload or {}).get("email")
+    if email:
+        email_norm = email.strip().lower()
+        if email_norm in counts:
+            counts.pop(email_norm, None)
+            RECREATE_FILE.write_text(json.dumps(counts, indent=2), encoding="utf-8")
+            return {"ok": True, "cleared": email_norm, "left": counts}
+        else:
+            return {"ok": True, "message": f"Aucune entrée pour {email_norm}."}
+    else:
+        # reset total
+        RECREATE_FILE.write_text("{}", encoding="utf-8")
+        return {"ok": True, "cleared": "ALL"}
