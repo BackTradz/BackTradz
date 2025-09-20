@@ -952,7 +952,9 @@ def reset_history(request: Request, scope: str = Body("all")):
 
     return {"status": "ok", "changed_users": changed}
 
-RECREATE_FILE = (DB_DIR / "email_recreate.json")
+
+#---- on reutilise la meme route--- 
+RECREATE_FILE = Path(USERS_FILE).parent / "email_recreate.json"
 
 def _load_json_safe(path):
     try:
