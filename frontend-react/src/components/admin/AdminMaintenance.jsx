@@ -1,133 +1,115 @@
-// components/admin/AdminMaintenance.jsx
-// ------------------------------------------------------------
-// Bloc Maintenance Admin
-// - Réinitialise le compteur email_recreate.json
-// - Code tolérant : si l'endpoint d'état n'existe pas, on continue
-// ------------------------------------------------------------
+// AdminMaintenance.jsx
 import { useEffect, useState } from "react";
-
-const API_BASE = import.meta.env.VITE_API_URL || "/api";
+import api from "../apiClient"; // ton client axios/fetch déjà configuré
 
 export default function AdminMaintenance() {
   const [loading, setLoading] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-  const [stats, setStats] = useState(null); // { total, byEmail } si dispo
+  const [counts, setCounts] = useState({});
+  const [email, setEmail] = useState("");
+  const [msg, setMsg] = useState(null);
+  const [err, setErr] = useState(null);
 
-  async function fetchStatus() {
-    // Optionnel : si tu as un endpoint d'état, on l’affiche
-    // GET /api/admin/recreate/status (ignorer si 404)
+  const load = async () => {
+    setLoading(true);
+    setErr(null);
     try {
-      const res = await fetch(`${API_BASE}/admin/recreate/status`, {
-        credentials: "include",
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
-      }
-    } catch {
-      // silencieux : l’endpoint peut ne pas exister et ce n’est pas bloquant
-    }
-  }
-
-  useEffect(() => {
-    fetchStatus();
-  }, []);
-
-  async function handleReset() {
-    setBusy(true);
-    setMessage("");
-    try {
-      // ⚠️ adapte le chemin si nécessaire :
-      // j’utilise POST /api/admin/reset-recreate (celui que tu as ajouté)
-      const res = await fetch(`${API_BASE}/admin/reset-recreate`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        throw new Error(txt || `HTTP ${res.status}`);
-      }
-      setMessage("✅ Réinitialisation effectuée.");
-      await fetchStatus();
+      const { data } = await api.get("/api/admin/email-recreate");
+      setCounts(data.counts || {});
     } catch (e) {
-      setMessage("❌ Échec : " + (e?.message || "erreur inconnue"));
+      setErr("Impossible de charger les données.");
     } finally {
-      setBusy(false);
+      setLoading(false);
     }
-  }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const resetAll = async () => {
+    setErr(null); setMsg(null);
+    try {
+      const { data } = await api.post("/api/admin/reset-email-recreate", {});
+      setMsg("Compteur réinitialisé.");
+      setCounts({});
+    } catch (e) {
+      setErr("Échec de la réinitialisation globale.");
+    }
+  };
+
+  const resetOne = async (targetEmail) => {
+    setErr(null); setMsg(null);
+    try {
+      const { data } = await api.post("/api/admin/reset-email-recreate", { email: targetEmail });
+      setMsg(`Entrée supprimée pour ${targetEmail}.`);
+      setCounts(data.left || {});
+    } catch (e) {
+      setErr("Échec de la suppression ciblée.");
+    }
+  };
 
   return (
-    <div className="admin-section">
-      <h2 className="admin-section-title">🧰 Maintenance</h2>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">🧰 Maintenance</h1>
 
-      <div
-        style={{
-          background: "#121a2b",
-          border: "1px solid #22304a",
-          borderRadius: 16,
-          padding: 20,
-          marginBottom: 24,
-        }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: 8 }}>
+      <div className="bg-[#121a2b] border border-[#22304a] rounded-xl p-5 mb-8">
+        <h2 className="text-lg font-semibold mb-2">
           Réinitialiser <code>email_recreate.json</code>
-        </h3>
-        <p style={{ opacity: 0.8, marginTop: 0 }}>
-          Remet à zéro le compteur de (re)création de comptes test pour pouvoir
-          rejouer les étapes d’inscription.
+        </h2>
+        <p className="text-sm opacity-80 mb-4">
+          Remet à zéro le compteur de (re)création de comptes test pour rejouer le flow d’inscription.
         </p>
 
-        {stats && (
-          <div
-            style={{
-              background: "#0b1220",
-              border: "1px solid #22304a",
-              borderRadius: 12,
-              padding: "12px 14px",
-              marginBottom: 12,
-            }}
-          >
-            <div style={{ fontWeight: 600, marginBottom: 6 }}>
-              État actuel (si exposé par l’API)
-            </div>
-            <div style={{ fontSize: 14, opacity: 0.85 }}>
-              Total: <b>{stats.total ?? "-"}</b>
-            </div>
-            {stats.byEmail && (
-              <div style={{ fontSize: 13, marginTop: 6 }}>
-                {Object.entries(stats.byEmail).map(([email, n]) => (
-                  <div key={email}>
-                    <code>{email}</code> → {n}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <button onClick={resetAll}
+                  className="px-4 py-2 rounded-lg font-semibold
+                             bg-gradient-to-r from-[#3aa2ff] to-[#5cc4ff] text-[#0b1220]">
+            Réinitialiser maintenant (global)
+          </button>
 
-        <button
-          onClick={handleReset}
-          disabled={busy}
-          style={{
-            display: "inline-block",
-            background: "linear-gradient(90deg,#3aa2ff,#5cc4ff)",
-            color: "#0b1220",
-            fontWeight: 700,
-            borderRadius: 12,
-            padding: "10px 18px",
-            border: "none",
-            cursor: busy ? "not-allowed" : "pointer",
-          }}
-        >
-          {busy ? "Réinitialisation…" : "Réinitialiser maintenant"}
-        </button>
-
-        {message && (
-          <div style={{ marginTop: 12, fontSize: 14, opacity: 0.9 }}>
-            {message}
+          <div className="flex items-center gap-2">
+            <input value={email} onChange={(e)=>setEmail(e.target.value)}
+                   placeholder="email à effacer..."
+                   className="bg-[#0b1220] border border-[#22304a] rounded-lg px-3 py-2 text-sm outline-none w-72" />
+            <button onClick={()=> email && resetOne(email)}
+                    className="px-3 py-2 rounded-lg text-sm font-semibold bg-[#22304a] hover:bg-[#2a3b5b]">
+              Effacer cette entrée
+            </button>
           </div>
+        </div>
+
+        {msg && <div className="text-green-400 text-sm">✔ {msg}</div>}
+        {err && <div className="text-red-400 text-sm">✖ {err}</div>}
+      </div>
+
+      <div className="bg-[#121a2b] border border-[#22304a] rounded-xl p-5">
+        <h3 className="text-lg font-semibold mb-3">Entrées actuelles</h3>
+        {loading ? (
+          <div className="opacity-70">Chargement…</div>
+        ) : Object.keys(counts).length === 0 ? (
+          <div className="opacity-70">Aucune entrée.</div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="opacity-70">
+              <tr>
+                <th className="text-left py-2">Email</th>
+                <th className="text-left py-2">Compteur</th>
+                <th className="text-left py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(counts).map(([k,v]) => (
+                <tr key={k} className="border-t border-[#22304a]">
+                  <td className="py-2">{k}</td>
+                  <td className="py-2">{String(v)}</td>
+                  <td className="py-2">
+                    <button onClick={()=>resetOne(k)}
+                            className="px-3 py-1 rounded bg-[#22304a] hover:bg-[#2a3b5b]">
+                      Effacer
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>

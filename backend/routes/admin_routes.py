@@ -959,17 +959,24 @@ def _load_json_safe(path):
     except Exception:
         return {}
 
-@router.post("/admin/reset-email-recreate")
-def admin_reset_email_recreate(request: Request, payload: dict = None):
+@router.get("/email-recreate")
+def admin_get_email_recreate(request: Request):
+    """Retourne le contenu actuel du compteur (clé email -> nb tentatives)."""
+    require_admin(request)
+    if not RECREATE_FILE.exists():
+        return {"ok": True, "counts": {}}
+    return {"ok": True, "counts": _load_json_safe(RECREATE_FILE)}
+
+@router.post("/reset-email-recreate")
+def admin_reset_email_recreate(request: Request, payload: dict | None = None):
     """
-    Reset du compteur de créations d'email (limite anti-abus).
-    - Si payload = {"email": "x@y.com"} => supprime uniquement cette clé
-    - Si payload vide/None => vide complètement le fichier
+    Reset du compteur de créations d'email.
+    - payload={"email":"x@y.com"} -> supprime cette entrée uniquement
+    - payload=None/{} -> reset total du fichier
     """
-    require_admin(request)  # 🔐 bloque si pas admin
+    require_admin(request)
 
     if not RECREATE_FILE.exists():
-        # rien à faire
         return {"ok": True, "message": "Fichier inexistant (déjà vide)."}
 
     counts = _load_json_safe(RECREATE_FILE)
@@ -980,9 +987,8 @@ def admin_reset_email_recreate(request: Request, payload: dict = None):
             counts.pop(email_norm, None)
             RECREATE_FILE.write_text(json.dumps(counts, indent=2), encoding="utf-8")
             return {"ok": True, "cleared": email_norm, "left": counts}
-        else:
-            return {"ok": True, "message": f"Aucune entrée pour {email_norm}."}
-    else:
-        # reset total
-        RECREATE_FILE.write_text("{}", encoding="utf-8")
-        return {"ok": True, "cleared": "ALL"}
+        return {"ok": True, "message": f"Aucune entrée pour {email_norm}."}
+
+    # reset total
+    RECREATE_FILE.write_text("{}", encoding="utf-8")
+    return {"ok": True, "cleared": "ALL"}
