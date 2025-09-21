@@ -993,6 +993,6 @@
 /* Register (mobile) — espace entre CTA "S'inscrire" et bouton Google */
 @media (max-width: 900px){
   .auth-form.register-form .auth-form-inner .google-button-wrapper{
-    margin-top: 10px !important; /* ajuste 8–12px si tu veux */
+    margin-top: 12px !important; /* ajuste 8–12px si tu veux */
   }
 }
