@@ -820,7 +820,7 @@
   body.auth-page .form-panel .dbt-btn{
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important;
+    margin-inline: 0 !important; 
     box-sizing: border-box !important;
   }
 
@@ -971,10 +971,6 @@
     row-gap: 12px;        /* 👈 espacement vertical uniforme */
   }
 
-  /* Les inputs n’ont plus besoin de margin-bottom quand row-gap gère le rythme */
-  .auth-form .form-input {
-    margin-bottom: 0 !important;
-  }
 
   /* Lignes “mot de passe oublié / réinitialiser” : un peu d’air au-dessus */
   .auth-form .form-inline {
@@ -985,4 +981,8 @@
   .auth-form .google-button-wrapper {
     margin-top: 0 !important;
   }
+}
+
+@media (max-width: 900px){
+  .auth-form-inner > * + * { margin-top: 16px; }  /* espace régulier entre champs/boutons */
 }
