@@ -399,7 +399,7 @@ async def upload_csv_and_backtest(
         # 🔗 Compat : certaines stratégies lisent encore 'Datetime' → on duplique depuis 'time'
         if "Datetime" not in df.columns:
             df["Datetime"] = df["time"]
-            
+
 
          # 🔎 Détection symbole/TF si l'utilisateur a laissé "CUSTOM"
         detected_symbol = _detect_symbol_from_name(csv_file.filename or "")
@@ -464,6 +464,29 @@ async def upload_csv_and_backtest(
                 print(f"🔁 Miroir ANALYSIS_DIR: {dest_dir}")
         except Exception as _e:
             print("⚠️ Mirror vers ANALYSIS_DIR échoué:", _e)
+        # 📝 Maj params.json avec user_id pour affichage dashboard
+        try:
+            folder_path = Path(analysis_xlsx_path).parent
+            params_path = folder_path / "params.json"
+            params = {}
+            if params_path.exists():
+                try:
+                    params = json.loads(params_path.read_text(encoding="utf-8"))
+                except Exception:
+                    params = {}
+            params.update({
+                "user_id": user.id,
+                "pair": sym,
+                "timeframe": tf,
+                "strategy": strategy,
+                "period": period_str,
+                "params": {"sl_pips": sl_pips},
+            })
+            params_path.write_text(json.dumps(params, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(f"📝 params.json mis à jour avec user_id={user.id} → {params_path}")
+        except Exception as e:
+            print("⚠️ Impossible d'annoter params.json :", e)
+
         # 🎫 Crédit -2
         try:
             folder = Path(analysis_xlsx_path).parent.name if analysis_xlsx_path else None
