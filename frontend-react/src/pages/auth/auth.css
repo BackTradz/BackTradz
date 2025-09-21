@@ -983,3 +983,19 @@
     row-gap: 16px;               /* un chouïa plus d’air sur mobile */
   }
 }
+
+/* ===== AUTH — FIX FINAL ESPACEMENT MOBILE (≤900px) ===== */
+@media (max-width: 900px){
+  /* 1) Le form redevient un flux normal (pas besoin du flex ici) */
+  .auth-form-inner{ display: block !important; }
+
+  /* 2) ESPACE ENTRE TOUS LES ÉLÉMENTS DIRECTS DU FORMULAIRE
+        (inputs, bouton CTA, "mot de passe oublié", bouton Google) */
+  .auth-form-inner > * + *{ 
+    margin-top: 16px !important;   /* 👈 souffle net et uniforme */
+  }
+
+  /* 3) Petits ajustements */
+  .auth-form-inner .form-title{ margin-bottom: 12px !important; }
+  .auth-form-inner .form-inline{ margin-top: 10px !important; } /* un peu + d'air sous le CTA */
+}
