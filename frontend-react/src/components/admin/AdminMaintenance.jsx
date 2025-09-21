@@ -122,64 +122,68 @@ export default function AdminMaintenance() {
           <div className="opacity-70">Chargement…</div>
         ) : Object.keys(counts).length === 0 ? (
           <div className="opacity-70">Aucune entrée.</div>
+        
+
         ) : (
           <div className="maint-table admin-table">
             <table className="table-clean">
-            <thead className="opacity-70">
-              <tr>
-                <th className="text-left py-2">Email</th>
-                <th className="text-left py-2">Compteur</th>
-                <th className="text-left py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(counts).map(([k,v]) => (
-                <tr key={k}>
-                  <td className="py-2">{k}</td>
-                  <td className="py-2">{String(v)}</td>
-                  <td className="py-2">
-                    <button onClick={()=>resetOne(k)} className="btn btn-danger">
-                      Effacer
-                    </button>
-                  </td>
+              <thead className="opacity-70">
+                <tr>
+                  <th className="text-left py-2">Email</th>
+                  <th className="text-left py-2">Compteur</th>
+                  <th className="text-left py-2">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-              <div className="maint-card">
-                <h3 className="text-lg font-semibold mb-3">Fichiers de facturation (disk)</h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <button onClick={load} className="btn">Rafraîchir</button>
-                  <span className="opacity-70 ml-2">{invoiceFiles.length} fichier(s)</span>
-                </div>
-                {invoiceFiles.length === 0 ? (
-                  <div className="opacity-70">Aucun fichier.</div>
-                ) : (
-                  <div className="maint-table admin-table">
-                    <table className="table-clean">
-                      <thead className="opacity-70">
-                        <tr>
-                          <th className="text-left py-2">Nom</th>
-                          <th className="text-left py-2">Taille</th>
-                          <th className="text-left py-2">Modifié</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {invoiceFiles.map((it) => (
-                          <tr key={it.rel}>
-                            <td className="py-2">{it.name}</td>
-                            <td className="py-2">{fmtBytes(it.bytes)}</td>
-                            <td className="py-2">{fmtDate(it.mtime)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-
+              </thead>
+              <tbody>
+                {Object.entries(counts).map(([k,v]) => (
+                  <tr key={k}>
+                    <td className="py-2">{k}</td>
+                    <td className="py-2">{String(v)}</td>
+                    <td className="py-2">
+                      <button onClick={()=>resetOne(k)} className="btn btn-danger">
+                        Effacer
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
-    </div>
+
+
+      <div className="maint-card">
+        <h3 className="text-lg font-semibold mb-3">Fichiers de facturation (disk)</h3>
+        <div className="flex items-center gap-2 mb-2">
+          <button onClick={load} className="btn">Rafraîchir</button>
+          <span className="opacity-70 ml-2">{invoiceFiles.length} fichier(s)</span>
+        </div>
+        {invoiceFiles.length === 0 ? (
+          <div className="opacity-70">Aucun fichier.</div>
+        ) : (
+          <div className="maint-table admin-table">
+            <table className="table-clean">
+              <thead className="opacity-70">
+                <tr>
+                  <th className="text-left py-2">Nom</th>
+                  <th className="text-left py-2">Taille</th>
+                  <th className="text-left py-2">Modifié</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoiceFiles.map((it) => (
+                  <tr key={it.rel}>
+                    <td className="py-2">{it.name}</td>
+                    <td className="py-2">{fmtBytes(it.bytes)}</td>
+                    <td className="py-2">{fmtDate(it.mtime)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+     </div>
   );
 }
