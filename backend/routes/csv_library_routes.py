@@ -569,22 +569,45 @@ def extract_to_output_live(
         if df is None or df.empty:
             raise HTTPException(status_code=404, detail="Aucune donnée extraite")
 
-        # Normalise paramètres
-        sym = symbol.upper()
-        tf = timeframe.upper()
-        start_token = start_date.replace("-", "")
-        end_token = end_date.replace("-", "")
+        # --- BTZ-PATCH: match par recouvrement de période (pas besoin du token de fin exact) ---
+        from datetime import datetime as _dt
 
-        # Dossier attendu : backend/output_live/{SYMBOL}/{TF}/
-        base_dir = (OUTPUT_LIVE_DIR / sym / tf)
+        def _yyyymmdd(s: str) -> int:
+            # "20250901" -> 20250901 (int), robuste aux underscores etc.
+            try:
+                return int(s)
+            except Exception:
+                return 0
+
+        def _parse_range_from_name(name_upper: str, tf: str):
+            # Ex: "BTCUSD_H1_20250901_to_20250920.csv"
+            try:
+                base = name_upper.split(".")[0]
+                # prend la dernière occurrence "XXXXXXX_to_YYYYYYY"
+                part = base.rsplit("_TO_", 1)
+                if len(part) != 2:
+                    return (0, 0)
+                start_str = ''.join(ch for ch in part[0] if ch.isdigit())[-8:]  # ...20250901
+                end_str   = ''.join(ch for ch in part[1] if ch.isdigit())[-8:]  # 20250920
+                return (_yyyymmdd(start_str), _yyyymmdd(end_str))
+            except Exception:
+                return (0, 0)
+
+        sym = symbol.upper()
+        tf  = timeframe.upper()
+        sym_dir = sym.replace("-", "")
+        req_start_i = int(start_date.replace("-", ""))
+        req_end_i   = int(end_date.replace("-", ""))
+
+        base_dir = (OUTPUT_LIVE_DIR / sym_dir / tf)
         offers = []
         if base_dir.exists():
-            # Cherche fichier qui contient _TF_ + dates
-            for f in base_dir.glob(f"{sym}_{tf}_*.*"):
-                name = f.stem.upper()
-                if start_token in name and end_token in name:
+            for f in base_dir.glob(f"{sym_dir}_{tf}_*.*"):
+                nameU = f.stem.upper()
+                f_start_i, f_end_i = _parse_range_from_name(nameU, tf)
 
-                    # ✅ BTZ-PATCH: relativiser à OUTPUT_LIVE_DIR et retourner "output_live/…"
+                # 🟢 Condition: recouvrement (file_range ∩ requested_range ≠ ∅)
+                if f_start_i and f_end_i and not (f_end_i < req_start_i or f_start_i > req_end_i):
                     rel_under_live = str(
                         f.resolve().relative_to(OUTPUT_LIVE_DIR.resolve())
                     ).replace("\\", "/")
@@ -596,12 +619,14 @@ def extract_to_output_live(
                         "year": start_date[:4],
                         "month": start_date[5:7],
                         "filename": f.name,
-                        "relative_path": rel_path,   # ✅ "output_live/…"
+                        "relative_path": rel_path,   # ex: output_live/BTCUSD/H1/...
                         "source": "live",
-                        "start_date": start_date,  # 👈 NEW
-                        "end_date": end_date       # 👈 NEW
+                        "start_date": start_date,
+                        "end_date": end_date,
                     })
-                    break  # un fichier suffit
+                    break
+        # --- /BTZ-PATCH ---
+
         # Log des extractions (Niv.2) — une entrée par fichier proposé
         for off in offers:
             _store_extraction_log(user, {
