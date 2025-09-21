@@ -548,14 +548,20 @@ def extract_to_output_live(
             for f in base_dir.glob(f"{sym}_{tf}_*.*"):
                 name = f.stem.upper()
                 if start_token in name and end_token in name:
-                    rel_path = str(f.resolve().relative_to(Path("backend").resolve())).replace("\\", "/")
+
+                    # ✅ BTZ-PATCH: relativiser à OUTPUT_LIVE_DIR et retourner "output_live/…"
+                    rel_under_live = str(
+                        f.resolve().relative_to(OUTPUT_LIVE_DIR.resolve())
+                    ).replace("\\", "/")
+                    rel_path = f"output_live/{rel_under_live}"
+
                     offers.append({
                         "symbol": sym,
                         "timeframe": tf,
                         "year": start_date[:4],
                         "month": start_date[5:7],
                         "filename": f.name,
-                        "relative_path": rel_path,
+                        "relative_path": rel_path,   # ✅ "output_live/…"
                         "source": "live",
                         "start_date": start_date,  # 👈 NEW
                         "end_date": end_date       # 👈 NEW
