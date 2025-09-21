@@ -211,6 +211,26 @@ def admin_factures_delete(request: Request, rel: Optional[str] = Body(None), pay
     # renvoyer stats à jour pour rafraîchir l'UI
     return {"ok": True, "left": _factures_stats()}
 
+
+@router.get("/admin/factures_delete")
+def admin_factures_delete_get(request: Request, rel: str):
+    """
+    Variante GET pour supprimer une facture (même contrat que download):
+    /api/admin/factures_delete?rel=...&apiKey=...
+    """
+    require_admin_from_request_or_query(request)
+    target = (FACTURES_DIR / rel).resolve()
+    if not _safe_under_data_root(target) or not str(target).startswith(str(FACTURES_DIR.resolve())):
+        raise HTTPException(status_code=400, detail="Chemin non autorisé.")
+    if not target.is_file():
+        raise HTTPException(status_code=404, detail="Fichier introuvable.")
+    try:
+        target.unlink(missing_ok=False)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Échec de suppression.")
+    return {"ok": True}
+
+
 @router.get("/admin/stats/daily_summary")
 def daily_summary():
     """
