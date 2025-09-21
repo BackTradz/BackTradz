@@ -63,7 +63,7 @@ export default function CSVInfoBanner({
           {optional.length > 0 && <span className="chip chip--xs chip--divider">•</span>}
           {optional.map(c => <span key={c.name} className="chip chip--xs chip--optional">{c.name}</span>)}
         </div>
-        <DetailButton onClick={() => setOpen(v => !v)} aria-expanded={open}>
+        <DetailButton className="infobar-details-btn" onClick={() => setOpen(v => !v)} aria-expanded={open}>
           Détails
         </DetailButton>
       </div>

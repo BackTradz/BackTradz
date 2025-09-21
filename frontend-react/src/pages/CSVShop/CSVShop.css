@@ -483,3 +483,39 @@
   /* (si un ancien patch a forcé 2 colonnes, on l’écrase) */
   .infobar-popover .cols-table{ grid-template-columns: 160px 120px 90px minmax(420px,1fr) !important; }
 }
+
+/* =========================================================
+   📱 Fix "Détails" qui déborde dans la barre d'info (mobile)
+   - On autorise le wrap côté droit
+   - Les "chips" prennent la ligne complète si besoin
+   - Le bouton passe à la ligne, sans déborder
+   ========================================================= */
+@media (max-width: 640px) {
+  /* Autoriser le retour à la ligne du strip entier */
+  .csvshop-infobar.infobar--strip {
+    flex-wrap: wrap;
+  }
+
+  /* Le bloc de droite accepte le wrap et s'aligne en haut */
+  .infobar-strip-right {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;        /* ⬅️ clé */
+    min-width: 0;
+  }
+
+  /* Les chips peuvent se compresser et occuper toute la largeur */
+  .infobar-chips {
+    flex: 1 1 100%;         /* ⬅️ prennent la ligne si manque de place */
+    min-width: 0;
+  }
+
+  /* Le bouton "Détails" passe sous les chips et ne déborde pas */
+  .infobar-details-btn.dbt-btn {
+    flex: 0 0 auto;
+    margin-top: 6px;        /* petit espace sous les chips */
+    white-space: nowrap;    /* évite la casse du label */
+    max-width: 100%;        /* ceinture/bretelles si texte long */
+  }
+}
