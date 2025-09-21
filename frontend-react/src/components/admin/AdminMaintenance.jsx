@@ -144,6 +144,8 @@ export default function AdminMaintenance() {
                   </td>
                 </tr>
               ))}
+            </tbody>
+          </table>
               <div className="maint-card">
                 <h3 className="text-lg font-semibold mb-3">Fichiers de facturation (disk)</h3>
                 <div className="flex items-center gap-2 mb-2">
@@ -176,9 +178,6 @@ export default function AdminMaintenance() {
                 )}
               </div>
 
-            </tbody>
-          </table>
-          </div>
         )}
       </div>
     </div>
