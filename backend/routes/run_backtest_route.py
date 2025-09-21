@@ -396,6 +396,11 @@ async def upload_csv_and_backtest(
         # Evite les collisions dans les stratégies qui font reset_index() (sinon: "cannot insert time, already exists")
         df.index.name = None
 
+        # 🔗 Compat : certaines stratégies lisent encore 'Datetime' → on duplique depuis 'time'
+        if "Datetime" not in df.columns:
+            df["Datetime"] = df["time"]
+            
+
          # 🔎 Détection symbole/TF si l'utilisateur a laissé "CUSTOM"
         detected_symbol = _detect_symbol_from_name(csv_file.filename or "")
         detected_tf = _detect_tf_from_name(csv_file.filename or "") or _infer_tf_from_df(df)
