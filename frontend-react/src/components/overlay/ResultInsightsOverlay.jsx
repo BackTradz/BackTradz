@@ -8,7 +8,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import PillTabs from "../ui/switchonglet/PillTabs";
 import { xlsxMeta, xlsxSheet } from "../../sdk/backtestXlsxApi";
 import { formatPair, formatStrategy } from "../../lib/labels";
-import CTAButton from "../ui/button/CTAButton";
+
 
 
 import "./insights.css";
@@ -372,7 +372,7 @@ function PublicDataSheetView({ folder, sheet }) {
           </div>
         )}
 
-
+      </div>
 
 
       <div className="table-wrap">
