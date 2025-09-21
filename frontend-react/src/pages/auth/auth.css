@@ -908,10 +908,12 @@
 }
 
 
-/* Mobile: ajoute un espace vertical entre chaque élément du formulaire
-   Sans toucher au padding ni aux largeurs/marges latérales */
+/* 📱 Mobile (≤900px) — juste un peu d'air entre les blocs,
+   sans toucher au padding ni aux largeurs */
 @media (max-width: 900px) {
-  .auth-form > * + * {
-    margin-top: 12px !important;  /* ajuste 12px à ton goût */
-  }
+  /* espace entre le bouton CTA et la ligne "Mot de passe oublié ?" */
+  .auth-form .dbt-btn + .form-inline { margin-top: 12px !important; }
+
+  /* espace entre cette ligne et le bouton Google */
+  .auth-form .form-inline + .google-button-wrapper { margin-top: 12px !important; }
 }
