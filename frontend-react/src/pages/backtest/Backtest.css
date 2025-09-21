@@ -587,3 +587,17 @@
     max-width: none;
   }
 }
+
+/* ---------------------------------------------------------
+   Espace entre "Crédits restants" et les 2 boutons
+   --------------------------------------------------------- */
+.bt-result-actions{
+  margin-top: 10px;        /* mobile & défaut */
+}
+
+@media (min-width: 768px){
+  .bt-result-actions{
+    margin-top: 14px;      /* un peu plus d’air sur desktop */
+  }
+}
+
