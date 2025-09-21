@@ -95,10 +95,37 @@ def _load_recent_extractions(user):
                 exp = now  # si cassé → on filtre
             if exp <= now:
                 continue
-            # Fichier toujours présent ?
+            # --- BTZ-PATCH: existence sous OUTPUT et OUTPUT_LIVE (plus 'backend/') ---
             rel = obj.get("relative_path") or obj.get("path")
             if not rel:
                 continue
+
+            # normalisation
+            rel = str(rel).replace("\\", "/")
+
+            exists = False
+
+            # a) si rel commence par output/ ou output_live/, teste sous les deux racines
+            roots = [OUTPUT_DIR.resolve(), OUTPUT_LIVE_DIR.resolve()]
+            for root in roots:
+                cand = (root / rel).resolve()
+                if cand.exists():
+                    exists = True
+                    break
+
+            # b) si on nous a laissé un absolu (ex: /var/data/backtradz/output_live/...), teste tel quel
+            if not exists:
+                try:
+                    cand_abs = _P(rel).resolve()
+                    if cand_abs.exists():
+                        exists = True
+                except Exception:
+                    pass
+
+            if not exists:
+                continue
+            # --- /BTZ-PATCH ---
+
             f_abs = Path("backend").resolve() / Path(rel)
             if not f_abs.exists():
                 continue
