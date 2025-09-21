@@ -185,7 +185,17 @@ export default function CsvList() {
         }));
 
         if (!alive) return;
-        setItems([...libItems, ...liveItems]);
+        // 🔁 fusion + dédup (même fichier = 1 carte)
+        const merged = [...libItems, ...liveItems];
+        const seen = new Set();
+        const uniq = merged.filter(it => {
+          const k = keyForItem(it);      // utilise delete_path || URL sans ?token || (pair|tf|period)
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
+        setItems(uniq);
+
       } catch (e) {
         if (!alive) return;
         setErr(e.message || "Erreur de chargement");
