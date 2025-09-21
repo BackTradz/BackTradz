@@ -956,3 +956,30 @@
     margin-bottom: 4px !important; /* petit amorti avant le footer */
   }
 }
+
+/* === AUTH — Espacement vertical fiable des champs (mobile & desktop) === */
+.auth-form-inner{
+  display: flex;                 /* on empile proprement */
+  flex-direction: column;
+  row-gap: 14px;                 /* 👈 ESPACE ENTRE TOUS LES ÉLÉMENTS */
+}
+
+/* On neutralise les anciennes marges pour laisser le "gap" faire le job */
+.auth-form-inner .form-input,
+.auth-form-inner .dbt-btn,
+.auth-form-inner .google-button-wrapper,
+.auth-form-inner .form-inline{
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Micro-ajustements spécifiques */
+.auth-form-inner .form-inline{   /* "Mot de passe oublié ?" */
+  margin-top: 4px !important;    /* léger rapprochement si tu veux */
+}
+
+@media (max-width: 900px){
+  .auth-form-inner{
+    row-gap: 16px;               /* un chouïa plus d’air sur mobile */
+  }
+}
