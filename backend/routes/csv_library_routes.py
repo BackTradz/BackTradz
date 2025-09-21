@@ -462,11 +462,7 @@ def download_csv_by_path(
         f.seek(0)
         json.dump(users, f, indent=2, ensure_ascii=False)
         f.truncate()
-    # --- /BTZ-PATCH ---
-    # ... après écriture historique, juste avant le return
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Fichier introuvable")
-
+    # On a déjà un file_path existant via _resolve_storage_path_for_download
     return FileResponse(file_path, filename=file_path.name, media_type="text/csv")
 
 
