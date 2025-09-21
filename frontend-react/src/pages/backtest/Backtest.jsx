@@ -39,6 +39,7 @@ import STRATEGIES_MAP from "../../config/labels/strategies.map";
 import usePip from "../../hooks/usePip"; // ✅ nouveau hook
 import { getUiParamsSpec } from "../../config/labels/params.map"; // 🔥 on utilise la spec UI
 import DetailButton from "../../components/ui/button/DetailButton";
+import ResultInsightsOverlay from "../../components/overlay/ResultInsightsOverlay";
 
 
 export default function Backtest() {
@@ -82,6 +83,10 @@ export default function Backtest() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [pageLoading, setPageLoading] = useState(true);
+  const [showOverlay, setShowOverlay] = useState(false);   // (tu l’as déjà)
+  const [overlayFolder, setOverlayFolder] = useState("");  // 👈 nouveau
+  const [overlayPeriod, setOverlayPeriod] = useState("");  // 👈 nouveau
+
 
   // ===== Dates helpers (FR + ISO) =====
   // Parse "DD-MM-YYYY" / "DD/MM/YYYY" / "YYYY-MM-DD" en Date locale minuit
@@ -369,9 +374,16 @@ export default function Backtest() {
               };
 
               return (
-                <DetailButton as="button" onClick={handleDownload}>
-                  📥 Télécharger le rapport (.xlsx)
+                <DetailButton as="button" onClick={(e) => {
+                  e.preventDefault();
+                  setOverlayFolder(folder);
+                  // si tu as une période dispo dans result, tu peux la mettre, sinon vide:
+                  setOverlayPeriod("");
+                  setShowOverlay(true);
+                }}>
+                  👁️ Voir les résultats
                 </DetailButton>
+
               );
             })()}
 
@@ -764,7 +776,13 @@ export default function Backtest() {
                 <ResultInsightsOverlay
                   open={showOverlay}
                   onClose={() => setShowOverlay(false)}
-                  item={{ folder /* le folder extrait ci-dessus */, symbol, timeframe, strategy: selectedStratOfficial || selectedStratCustom, period: /* si dispo dans result ou reconstituée */ }}
+                  item={{
+                    folder: overlayFolder,                      // ✅ depuis l’état
+                    symbol,                                     // inchangé
+                    timeframe,                                  // inchangé
+                    strategy: selectedStratOfficial || selectedStratCustom,
+                    period: overlayPeriod                       // ✅ valeur concrète (même vide)
+                  }}
                 />
 
               </section>
