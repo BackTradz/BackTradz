@@ -217,6 +217,7 @@ def admin_factures_delete_get(request: Request, rel: str):
     """
     Variante GET pour supprimer une facture (même contrat que download):
     /api/admin/factures_delete?rel=...&apiKey=...
+    Retourne aussi les stats restantes pour faciliter le refresh UI.
     """
     require_admin_from_request_or_query(request)
     target = (FACTURES_DIR / rel).resolve()
@@ -228,7 +229,8 @@ def admin_factures_delete_get(request: Request, rel: str):
         target.unlink(missing_ok=False)
     except Exception:
         raise HTTPException(status_code=500, detail="Échec de suppression.")
-    return {"ok": True}
+    # ✅ aligne le contrat sur la POST: renvoyer les stats restantes
+    return {"ok": True, "left": _factures_stats()}
 
 
 @router.get("/admin/stats/daily_summary")
