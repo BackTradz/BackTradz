@@ -24,6 +24,18 @@ from pathlib import Path
 from datetime import datetime, timedelta, timezone
 import os
 
+# --- BTZ-PATCH: horodatage local (+02:00 Europe/Brussels) ---
+try:
+    from zoneinfo import ZoneInfo
+    _TZ = ZoneInfo("Europe/Brussels")   # Belgique (gère l’heure d’été)
+    def now_iso():
+        return datetime.now(_TZ).isoformat()
+except Exception:
+    # Fallback universel: prend l’UTC puis convertit sur le TZ système
+    def now_iso():
+        return datetime.now(timezone.utc).astimezone().isoformat()
+# --- /BTZ-PATCH ---
+
 router = APIRouter()
 
 
@@ -360,7 +372,7 @@ def download_csv_by_path(
             "price_paid": -1,          # legacy (affichage)
             "credits_delta": -1,       # ✅ clé pour amount = “–1 crédits” dans l’UI
             "filename": file_path.name,
-            "date": datetime.now().isoformat(),
+            "date": now_iso(),   
         }
         if rel:
             entry["relative_path"] = rel                          # ex: BTCUSD/M5/2025-06.csv
@@ -460,7 +472,7 @@ def download_owned_csv_by_path(
             "type": "Téléchargement",
             "filename": filename,
             "relative_path": (rel_out or rel_live or ""),
-            "date": datetime.now().isoformat()
+            "date": now_iso(),   
         })
         f.seek(0); json.dump(users, f, indent=2); f.truncate()
 
