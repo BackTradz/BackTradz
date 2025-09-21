@@ -143,6 +143,28 @@ def admin_reset_factures(request: Request):
     stats = _factures_stats()
     return {"ok": True, "deleted_files": deleted_files, "deleted_dirs": deleted_dirs, "left": stats}
 
+@router.get("/admin/factures_list")
+def admin_factures_list(request: Request, limit: int = 200):
+    """Liste des fichiers du dossier factures (nom, taille, mtime)."""
+    require_admin(request)
+    items = []
+    try:
+        for p in FACTURES_DIR.glob("**/*"):
+            if p.is_file():
+                st = p.stat()
+                items.append({
+                    "name": p.name,
+                    "rel": str(p.relative_to(FACTURES_DIR)),
+                    "bytes": int(st.st_size),
+                    "mtime": datetime.fromtimestamp(st.st_mtime).isoformat(),
+                })
+        # tri recent -> ancien
+        items.sort(key=lambda x: x["mtime"], reverse=True)
+    except Exception:
+        items = []
+    return {"ok": True, "items": items[:max(1, min(limit, 1000))]}
+
+
 @router.get("/admin/stats/daily_summary")
 def daily_summary():
     """

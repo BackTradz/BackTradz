@@ -9,6 +9,7 @@ export default function AdminMaintenance() {
   const [msg, setMsg] = useState(null);
   const [err, setErr] = useState(null);
   const [factures, setFactures] = useState({ count: 0, bytes: 0 });
+  const [invoiceFiles, setInvoiceFiles] = useState([]);
 
   const load = async () => {
     setLoading(true);
@@ -18,6 +19,8 @@ export default function AdminMaintenance() {
       setCounts(data?.counts || {});
       const f = await api("/api/admin/factures_info");
       setFactures({ count: f?.count || 0, bytes: f?.bytes || 0 });
+      const l = await api("/api/admin/factures_list");
+      setInvoiceFiles(Array.isArray(l?.items) ? l.items : []);
     } catch (e) {
       setErr("Impossible de charger les données.");
     } finally {
@@ -63,9 +66,19 @@ export default function AdminMaintenance() {
       setMsg(`Dossier factures vidé (${res?.deleted_files || 0} fichiers supprimés).`);
       const f = await api("/api/admin/factures_info");
       setFactures({ count: f?.count || 0, bytes: f?.bytes || 0 });
+      const l = await api("/api/admin/factures_list");
+      setInvoiceFiles(Array.isArray(l?.items) ? l.items : []);
     } catch (e) {
       setErr("Échec du nettoyage du dossier factures.");
     }
+  };
+
+  const fmtDate = (iso) => {
+    if (!iso) return "";
+    try {
+      const d = new Date(iso);
+      return d.toLocaleString();
+    } catch { return iso; }
   };
 
   return (
@@ -101,27 +114,8 @@ export default function AdminMaintenance() {
         {msg && <div className="maint-msg">✔ {msg}</div>}
         {err && <div className="maint-err">✖ {err}</div>}
       </div>
-      <div className="maint-card">
-        <h2 className="maint-title">
-          Vider le dossier <code>factures</code> (disk)
-        </h2>
-        <p className="maint-desc">
-          Supprime tous les fichiers générés de facturation sur le disque Render.
-        </p>
-        <div className="maint-stats opacity-80 mb-3">
-          <span>Fichiers : <b>{factures.count}</b></span>
-          <span className="mx-3">•</span>
-          <span>Taille totale : <b>{fmtBytes(factures.bytes)}</b></span>
-        </div>
-        <div className="maint-actions">
-          <button onClick={resetFactures} className="btn btn-danger">
-            Vider maintenant
-          </button>
-          <button onClick={load} className="btn ml-2">
-            Rafraîchir
-          </button>
-        </div>
-      </div>
+
+
       <div className="maint-card">
         <h3 className="text-lg font-semibold mb-3">Entrées actuelles</h3>
         {loading ? (
@@ -150,6 +144,38 @@ export default function AdminMaintenance() {
                   </td>
                 </tr>
               ))}
+              <div className="maint-card">
+                <h3 className="text-lg font-semibold mb-3">Fichiers de facturation (disk)</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <button onClick={load} className="btn">Rafraîchir</button>
+                  <span className="opacity-70 ml-2">{invoiceFiles.length} fichier(s)</span>
+                </div>
+                {invoiceFiles.length === 0 ? (
+                  <div className="opacity-70">Aucun fichier.</div>
+                ) : (
+                  <div className="maint-table admin-table">
+                    <table className="table-clean">
+                      <thead className="opacity-70">
+                        <tr>
+                          <th className="text-left py-2">Nom</th>
+                          <th className="text-left py-2">Taille</th>
+                          <th className="text-left py-2">Modifié</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {invoiceFiles.map((it) => (
+                          <tr key={it.rel}>
+                            <td className="py-2">{it.name}</td>
+                            <td className="py-2">{fmtBytes(it.bytes)}</td>
+                            <td className="py-2">{fmtDate(it.mtime)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
             </tbody>
           </table>
           </div>
