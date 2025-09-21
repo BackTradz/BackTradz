@@ -150,15 +150,17 @@ def _resolve_storage_path_for_download(req_path: str):
         (OUTPUT_LIVE_DIR.resolve(), "output_live"),
     ]
 
-    # 1) S'il y a un préfixe explicite, on essaie ce root en premier
+     # 1) S'il y a un préfixe explicite, on essaie ce root en premier
     order = roots
     low = s.lower()
     if low.startswith("output_live/"):
+        # ⚠️ utiliser la chaîne d'origine 's' pour garder la casse réelle sur disque
         order = [roots[1], roots[0]]
-        s_path = Path(low[len("output_live/"):])
+        s_path = Path(s[len("output_live/"):])
     elif low.startswith("output/"):
         order = [roots[0], roots[1]]
-        s_path = Path(low[len("output/"):])
+        s_path = Path(s[len("output/"):])
+
 
     # 2) Essais en relatif (existe ?)
     for root_abs, _tag in order:
