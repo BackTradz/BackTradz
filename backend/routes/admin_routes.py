@@ -19,7 +19,7 @@ Notes:
 # en haut de fichier (si pas déjà importé)
 from fastapi import Body
 from backend.core.paths import DB_DIR
-from backend.core.paths import OUTPUT_DIR, ANALYSIS_DIR, USERS_JSON
+from backend.core.paths import OUTPUT_DIR, ANALYSIS_DIR, USERS_JSON, INVOICES_DIR
 from backend.core.paths import DATA_ROOT
 from fastapi import APIRouter
 from fastapi import Request, HTTPException
@@ -45,10 +45,10 @@ AUDIT_DIR = (DATA_ROOT / "audit").resolve()
 AUDIT_DIR.mkdir(parents=True, exist_ok=True)
 AUDIT_FILE = (AUDIT_DIR / "ledger.jsonl").resolve()
 
-# 📂 Dossier des factures (sur le disk Render)
-FACTURES_DIR = (DATA_ROOT / "factures").resolve()
+# 📂 Dossier des factures (même que l’émetteur d’invoices)
+#  → cf. backend/utils/invoice_generator.py qui écrit dans INVOICES_DIR
+FACTURES_DIR = INVOICES_DIR.resolve()
 FACTURES_DIR.mkdir(parents=True, exist_ok=True)
-
 def _safe_under_data_root(p: Path) -> bool:
     try:
         return str(p.resolve()).startswith(str(DATA_ROOT.resolve()))

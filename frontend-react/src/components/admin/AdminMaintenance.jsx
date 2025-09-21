@@ -101,7 +101,6 @@ export default function AdminMaintenance() {
         {msg && <div className="maint-msg">✔ {msg}</div>}
         {err && <div className="maint-err">✖ {err}</div>}
       </div>
-
       <div className="maint-card">
         <h2 className="maint-title">
           Vider le dossier <code>factures</code> (disk)
@@ -118,9 +117,11 @@ export default function AdminMaintenance() {
           <button onClick={resetFactures} className="btn btn-danger">
             Vider maintenant
           </button>
+          <button onClick={load} className="btn ml-2">
+            Rafraîchir
+          </button>
         </div>
       </div>
-
       <div className="maint-card">
         <h3 className="text-lg font-semibold mb-3">Entrées actuelles</h3>
         {loading ? (
