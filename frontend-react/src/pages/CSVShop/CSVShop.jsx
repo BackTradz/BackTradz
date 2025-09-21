@@ -95,10 +95,11 @@ export default function CSVShop() {
   useEffect(() => {
     (async () => {
       try {
-        const token = localStorage.getItem("apiKey");
+        const token = getApiTokenSafe();
         const res = await fetch("/api/my_recent_extractions", {
           headers: { "X-API-Key": token || "" },
         });
+
         if (!res.ok) return;
         const js = await res.json();
         const files = Array.isArray(js.files) ? js.files : [];
@@ -176,6 +177,14 @@ export default function CSVShop() {
           || "";
     } catch { return localStorage.getItem("apiKey") || ""; }
   }
+
+  function withToken(url) {
+    const t = getApiTokenSafe();
+    if (!t) return url;
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}token=${encodeURIComponent(t)}`;
+  }
+
 
   async function handleExtract(e) {
     e.preventDefault();
@@ -279,7 +288,7 @@ export default function CSVShop() {
                     symbol={it.pair}
                     timeframe={it.timeframe}
                     period={`${it.year}-${it.month}`}
-                    downloadUrl={ it.path ? downloadCsvByPathUrl(it.path) : "" }
+                    downloadUrl={ it.path ? withToken(downloadCsvByPathUrl(it.path)) : "" }
                     className="csvshop-card"
                     downloadLabel="Télécharger(–1 crédit)"   // ← piloté par la page
                     downloadTitle="Télécharger(–1 crédit))"

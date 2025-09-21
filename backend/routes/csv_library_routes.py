@@ -124,12 +124,8 @@ def _load_recent_extractions(user):
 
             if not exists:
                 continue
-            # --- /BTZ-PATCH ---
-
-            f_abs = Path("backend").resolve() / Path(rel)
-            if not f_abs.exists():
-                continue
             rows.append(obj)
+
     # Tri + limite
     rows.sort(key=lambda r: r.get("created_at", ""), reverse=True)
     return rows[:RECENT_MAX_RETURN]
