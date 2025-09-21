@@ -35,6 +35,7 @@ from backend.core.admin import is_admin_user
 from backend.core.paths import ANALYSIS_DIR
 import shutil
 import time
+import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 PARIS_TZ = ZoneInfo("Europe/Paris")
@@ -99,6 +100,40 @@ def _parse_date_flex(s: str) -> datetime | None:
 def _days_inclusive(d1: datetime, d2: datetime) -> int:
     return (d2.date() - d1.date()).days + 1
 
+PAIR_RE = re.compile(r'([A-Z0-9]{2,6}[-_/]?[A-Z0-9]{2,6})', re.IGNORECASE)
+TF_RE   = re.compile(r'\b(M5|M15|M30|H1|H4|D1)\b', re.IGNORECASE)
+
+def _detect_symbol_from_name(name: str) -> str | None:
+    if not name:
+        return None
+    # retirer un éventuel TF pour éviter les confusions
+    core = TF_RE.sub(" ", name)
+    m = PAIR_RE.search(core.replace(" ", "_"))
+    if not m:
+        return None
+    sym = m.group(1).upper().replace("/", "-").replace("_", "-")
+    if sym.endswith("=X"):  # ex: GBPUSD=X
+        sym = sym[:-2]
+    if "-" not in sym and len(sym) == 6:
+        sym = sym[:3] + "-" + sym[3:]
+    return sym
+
+def _detect_tf_from_name(name: str) -> str | None:
+    m = TF_RE.search(name or "")
+    return m.group(1).upper() if m else None
+
+def _infer_tf_from_df(df: pd.DataFrame) -> str | None:
+    if "time" not in df.columns or len(df) < 3:
+        return None
+    s = pd.to_datetime(df["time"], utc=True, errors="coerce").dropna().sort_values()
+    if len(s) < 3:
+        return None
+    dt = (s.iloc[1:] - s.iloc[:-1]).median()
+    if not isinstance(dt, pd.Timedelta):
+        return None
+    minutes = int(dt / timedelta(minutes=1))
+    mapping = {5: "M5", 15: "M15", 30: "M30", 60: "H1", 240: "H4", 1440: "D1"}
+    return mapping.get(minutes)
 
 
 @router.post("/run_backtest")
@@ -355,6 +390,18 @@ async def upload_csv_and_backtest(
         # 📌 Index temporel comme dans le flux interne
         df = df.sort_values("time").reset_index(drop=True)  # on GARDE 'time' comme colonne
 
+         # 🔎 Détection symbole/TF si l'utilisateur a laissé "CUSTOM"
+        detected_symbol = _detect_symbol_from_name(csv_file.filename or "")
+        detected_tf = _detect_tf_from_name(csv_file.filename or "") or _infer_tf_from_df(df)
+
+        sym = symbol
+        tf  = timeframe
+        if (not sym or sym.upper() == "CUSTOM") and detected_symbol:
+            sym = detected_symbol
+        if (not tf or tf.upper() == "CUSTOM") and detected_tf:
+            tf = detected_tf
+
+        print(f"🧭 Symbol/TF utilisés → {sym} / {tf} (filename='{csv_file.filename}')")
 
         # 🧠 Chargement dynamique de la stratégie
         module_path = f"backend.strategies.{strategy}"
@@ -372,8 +419,8 @@ async def upload_csv_and_backtest(
             sl_pips=sl_pips,
             tp1_pips=tp1_pips,
             tp2_pips=tp2_pips,
-            symbol=symbol,
-            timeframe=timeframe,
+            symbol=sym,
+            timeframe=tf,
             period=period_str,
             auto_analyze=False,
             params={},  # Pas de params dynamiques ici pour l'instant
@@ -386,7 +433,7 @@ async def upload_csv_and_backtest(
         analysis_xlsx_path = run_analysis(
             csv_result_path,
             strategy,
-            symbol,
+            sym,
             sl_pips,
             period_str
         )
@@ -411,15 +458,15 @@ async def upload_csv_and_backtest(
             folder = Path(analysis_xlsx_path).parent.name if analysis_xlsx_path else None
             period_str = f"{start_date} to {end_date}" if start_date and end_date else ""
             charge_2_credits_for_backtest(user.id, {
-                "symbol": symbol,
-                "timeframe": timeframe,
+                "symbol": sym,
+                "timeframe": tf,
                 "strategy": strategy,
                 "period": period_str,
                 "folder": folder,
                 "duration_ms": elapsed_ms,  # NEW
                 "credits_delta": -2,         # NEW
                 "type": "backtest",                                              # NEW
-                "label": f"Backtest {symbol} {timeframe} {strategy}" # NEW
+                "label": f"Backtest {sym} {tf} {strategy}" # NEW
             })
         except ValueError as e:
             print("⚠️ Débit post-succès impossible:", e)
