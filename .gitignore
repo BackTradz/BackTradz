@@ -1,5 +1,10 @@
 # === 🛡️ Sécurité : toujours ignorer les clés secrètes ===
 .env
+/data/**
+/database/**
+/output_live/**
+/analysis/**
+/users.json
 
 # === 🐍 Python : fichiers temporaires et cache ===
 __pycache__/
