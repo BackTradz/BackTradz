@@ -353,7 +353,8 @@ async def upload_csv_and_backtest(
             df = df[(df["time"] >= start_dt) & (df["time"] <= end_dt)]
 
         # 📌 Index temporel comme dans le flux interne
-        df.set_index("time", inplace=True)
+        df = df.sort_values("time").reset_index(drop=True)  # on GARDE 'time' comme colonne
+
 
         # 🧠 Chargement dynamique de la stratégie
         module_path = f"backend.strategies.{strategy}"
