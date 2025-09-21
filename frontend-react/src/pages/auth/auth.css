@@ -984,5 +984,5 @@
 }
 
 @media (max-width: 900px){
-  .auth-form-inner > * + * { margin-top: 16px; }  /* espace régulier entre champs/boutons */
+  .auth-form-inner > * + * { margin-top: 12px; }  /* espace régulier entre champs/boutons */
 }
