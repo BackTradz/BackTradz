@@ -907,3 +907,27 @@
   box-shadow: 0 0 0 3px rgba(59,130,246,.2) !important;
 }
 
+/* ===== Auth forms (inner) — spacing + largeur contrôlée ===== */
+.auth-form-inner{
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.auth-form-inner .form-title{
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Espace vertical net entre les inputs (mobile friendly) */
+.auth-form-inner .form-input{
+  margin-bottom: 16px; /* ~16px de souffle */
+}
+
+/* Empêche tout effet d'une ancienne règle mobile qui forcerait l'affichage */
+@media (max-width: 900px){
+  /* On rappelle que SEUL le wrapper actif est visible,
+     le <form> interne ne doit JAMAIS forcer l'affichage */
+  .auth-form-inner{ display: block !important; }
+}

@@ -21,7 +21,7 @@ export default function LoginForm({ onLogin }) {
   };
 
   return (
-    <form className="auth-form login-form visible" onSubmit={handleSubmit}>
+    <form className="auth-form-inner" onSubmit={handleSubmit}>
       <h2 className="form-title">Connexion</h2>
 
       {/* Champ identifiant ou email */}

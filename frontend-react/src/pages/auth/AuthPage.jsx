@@ -185,19 +185,22 @@ export default function AuthPage() {
 
           {/* 🔹 Panneau droit */}
           <div className="form-panel">
-            <div className="auth-form login-form">
-              {oauthError && (
-                <div className="form-error" role="alert" style={{marginBottom:12}}>
-                  {oauthError}
-                </div>
-              )}
-              <LoginForm onLogin={handleLogin} />
-            </div>
-            <div className="auth-form register-form">
-              <RegisterForm onRegister={handleRegister} />
-            </div>
+            {isLoginActive ? (
+              <div className="auth-form login-form">
+                {oauthError && (
+                  <div className="form-error" role="alert" style={{ marginBottom: 12 }}>
+                    {oauthError}
+                  </div>
+                )}
+                <LoginForm onLogin={handleLogin} />
+              </div>
+            ) : (
+              <div className="auth-form register-form">
+                <RegisterForm onRegister={handleRegister} />
+              </div>
+            )}
           </div>
-        </div>
+
 
 
       <div className="auth-legal">

@@ -29,7 +29,7 @@ export default function RegisterForm({ onRegister }) {
   };
 
   return (
-    <form className="auth-form register-form visible" onSubmit={handleSubmit}>
+    <form className="auth-form-inner" onSubmit={handleSubmit}>
       <h2 className="form-title">Créer un compte</h2>
 
       {/* Champ prénom */}
