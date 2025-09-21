@@ -36,6 +36,7 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 from pathlib import Path
 import openpyxl
+import shutil
 
 PARIS_TZ = ZoneInfo("Europe/Paris")
 
@@ -44,6 +45,27 @@ AUDIT_DIR = (DATA_ROOT / "audit").resolve()
 AUDIT_DIR.mkdir(parents=True, exist_ok=True)
 AUDIT_FILE = (AUDIT_DIR / "ledger.jsonl").resolve()
 
+# 📂 Dossier des factures (sur le disk Render)
+FACTURES_DIR = (DATA_ROOT / "factures").resolve()
+FACTURES_DIR.mkdir(parents=True, exist_ok=True)
+
+def _safe_under_data_root(p: Path) -> bool:
+    try:
+        return str(p.resolve()).startswith(str(DATA_ROOT.resolve()))
+    except Exception:        
+        return False
+
+def _factures_stats():
+    count = 0
+    size  = 0
+    for root, _, files in os.walk(FACTURES_DIR):
+        for fn in files:
+            count += 1
+            try:
+                size += (Path(root) / fn).stat().st_size
+            except Exception:
+                pass
+    return {"count": count, "bytes": int(size)}
 
 
 def _infer_subscription_price_from_user(u: dict, tx: dict):
@@ -84,6 +106,42 @@ router = APIRouter()
 def admin_ping(request: Request):
     require_admin(request)
     return {"ok": True}
+
+@router.get("/admin/factures_info")
+def admin_factures_info(request: Request):
+    """Infos rapides sur le dossier 'factures' (nb de fichiers, poids total)."""
+    require_admin(request)
+    return {"ok": True, **_factures_stats()}
+
+@router.post("/admin/reset-factures")
+def admin_reset_factures(request: Request):
+    """
+    Vide le dossier 'factures' sur le disk (suppression récursive des fichiers).
+    Sécurité: ne supprime que sous DATA_ROOT/factures.
+    """
+    require_admin(request)
+    if not _safe_under_data_root(FACTURES_DIR):
+        raise HTTPException(status_code=400, detail="Chemin non autorisé.")
+
+    deleted_files = 0
+    deleted_dirs  = 0
+    try:
+        for child in FACTURES_DIR.iterdir():
+            try:
+                if child.is_file():
+                    child.unlink(missing_ok=True)
+                    deleted_files += 1
+                elif child.is_dir():
+                    shutil.rmtree(child, ignore_errors=True)
+                    deleted_dirs += 1
+            except Exception:
+                # on continue, on ne casse pas l'endpoint
+                pass
+    except Exception:
+        raise HTTPException(status_code=500, detail="Échec du nettoyage.")
+
+    stats = _factures_stats()
+    return {"ok": True, "deleted_files": deleted_files, "deleted_dirs": deleted_dirs, "left": stats}
 
 @router.get("/admin/stats/daily_summary")
 def daily_summary():

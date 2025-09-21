@@ -8,6 +8,7 @@ export default function AdminMaintenance() {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState(null);
   const [err, setErr] = useState(null);
+  const [factures, setFactures] = useState({ count: 0, bytes: 0 });
 
   const load = async () => {
     setLoading(true);
@@ -15,6 +16,8 @@ export default function AdminMaintenance() {
     try {
       const data = await api("/api/admin/email-recreate");
       setCounts(data?.counts || {});
+      const f = await api("/api/admin/factures_info");
+      setFactures({ count: f?.count || 0, bytes: f?.bytes || 0 });
     } catch (e) {
       setErr("Impossible de charger les données.");
     } finally {
@@ -43,6 +46,25 @@ export default function AdminMaintenance() {
       setCounts(data?.left || {});
     } catch (e) {
       setErr("Échec de la suppression ciblée.");
+    }
+  };
+
+  const fmtBytes = (n=0) => {
+    if (n < 1024) return `${n} o`;
+    if (n < 1024*1024) return `${(n/1024).toFixed(1)} ko`;
+    if (n < 1024*1024*1024) return `${(n/1024/1024).toFixed(1)} Mo`;
+    return `${(n/1024/1024/1024).toFixed(1)} Go`;
+  };
+
+  const resetFactures = async () => {
+    setErr(null); setMsg(null);
+    try {
+      const res = await api("/api/admin/reset-factures", { method: "POST", body: {} });
+      setMsg(`Dossier factures vidé (${res?.deleted_files || 0} fichiers supprimés).`);
+      const f = await api("/api/admin/factures_info");
+      setFactures({ count: f?.count || 0, bytes: f?.bytes || 0 });
+    } catch (e) {
+      setErr("Échec du nettoyage du dossier factures.");
     }
   };
 
@@ -78,6 +100,25 @@ export default function AdminMaintenance() {
 
         {msg && <div className="maint-msg">✔ {msg}</div>}
         {err && <div className="maint-err">✖ {err}</div>}
+      </div>
+
+      <div className="maint-card">
+        <h2 className="maint-title">
+          Vider le dossier <code>factures</code> (disk)
+        </h2>
+        <p className="maint-desc">
+          Supprime tous les fichiers générés de facturation sur le disque Render.
+        </p>
+        <div className="maint-stats opacity-80 mb-3">
+          <span>Fichiers : <b>{factures.count}</b></span>
+          <span className="mx-3">•</span>
+          <span>Taille totale : <b>{fmtBytes(factures.bytes)}</b></span>
+        </div>
+        <div className="maint-actions">
+          <button onClick={resetFactures} className="btn btn-danger">
+            Vider maintenant
+          </button>
+        </div>
       </div>
 
       <div className="maint-card">
