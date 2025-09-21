@@ -760,6 +760,13 @@ export default function Backtest() {
               <section className="bt-card">
                 <h3 className="bt-section-title">Résultats</h3>
                 {resultView}
+
+                <ResultInsightsOverlay
+                  open={showOverlay}
+                  onClose={() => setShowOverlay(false)}
+                  item={{ folder /* le folder extrait ci-dessus */, symbol, timeframe, strategy: selectedStratOfficial || selectedStratCustom, period: /* si dispo dans result ou reconstituée */ }}
+                />
+
               </section>
             )}
             </div>
