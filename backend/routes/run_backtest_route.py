@@ -391,6 +391,8 @@ async def upload_csv_and_backtest(
 
         # 📌 Index temporel comme dans le flux interne
         df = df.sort_values("time").reset_index(drop=True)  # on GARDE 'time' comme colonne
+        # ✅ l’index doit être 'time' pour que le runner trouve entry_time, mais on garde aussi la colonne
+        df.set_index("time", inplace=True, drop=False)
 
          # 🔎 Détection symbole/TF si l'utilisateur a laissé "CUSTOM"
         detected_symbol = _detect_symbol_from_name(csv_file.filename or "")
