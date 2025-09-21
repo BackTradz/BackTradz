@@ -907,3 +907,29 @@
   box-shadow: 0 0 0 3px rgba(59,130,246,.2) !important;
 }
 
+/* =========================================================
+   AUTH (≤900px) — Espacement vertical entre champs & boutons
+   -> Ne touche pas au padding existant
+   ========================================================= */
+@media (max-width: 900px) {
+  /* Le formulaire empile déjà les éléments : on ajoute un row-gap */
+  .auth-form {
+    display: flex !important;
+    flex-direction: column !important;
+    row-gap: 12px;                 /* 👈 espace entre input, CTA, Google */
+  }
+
+  /* On neutralise d’éventuels margins redondants pour garder un rythme propre */
+  .auth-form .form-input,
+  .auth-form .dbt-btn,
+  .auth-form .sdx-google-btn,
+  .auth-form .google-button-wrapper {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* La ligne "Mot de passe oublié ? / Réinitialiser" garde un petit espace */
+  .auth-form .form-inline {
+    margin-top: 4px !important;
+  }
+}
