@@ -168,7 +168,15 @@ export default function CSVShop() {
     }
   }
 
-  // Extraction “light”
+  // BTZ-PATCH (CSVShop.jsx) : token robuste + conserver f.path
+  function getApiTokenSafe() {
+    try {
+      return localStorage.getItem("apiKey")
+          || (JSON.parse(localStorage.getItem("user")||"{}")?.token)
+          || "";
+    } catch { return localStorage.getItem("apiKey") || ""; }
+  }
+
   async function handleExtract(e) {
     e.preventDefault();
     setExtractStatus("⛏ Extraction en cours…");
@@ -177,7 +185,7 @@ export default function CSVShop() {
         setExtractStatus("❌ Renseigne paire, TF, dates.");
         return;
       }
-      const token = localStorage.getItem("apiKey");
+      const token = getApiTokenSafe();  // ✅ au lieu de localStorage.apiKey
       const res = await fetch(
         `/api/extract_to_output_live?symbol=${encodeURIComponent(exSymbol)}&timeframe=${encodeURIComponent(exTimeframe)}&start_date=${encodeURIComponent(exStart)}&end_date=${encodeURIComponent(exEnd)}`,
         { headers: { "X-API-Key": token || "" } }
@@ -193,7 +201,8 @@ export default function CSVShop() {
           timeframe: (f.timeframe || exTimeframe).toUpperCase(),
           year: String(f.year || "").padStart(4, "0"),
           month: String(f.month || "").padStart(2, "0"),
-          path: f.relative_path || "",
+          // ✅ garder les deux formes
+          path: (f.relative_path || f.path || ""),
           source: f.source || "live",
           start: f.start_date || exStart,
           end: f.end_date || exEnd,
