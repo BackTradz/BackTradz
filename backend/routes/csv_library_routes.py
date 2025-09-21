@@ -108,24 +108,49 @@ def _load_recent_extractions(user):
     return rows[:RECENT_MAX_RETURN]
 
 # --- utils chemin: renvoie (file_path_absolu, root_utilisé, rel_pour_history) ---
-def _resolve_storage_path_for_download(raw_path: str):
-    p = str(raw_path or "").replace("\\", "/").lstrip("/")
-    if p.lower().startswith("backend/"):
-        p = p[8:]
+# BTZ-PATCH: autoriser OUTPUT et OUTPUT_LIVE + chemins absolus
 
-    root = OUTPUT_DIR
-    if p.lower().startswith("output_live/"):
-        root = OUTPUT_LIVE_DIR
-        rel = p[len("output_live/"):]
-    elif p.lower().startswith("output/"):
-        root = OUTPUT_DIR
-        rel = p[len("output/"):]
-    else:
-        # cas fallback: on considère que p est déjà relatif à OUTPUT_DIR
-        rel = p
+def _resolve_storage_path_for_download(req_path: str):
+    """
+    Retourne (file_path_abs, root_used_abs, rel_for_history) en sécurisant:
+    - accepte un chemin relatif (ex: "AUDUSD/M15/x.csv") ou "backend/output_live/…"
+    - accepte un chemin ABSOLU sous OUTPUT_DIR / OUTPUT_LIVE_DIR (/var/data/backtradz/…)
+    - refuse tout ce qui sort de ces deux racines
+    """
+    # 1) normalisation "backend/…" -> retire le préfixe si présent
+    s = str(req_path or "").replace("\\", "/")
+    if s.lower().startswith("backend/"):
+        s = s[8:]  # retire "backend/"
+    s_path = Path(s)
 
-    file_path = (root / rel).resolve()
-    return file_path, root.resolve(), rel  # rel = chemin relatif (pour history)
+    # 2) liste des racines autorisées
+    roots = [
+        (OUTPUT_DIR.resolve(), "output"),
+        (OUTPUT_LIVE_DIR.resolve(), "output_live"),
+    ]
+
+    # 3) essaie chaque racine autorisée
+    for root_abs, _tag in roots:
+        try:
+            # a) si le chemin est RELATIF -> join sur la racine
+            cand = (root_abs / s_path).resolve()
+            rel = cand.relative_to(root_abs)
+            return cand, root_abs, str(rel).replace("\\", "/")
+        except Exception:
+            pass
+        try:
+            # b) si le chemin est ABSOLU sous cette racine -> accepte tel quel
+            cand_abs = s_path.resolve()
+            rel = cand_abs.relative_to(root_abs)
+            return cand_abs, root_abs, str(rel).replace("\\", "/")
+        except Exception:
+            pass
+
+    # 4) si aucune racine ne matche -> refuse proprement
+    raise HTTPException(
+        status_code=400,
+        detail="Chemin hors stockage autorisé (output/output_live)"
+    )
 
 @router.get("/list_csv_library")
 def list_csv_library():

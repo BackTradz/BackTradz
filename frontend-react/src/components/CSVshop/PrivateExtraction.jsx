@@ -10,11 +10,18 @@ function fmtFR(d) {
   return `${D}/${M}/${Y}`;
 }
 
-// 🔐 Ajoute le token d’auth localStorage à une URL
+// BTZ-PATCH: token robuste
+function getApiTokenSafe() {
+  try {
+    return localStorage.getItem("apiKey") ||
+           (JSON.parse(localStorage.getItem("user")||"{}")?.token) ||
+           "";
+  } catch { return localStorage.getItem("apiKey") || ""; }
+}
 function withToken(url) {
-  const token = localStorage.getItem("apiKey") || "";
+  const t = getApiTokenSafe();
   const sep = url.includes("?") ? "&" : "?";
-  return `${url}${sep}token=${encodeURIComponent(token)}`;
+  return `${url}${sep}token=${encodeURIComponent(t)}`;
 }
 
 /**
