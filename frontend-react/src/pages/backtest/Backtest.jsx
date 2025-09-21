@@ -374,15 +374,20 @@ export default function Backtest() {
               };
 
               return (
-                <DetailButton as="button" onClick={(e) => {
-                  e.preventDefault();
-                  setOverlayFolder(folder);
-                  // si tu as une période dispo dans result, tu peux la mettre, sinon vide:
-                  setOverlayPeriod("");
-                  setShowOverlay(true);
-                }}>
-                  👁️ Voir les résultats
-                </DetailButton>
+                <div className="flex gap-3 flex-wrap">
+                  <DetailButton as="button" onClick={handleDownload}>
+                    📥 Télécharger le rapport (.xlsx)
+                  </DetailButton>
+                  <DetailButton as="button" onClick={(e) => {
+                    e.preventDefault();
+                    setOverlayFolder(folder);
+                    setOverlayPeriod(""); // si tu n’as pas de période
+                    setShowOverlay(true);
+                  }}>
+                    👁️ Voir les résultats
+                  </DetailButton>
+                </div>
+
 
               );
             })()}
