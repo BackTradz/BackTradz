@@ -917,3 +917,14 @@
   /* espace entre cette ligne et le bouton Google */
   .auth-form .form-inline + .google-button-wrapper { margin-top: 12px !important; }
 }
+
+/* 📱 Auth mobile (≤900px) — espace vertical net entre les éléments
+   -> Utilise row-gap pour éviter de toucher aux paddings/marges latérales
+   -> Sélecteur très spécifique + !important pour battre les resets plus haut */
+@media (max-width: 900px) {
+  body.auth-page .auth-box .auth-form {
+    display: flex !important;
+    flex-direction: column !important;
+    row-gap: 12px !important; /* 👈 espace entre inputs, bouton, "Mot de passe oublié", Google */
+  }
+}
