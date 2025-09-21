@@ -63,7 +63,7 @@ from backend.routes import frontend_routes
 from backend.routes import pricing_routes
 from backend.routes.paypal_routes import router as paypal_router
 from backend.routes.crypto_routes import router as crypto_router
-from backend.routes.csv_library_routes import router as csv_router
+
 
 from fastapi_utils.tasks import repeat_every
 from backend.utils.subscription_utils import renew_all_subscriptions  # adapte au bon chemin
@@ -141,7 +141,7 @@ def _allowed_origins():
 
 # Montage des routers (certains en prefix /api)
 # NOTE: l'ordre peut influencer la résolution des routes statiques vs API si conflits de chemins.
-app.include_router(csv_router, prefix="/api")
+
 app.include_router(csv_library_router, prefix="/api")
 app.include_router(pricing_routes.router, prefix="/api")
 app.include_router(user_profile_routes.router, prefix="/api")
