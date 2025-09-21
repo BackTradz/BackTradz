@@ -37,6 +37,7 @@ from zoneinfo import ZoneInfo
 from pathlib import Path
 import openpyxl
 import shutil
+from fastapi.responses import FileResponse
 
 PARIS_TZ = ZoneInfo("Europe/Paris")
 
@@ -163,6 +164,24 @@ def admin_factures_list(request: Request, limit: int = 200):
     except Exception:
         items = []
     return {"ok": True, "items": items[:max(1, min(limit, 1000))]}
+
+
+@router.get("/admin/factures_download")
+def admin_factures_download(request: Request, rel: str):
+    """Télécharge un fichier de facture depuis le disk (admin-only)."""
+    require_admin(request)
+    target = (FACTURES_DIR / rel).resolve()
+    if not _safe_under_data_root(target) or not str(target).startswith(str(FACTURES_DIR.resolve())):
+        raise HTTPException(status_code=400, detail="Chemin non autorisé.")
+    if not target.is_file():
+        raise HTTPException(status_code=404, detail="Fichier introuvable.")
+    # Forcer le download
+    return FileResponse(
+        path=target,
+        media_type="application/octet-stream",
+        filename=target.name,
+        headers={"Content-Disposition": f'attachment; filename="{target.name}"'}
+    )
 
 
 @router.get("/admin/stats/daily_summary")

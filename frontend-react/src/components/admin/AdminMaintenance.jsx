@@ -81,6 +81,29 @@ export default function AdminMaintenance() {
     } catch { return iso; }
   };
 
+  const downloadInvoice = async (rel, name) => {
+    try {
+      // récupère le token déjà utilisé par tes appels API
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const res = await fetch(`/api/admin/factures_download?rel=${encodeURIComponent(rel)}`, {
+        method: "GET",
+        headers: token ? { "Authorization": token } : {},
+      });
+      if (!res.ok) throw new Error("Download failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name || "facture";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setErr("Impossible de télécharger ce fichier.");
+    }
+  };
+
   return (
     <div className="p-6 maint">
       <h1 className="text-2xl font-bold mb-6">🧰 Maintenance</h1>
@@ -174,7 +197,11 @@ export default function AdminMaintenance() {
               <tbody>
                 {invoiceFiles.map((it) => (
                   <tr key={it.rel}>
-                    <td className="py-2">{it.name}</td>
+                    <td className="py-2">
+                      <button className="link" onClick={() => downloadInvoice(it.rel, it.name)}>
+                        {it.name}
+                      </button>
+                    </td>
                     <td className="py-2">{fmtBytes(it.bytes)}</td>
                     <td className="py-2">{fmtDate(it.mtime)}</td>
                   </tr>
