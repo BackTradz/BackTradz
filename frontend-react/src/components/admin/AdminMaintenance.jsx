@@ -85,18 +85,18 @@ export default function AdminMaintenance() {
     try {
       // token admin déjà stocké (même logique que api())
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      const url = `/api/admin/factures_download?rel=${encodeURIComponent(rel)}${token ? `&apiKey=${encodeURIComponent(token)}` : ""}`;
-      const res = await fetch(url, { method: "GET" });
+      const downloadUrl = `/api/admin/factures_download?rel=${encodeURIComponent(rel)}${token ? `&apiKey=${encodeURIComponent(token)}` : ""}`;
+      const res = await fetch(downloadUrl, { method: "GET" });
       if (!res.ok) throw new Error("Download failed");
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
+      const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = blobUrl;
       a.download = name || "facture";
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(blobUrl);
     } catch (e) {
       setErr("Impossible de télécharger ce fichier.");
     }
