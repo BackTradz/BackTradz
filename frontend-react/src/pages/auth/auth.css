@@ -932,30 +932,6 @@
   .auth-form-inner{ display: block !important; }
 }
 
-/* ===== MOBILE: rythme vertical propre sur le formulaire (SAFE override) ===== */
-@media (max-width: 900px) {
-  /* + d'air entre les champs */
-  .auth-form-inner .form-input {
-    margin-bottom: 18px !important;   /* était ~16px -> un peu plus de souffle */
-  }
-
-  /* le bouton "Se connecter / Créer un compte" ne colle pas aux inputs */
-  .auth-form-inner .dbt-btn {
-    margin-top: 8px !important;
-  }
-
-  /* la ligne "Mot de passe oublié ? / Réinitialiser" respire */
-  .auth-form-inner .form-inline {
-    margin-top: 12px !important;
-    margin-bottom: 10px !important;
-  }
-
-  /* espace au-dessus du bouton Google */
-  .auth-form-inner .google-button-wrapper {
-    margin-top: 14px !important;
-    margin-bottom: 4px !important; /* petit amorti avant le footer */
-  }
-}
 
 /* =========================================================
    AUTH (≤900px) — Espacement vertical propre entre champs
@@ -983,6 +959,24 @@
   }
 }
 
+
+/* === AUTH — MOBILE spacing (source unique) ================== */
 @media (max-width: 900px){
-  .auth-form-inner > * + * { margin-top: 12px; }  /* espace régulier entre champs/boutons */
+  /* 1) Un seul rythme vertical pour TOUT le formulaire */
+  .auth-form{
+    display: flex !important;
+    flex-direction: column !important;
+    row-gap: 8px !important;   /* 👈 ajuste ici : 6–10px selon ton goût */
+  }
+
+  /* 2) Neutralise les marges internes pour éviter le double comptage */
+  .auth-form .form-input,
+  .auth-form .dbt-btn,
+  .auth-form .google-button-wrapper,
+  .auth-form .form-inline{
+    margin: 0 !important;
+  }
+
+  /* 3) Micro-air au-dessus des lignes secondaires si tu veux */
+  .auth-form .form-inline{ margin-top: 4px !important; }   /* “Mot de passe oublié ?” */
 }
