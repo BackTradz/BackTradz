@@ -200,7 +200,7 @@ export default function AuthPage() {
               </div>
             )}
           </div>
-
+         </div>
 
 
       <div className="auth-legal">
