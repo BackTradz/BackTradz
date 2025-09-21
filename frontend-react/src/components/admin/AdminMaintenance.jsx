@@ -106,7 +106,10 @@ export default function AdminMaintenance() {
       const url = `/api/admin/factures_delete?rel=${encodeURIComponent(rel)}${token ? `&apiKey=${encodeURIComponent(token)}` : ""}`;
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "X-API-Key": token } : {}),   // 👈 ajoute le header admin
+        },
         body: JSON.stringify({ rel }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
