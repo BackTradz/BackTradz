@@ -48,146 +48,148 @@ def get_user_backtests(request: Request, user=Depends(get_current_user)):
     backtests = []
     seen_folders = set()
 
-    # Parcours récursif de params.json dans TOUTES les racines
-    for root in search_dirs:
-        for meta_path in root.glob("**/params.json"):
+    # 📂 PROD UNIQUEMENT (Render disk)
+    search_root = ANALYSIS_DIR  # ex: /var/data/backtradz/analysis
+
+    # Parcours récursif de params.json
+    for meta_path in search_root.glob("**/params.json"):
+        try:
+            data = json.loads(meta_path.read_text(encoding="utf-8"))
+
+            folder_name = meta_path.parent.name
+            # dédup par nom de dossier (sécurité, si des hardlinks existent)
+            if folder_name in seen_folders:
+                continue
+            seen_folders.add(folder_name)
+
+            print(f"📄 SCANNING {meta_path} | user_id in file: {data.get('user_id')}")
+            if data.get("user_id") != user.id:
+                continue  # on ne montre que les runs de l'utilisateur courant
+
+            # Champs principaux (on respecte le fichier s'il les fournit)
+            symbol    = data.get("pair") or ""
+            timeframe = (data.get("timeframe") or "").upper()
+            period    = data.get("period") or ""
+            strategy  = data.get("strategy") or ""
+            sl_pips   = (data.get("params") or {}).get("sl_pips", 100)
+
+            # Fallbacks discrets depuis le nom de dossier si manquants
             try:
-                data = json.loads(meta_path.read_text(encoding="utf-8"))
+                parts = folder_name.split("_")
+                if not symbol and len(parts) >= 1:
+                    symbol = parts[0]
+                if not timeframe and len(parts) >= 2 and parts[1].upper() in {"M1","M5","M15","M30","H1","H4","D1"}:
+                    timeframe = parts[1].upper()
+                if not period:
+                    for p in parts:
+                        if "to" in p and any(ch.isdigit() for ch in p):
+                            period = p.replace("__", "_")
+                            break
+            except Exception:
+                pass
 
-                # Dédup par nom de dossier (évite doublon miroir/prod pour le même run)
-                folder_name = meta_path.parent.name
-                if folder_name in seen_folders:
-                    continue
-                seen_folders.add(folder_name)
+            # ⛑️ Fallback TF si toujours vide (certaines *upload_custom*)
+            if not timeframe:
+                timeframe = "H1"
 
-                print(f"📄 SCANNING {meta_path.name} | user_id in file: {data.get('user_id')}")
-                if data.get("user_id") != user.id:
-                    continue
+            # Résolution du XLSX (nom standard d'abord, sinon 1er 'analyse_*_resultats.xlsx')
+            xlsx_name = f"analyse_{strategy}_{symbol}_SL{sl_pips}_{period}_resultats.xlsx"
+            xlsx_path = meta_path.parent / xlsx_name
+            if not xlsx_path.exists():
+                candidates = list(meta_path.parent.glob("analyse_*_resultats.xlsx"))
+                if candidates:
+                    xlsx_path = candidates[0]
+                    xlsx_name = xlsx_path.name
 
-                # --------- Fallbacks champs manquants depuis le nom de dossier ----------
-                symbol    = data.get("pair")
-                timeframe = data.get("timeframe")
-                period    = data.get("period") or ""
-                strategy  = data.get("strategy") or ""
-                sl_pips   = data.get("params", {}).get("sl_pips", 100)
-
+            # Lecture métriques (tolérante, pas bloquante)
+            winrate = "N/A"
+            trades  = None
+            metrics_payload = None
+            if xlsx_path and xlsx_path.exists():
                 try:
-                    parts = folder_name.split("_")
-                    if not symbol and len(parts) >= 1:
-                        symbol = parts[0]
-                    if not timeframe and len(parts) >= 2 and parts[1].upper() in {"M1","M5","M15","M30","H1","H4","D1"}:
-                        timeframe = parts[1].upper()
-                    if not period:
-                        for p in parts:
-                            if "to" in p and any(ch.isdigit() for ch in p):
-                                period = p.replace("__", "_")
-                                break
-                except Exception:
-                    pass
+                    wb = openpyxl.load_workbook(xlsx_path, data_only=True)
+                    if "Global" in wb.sheetnames:
+                        ws = wb["Global"]
+                        metrics = {}
+                        for row in ws.iter_rows(min_row=1, max_row=ws.max_row):
+                            key = (str(row[0].value) if row[0].value is not None else "").strip()
+                            val = row[1].value if len(row) > 1 else None
+                            if key:
+                                metrics[key] = val
 
-                # ---------------- Résolution tolérante du fichier XLSX ------------------
-                filename = f"analyse_{strategy}_{symbol}_SL{sl_pips}_{period}_resultats.xlsx"
-                xlsx_path = meta_path.parent / filename
+                        def _get(*keys):
+                            for k in keys:
+                                if k in metrics and metrics[k] is not None:
+                                    return metrics[k]
+                            low = {k.lower().replace(" ", ""): k for k in metrics.keys()}
+                            for k in keys:
+                                t = k.lower().replace(" ", "")
+                                if t in low:
+                                    return metrics[low[t]]
+                            return None
 
-                if not xlsx_path.exists():
-                    candidates = list(meta_path.parent.glob("analyse_*_resultats.xlsx"))
-                    if candidates:
-                        xlsx_path = candidates[0]
-                        filename = xlsx_path.name
+                        def _pct(x):
+                            if x is None: return None
+                            s = str(x).strip().replace(",", ".")
+                            try:
+                                n = float(s);  return f"{n*100:.2f}%" if n <= 1 else f"{n:.2f}%"
+                            except:
+                                return s if s.endswith("%") else f"{s}%"
 
-                # ---------------------- Lecture de la feuille Global ---------------------
-                winrate = "N/A"
-                trades  = None
-                metrics_payload = None
-
-                if xlsx_path and xlsx_path.exists():
-                    try:
-                        wb = openpyxl.load_workbook(xlsx_path, data_only=True)
-                        if "Global" in wb.sheetnames:
-                            ws = wb["Global"]
-                            metrics = {}
-                            for row in ws.iter_rows(min_row=1, max_row=ws.max_row):
-                                key = (str(row[0].value) if row[0].value is not None else "").strip()
-                                val = row[1].value if len(row) > 1 else None
-                                if key:
-                                    metrics[key] = val
-
-                            def get_metric(*keys):
-                                for k in keys:
-                                    if k in metrics and metrics[k] is not None:
-                                        return metrics[k]
-                                low = {k.lower().replace(" ", ""): k for k in metrics.keys()}
-                                for k in keys:
-                                    t = k.lower().replace(" ", "")
-                                    if t in low:
-                                        return metrics[low[t]]
+                        def _num(x):
+                            if x is None: return None
+                            s = str(x).strip().replace(",", ".")
+                            try:
+                                return round(float(s), 2)
+                            except:
                                 return None
 
-                            def fmt_pct(x):
-                                if x is None: return None
-                                s = str(x).strip().replace(",", ".")
-                                try:
-                                    n = float(s)
-                                    return f"{n*100:.2f}%" if n <= 1 else f"{n:.2f}%"
-                                except:
-                                    return s if s.endswith("%") else f"{s}%"
+                        def _int(x):
+                            if x is None: return None
+                            s = str(x).strip().replace(",", ".")
+                            try:
+                                return int(float(s))
+                            except:
+                                return None
 
-                            def fmt_num(x):
-                                if x is None: return None
-                                s = str(x).strip().replace(",", ".")
-                                try:
-                                    return round(float(s), 2)
-                                except:
-                                    return None
+                        wr = _get("Winrate Gl","Winrate Global","WinrateGL","WinrateGlobal","Winrate TP1")
+                        if wr is not None: winrate = _pct(wr)
+                        tr = _get("Total Trades","Total Trad")
+                        if tr is not None: trades = _int(tr)
 
-                            def fmt_int(x):
-                                if x is None: return None
-                                s = str(x).strip().replace(",", ".")
-                                try:
-                                    return int(float(s))
-                                except:
-                                    return None
+                        metrics_payload = {
+                            "winrate_global": _pct(_get("Winrate Gl","Winrate Global","WinrateGL","WinrateGlobal")),
+                            "buy_winrate":    _pct(_get("Buy Winrate","BuyWinrate","Winrate Buy","WinrateBuy")),
+                            "sell_winrate":   _pct(_get("Sell Winrate","SellWinrate","Winrate Sell","WinrateSell")),
+                            "pct_buy":        _pct(_get("% Buy","%Buy")),
+                            "pct_sell":       _pct(_get("% Sell","%Sell")),
+                            "tp1":            _int(_get("TP1")),
+                            "sl":             _int(_get("SL")),
+                            "rr_tp1":         _num(_get("RR TP1 (avg)","RR TP1")),
+                            "rr_tp2":         _num(_get("RR TP2 (avg)","RR TP2")),
+                            "sl_size":        _num(_get("SL Size (avg,pips)", "SL Size", "Avg SL size", "SL (avg size)", "SL size avg")),
+                            "tp1_size":       _num(_get("TP1 Size (avg,pips)", "TP1 Size", "Avg TP1 size", "TP1 (avg size)", "TP1 size avg")),
+                        }
+                    wb.close()
+                except Exception as e:
+                    print(f"⚠️ Lecture XLSX échouée ({xlsx_path}) : {e}")
 
-                            wr = get_metric("Winrate Gl","Winrate Global","WinrateGL","WinrateGlobal","Winrate TP1")
-                            if wr is not None:
-                                winrate = fmt_pct(wr)
-                            tr = get_metric("Total Trades","Total Trad")
-                            if tr is not None:
-                                trades = fmt_int(tr)
+            # Ajout item — structure inchangée (front compatible)
+            backtests.append({
+                "strategy": strategy,
+                "symbol": symbol,
+                "timeframe": timeframe,
+                "period": period,
+                "winrate": winrate,
+                "trades": trades,
+                "xlsx_filename": xlsx_name,
+                "folder": str(meta_path.parent.name),
+                "metrics": metrics_payload,
+            })
 
-                            metrics_payload = {
-                                "winrate_global": fmt_pct(get_metric("Winrate Gl","Winrate Global","WinrateGL","WinrateGlobal")),
-                                "buy_winrate":  fmt_pct(get_metric("Buy Winrate","BuyWinrate","Winrate Buy","WinrateBuy")),
-                                "sell_winrate": fmt_pct(get_metric("Sell Winrate","SellWinrate","Winrate Sell","WinrateSell")),
-                                "pct_buy":        fmt_pct(get_metric("% Buy","%Buy")),
-                                "pct_sell":       fmt_pct(get_metric("% Sell","%Sell")),
-                                "tp1":            fmt_int(get_metric("TP1")),
-                                "sl":             fmt_int(get_metric("SL")),
-                                "rr_tp1":         fmt_num(get_metric("RR TP1 (avg)","RR TP1")),
-                                "rr_tp2":         fmt_num(get_metric("RR TP2 (avg)","RR TP2")),
-                                "sl_size":        fmt_num(get_metric("SL Size (avg,pips)", "SL Size", "Avg SL size", "SL (avg size)", "SL size avg")),
-                                "tp1_size":       fmt_num(get_metric("TP1 Size (avg,pips)", "TP1 Size", "Avg TP1 size", "TP1 (avg size)", "TP1 size avg")),
-                            }
-                        wb.close()
-                    except Exception as e:
-                        print(f"❌ Erreur lecture xlsx {xlsx_path}: {e}")
-
-                # -------------------------- Ajout de l'item -----------------------------
-                backtests.append({
-                    "strategy": strategy,
-                    "symbol": symbol,
-                    "timeframe": timeframe,
-                    "period": period,
-                    "winrate": winrate,
-                    "trades": trades,
-                    "xlsx_filename": filename,
-                    "folder": str(meta_path.parent.name),
-                    "metrics": metrics_payload,
-                })
-
-            except Exception as e:
-                print(f"❌ Erreur lecture {meta_path.name} → {e}")
-                continue
+        except Exception as e:
+            print(f"❌ Erreur lecture {meta_path} → {e}")
+            continue
 
 
     print(f"📊 TOTAL BACKTESTS TROUVÉS : {len(backtests)}")
