@@ -38,6 +38,8 @@ from pathlib import Path
 import openpyxl
 import shutil
 from fastapi.responses import FileResponse
+from typing import Optional
+from fastapi import Body
 
 PARIS_TZ = ZoneInfo("Europe/Paris")
 
@@ -187,10 +189,14 @@ def admin_factures_download(request: Request, rel: str):
 
 
 @router.post("/admin/factures_delete")
-def admin_factures_delete(request: Request, payload: dict):
+def admin_factures_delete(request: Request, rel: Optional[str] = Body(None), payload: dict = Body(None)):
     """Supprime un fichier unique dans le dossier factures (admin-only)."""
     require_admin_from_request_or_query(request)
-    rel = (payload or {}).get("rel")
+    # tolérant: body JSON {"rel": "..."} OU query ?rel=...
+    if rel is None:
+        rel = (payload or {}).get("rel") if payload else None
+    if rel is None:
+        rel = request.query_params.get("rel")
     if not rel:
         raise HTTPException(status_code=400, detail="Paramètre 'rel' manquant.")
     target = (FACTURES_DIR / rel).resolve()

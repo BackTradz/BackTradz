@@ -11,6 +11,7 @@ export default function AdminMaintenance() {
   const [factures, setFactures] = useState({ count: 0, bytes: 0 });
   const [invoiceFiles, setInvoiceFiles] = useState([]);
 
+
   const load = async () => {
     setLoading(true);
     setErr(null);
@@ -102,12 +103,13 @@ export default function AdminMaintenance() {
   const deleteInvoice = async (rel) => {
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      const url = `/api/admin/factures_delete${token ? `?apiKey=${encodeURIComponent(token)}` : ""}`;
-      await fetch(url, {
+      const url = `/api/admin/factures_delete?rel=${encodeURIComponent(rel)}${token ? `&apiKey=${encodeURIComponent(token)}` : ""}`;
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rel }),
       });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       // refresh liste + stats
       const f = await api("/api/admin/factures_info");
       setFactures({ count: f?.count || 0, bytes: f?.bytes || 0 });
