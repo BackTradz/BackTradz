@@ -315,38 +315,45 @@ async def upload_csv_and_backtest(
         buffer = BytesIO(csv_bytes)
         df = pd.read_csv(buffer)
 
-        # ✅ Vérification colonnes attendues (pas de transformation)
-        expected_cols = {"Datetime", "Open", "High", "Low", "Close"}
+        # 🔧 Normalisation colonnes pour coller au runner_core
+        #    -> runner_core attend: {'time','Open','High','Low','Close'}
+        lower = {c.lower(): c for c in df.columns}
+
+        # 1) 'Datetime'/'datetime'/'date' -> 'time'
+        if "time" not in df.columns:
+            if "datetime" in lower:
+                df.rename(columns={lower["datetime"]: "time"}, inplace=True)
+            elif "date" in lower:
+                df.rename(columns={lower["date"]: "time"}, inplace=True)
+
+        # 2) OHLC en casse standard
+        for k in ["Open", "High", "Low", "Close"]:
+            lk = k.lower()
+            if k not in df.columns and lk in lower:
+                df.rename(columns={lower[lk]: k}, inplace=True)
+
+        # ✅ Vérif colonnes attendues par le runner
+        expected_cols = {"time", "Open", "High", "Low", "Close"}
         if not expected_cols.issubset(df.columns):
-            return {"error": f"Le fichier CSV doit contenir les colonnes : {expected_cols}. Colonnes reçues : {df.columns.tolist()}"}
-       
-        # is_admin robuste (supporte user.role ou user.is_admin)
-        is_admin = is_admin_user(user)
+            return {"error": f"Le fichier CSV doit contenir les colonnes : {sorted(expected_cols)}. "
+                             f"Colonnes reçues : {df.columns.tolist()}"}
 
+        # 🗓️ Parse du temps (UTC) + types numériques
+        df["time"] = pd.to_datetime(df["time"], utc=True, errors="coerce")
+        for col in ["Open", "High", "Low", "Close"]:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        # 🗓️ Garde-fou 31 jours (OFFICIEL) — seulement si pas admin
-        if not is_admin:
-            sd = _parse_date_flex(start_date)
-            ed = _parse_date_flex(end_date)
-            if not sd or not ed:
-                return {"error": "Format de date invalide (YYYY-MM-DD attendu)."}
-            days = _days_inclusive(sd, ed)
-            if days > 31:
-                return {"error": f"Période trop longue ({days} jours). Maximum autorisé: 31 jours."}
+        # 🗑️ Drop lignes invalides (ligne d'entête Yahoo, NaN, etc.)
+        df = df.dropna(subset=["time", "Open", "High", "Low", "Close"]).reset_index(drop=True)
 
-        # 🗓 Filtrage des dates (si précisé)
-        df["Datetime"] = pd.to_datetime(df["Datetime"])
+        # 🗓 Filtrage des dates si fourni (sur la colonne 'time')
         if start_date and end_date:
             start_dt = pd.to_datetime(start_date).tz_localize("UTC")
             end_dt = pd.to_datetime(end_date).tz_localize("UTC")
-            df = df[(df["Datetime"] >= start_dt) & (df["Datetime"] <= end_dt)]
+            df = df[(df["time"] >= start_dt) & (df["time"] <= end_dt)]
 
-        # 🧼 Nettoyage du DF
-        df = df[df["Open"] != "GBPUSD=X"]
-        for col in ["Open", "High", "Low", "Close"]:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
-        df = df.dropna().reset_index(drop=True)
-        df.set_index("Datetime", inplace=True)
+        # 📌 Index temporel comme dans le flux interne
+        df.set_index("time", inplace=True)
 
         # 🧠 Chargement dynamique de la stratégie
         module_path = f"backend.strategies.{strategy}"
