@@ -50,6 +50,7 @@ AUDIT_FILE = (AUDIT_DIR / "ledger.jsonl").resolve()
 #  → cf. backend/utils/invoice_generator.py qui écrit dans INVOICES_DIR
 FACTURES_DIR = INVOICES_DIR.resolve()
 FACTURES_DIR.mkdir(parents=True, exist_ok=True)
+
 def _safe_under_data_root(p: Path) -> bool:
     try:
         return str(p.resolve()).startswith(str(DATA_ROOT.resolve()))
@@ -110,8 +111,8 @@ def admin_ping(request: Request):
 
 @router.get("/admin/factures_info")
 def admin_factures_info(request: Request):
-    """Infos rapides sur le dossier 'factures' (nb de fichiers, poids total)."""
-    require_admin(request)
+    """Infos rapides sur le dossier 'factures'."""
+    require_admin_from_request_or_query(request)
     return {"ok": True, **_factures_stats()}
 
 @router.post("/admin/reset-factures")
@@ -120,7 +121,7 @@ def admin_reset_factures(request: Request):
     Vide le dossier 'factures' sur le disk (suppression récursive des fichiers).
     Sécurité: ne supprime que sous DATA_ROOT/factures.
     """
-    require_admin(request)
+    require_admin_from_request_or_query(request)
     if not _safe_under_data_root(FACTURES_DIR):
         raise HTTPException(status_code=400, detail="Chemin non autorisé.")
 
@@ -147,7 +148,7 @@ def admin_reset_factures(request: Request):
 @router.get("/admin/factures_list")
 def admin_factures_list(request: Request, limit: int = 200):
     """Liste des fichiers du dossier factures (nom, taille, mtime)."""
-    require_admin(request)
+    require_admin_from_request_or_query(request)
     items = []
     try:
         for p in FACTURES_DIR.glob("**/*"):
