@@ -15,6 +15,19 @@ import { pairsToOptions } from "../../lib/labels";
 
 /* ---------- Utils ---------- */
 
+// 🔧 normalise une paire pour comparaison (BTC-USD, btc/usd, btcusd → BTC-USD)
+function canonPair(s) {
+  const x = String(s || "").toUpperCase().trim();
+  // remplace slash/underscore par tiret, compresse les doublons
+  return x.replace(/[\/_]/g, "-").replace(/-+/g, "-");
+}
+// 🔧 extrait la valeur d’un Select (objet {value} ou string)
+function readValue(v, fallback = "ALL") {
+  if (v && typeof v === "object") return v.value ?? fallback;
+  if (typeof v === "string") return v;
+  return fallback;
+}
+
 // Parse nom de fichier d'achat (mensuel/range/xlsx analyse)
 function parsePurchaseFilename(filename) {
   const f = String(filename || "");
@@ -172,9 +185,13 @@ export default function CsvList() {
     const uniq = Array.from(new Set(items.map(i => i.symbol).filter(Boolean)));
     return pairsToOptions(uniq);
   }, [items]);
+
   // NEW: filtre + pagination
   const filtered = useMemo(() => {
-    return pairFilter === "ALL" ? items : items.filter(i => i.symbol === pairFilter);
+    const sel = readValue(pairFilter, "ALL");
+    if (sel === "ALL") return items;
+    const target = canonPair(sel);
+    return items.filter(i => canonPair(i.symbol) === target);
   }, [items, pairFilter]);
 
   const visible = filtered.slice(0, limit);
@@ -201,7 +218,7 @@ export default function CsvList() {
             <Select
               id="csv-pair"
               value={pairFilter}
-              onChange={setPairFilter}
+              onChange={(v) => setPairFilter(readValue(v))}
               options={pairOptions}
               size="md"
               variant="solid"
