@@ -15,29 +15,32 @@ import { pairsToOptions } from "../../lib/labels";
 
 /* ---------- Utils ---------- */
 
-// 🔧 normalise une paire pour comparaison (BTC-USD, btc/usd, btcusd → BTC-USD)
+// normalise une paire (BTC-USD / btc/usd / btcusd → BTC-USD)
 function canonPair(s) {
   const x = String(s || "").toUpperCase().trim();
-  // Si la chaîne ne contient que des lettres (ex: AUDCHF), injecter le tiret au milieu (3+3)
   const letters = x.replace(/[^A-Z]/g, "");
-  if (letters.length === 6) {
-    return `${letters.slice(0, 3)}-${letters.slice(3)}`;
-  }
-  // Sinon: normalisations classiques /, _ → -
+  if (letters.length === 6) return `${letters.slice(0, 3)}-${letters.slice(3)}`;
   return x.replace(/[\/_]/g, "-").replace(/-+/g, "-");
 }
 
-// 🔧 extrait la valeur d’un Select (objet {value} ou string)
+// lit la valeur d’un <Select> (objet {value}, event natif, ou string)
 function readValue(v, fallback = "ALL") {
-  // Objet Select { value, label }
   if (v && typeof v === "object") {
-    if ("value" in v) return v.value ?? fallback;
-    // Event natif <select>
-    if (v.target && typeof v.target.value === "string") return v.target.value;
+    if ("value" in v) return v.value ?? fallback;      // react-select like
+    if (v.target && typeof v.target.value === "string") return v.target.value; // <select>
   }
-  // String directe
   if (typeof v === "string") return v;
   return fallback;
+}
+
+// clé stable pour dédup : priorité au chemin ou à l’URL sans ?token
+function baseUrl(u) { return String(u || "").split("?")[0]; }
+function keyForItem(it) {
+  return (
+    it.delete_path ||
+    baseUrl(it.downloadUrl) ||
+    `${canonPair(it.symbol)}|${String(it.timeframe || "").toUpperCase()}|${it.period || ""}`
+  );
 }
 
 
