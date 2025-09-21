@@ -47,181 +47,188 @@ def get_user_backtests(request: Request, user=Depends(get_current_user)):
 
     backtests = []
 
-    # Parcours récursif de tous les JSON d'analyse
-    for subdir in base_dir.glob("**/*.json"):
-        try:
-            with open(subdir, "r", encoding="utf-8") as f:
-                data = json.load(f)
-
-            print(f"📄 SCANNING {subdir.name} | user_id in file: {data.get('user_id')}")
-            if data.get("user_id") != user.id:
-                #print("⛔️ USER MISMATCH → ignoré")
-                continue
-
-            #print("✅ USER MATCH → ajouté au dashboard")
-
-            # --------- Fallbacks champs manquants depuis le nom de dossier ----------
-            symbol   = data.get("pair")
-            timeframe = data.get("timeframe")
-            period   = data.get("period") or ""
-            strategy = data.get("strategy") or ""
-            sl_pips  = data.get("params", {}).get("sl_pips", 100)
-
-            folder_name = subdir.parent.name  # ex: AUDUSD_M5_ob_pullback_pure_2025-07-01to2025-07-31_sl100
+    # Parcours récursif de tous les JSON d'analyse dans TOUTES les racines
+    for root in search_dirs:
+        for subdir in root.glob("**/*.json"):
             try:
-                parts = folder_name.split("_")
-                if not symbol and len(parts) >= 1:
-                    symbol = parts[0]
-                if not timeframe and len(parts) >= 2 and parts[1].upper() in {"M1","M5","M15","M30","H1","H4","D1"}:
-                    timeframe = parts[1].upper()
-                 # 🔥 fallback pour la période
-                if not period:
-                    for p in parts:
-                        if "to" in p and any(ch.isdigit() for ch in p):
-                            period = p.replace("__", "_")
-                            break
-            except Exception:
-                pass
-                    
+                with open(subdir, "r", encoding="utf-8") as f:
+                    data = json.load(f)
 
-            # ---------------- Résolution tolérante du fichier XLSX ------------------
-            filename = f"analyse_{strategy}_{symbol}_SL{sl_pips}_{period}_resultats.xlsx"
-            xlsx_path = subdir.parent / filename
+                # dédupe par dossier d'analyse (miroir /var vs backend/)
+                folder_name = subdir.parent.name
+                if folder_name in seen_folders:
+                    continue
+                seen_folders.add(folder_name)
 
-            if not xlsx_path.exists():
-                variants = set()
-                if period:
-                    variants.update({
-                        period,
-                        period.replace("_to_", " to "),
-                        period.replace(" to ", "_to_"),
-                        period.replace(" ", "_"),
-                        period.replace("_", " "),
-                        period.replace("to", " to ").replace("__", "_"),
-                    })
+                print(f"📄 SCANNING {subdir.name} | user_id in file: {data.get('user_id')}")
+                if data.get("user_id") != user.id:
+                    #print("⛔️ USER MISMATCH → ignoré")
+                    continue
 
-                # essaie les variantes de period
-                for per in variants:
-                    cand = subdir.parent / f"analyse_{strategy}_{symbol}_SL{sl_pips}_{per}_resultats.xlsx"
-                    if cand.exists():
-                        xlsx_path, filename = cand, cand.name
-                        break
+                #print("✅ USER MATCH → ajouté au dashboard")
 
-                # fallback: prends le 1er résultat plausible
-                if not xlsx_path.exists():
-                    cands = list(subdir.parent.glob(f"analyse_{strategy}_{symbol}_SL*_*resultats.xlsx")) \
-                            or list(subdir.parent.glob("analyse_*_resultats.xlsx"))
-                    if cands:
-                        xlsx_path, filename = cands[0], cands[0].name
+                # --------- Fallbacks champs manquants depuis le nom de dossier ----------
+                symbol   = data.get("pair")
+                timeframe = data.get("timeframe")
+                period   = data.get("period") or ""
+                strategy = data.get("strategy") or ""
+                sl_pips  = data.get("params", {}).get("sl_pips", 100)
 
-            # ---------------------- Lecture de la feuille Global ---------------------
-            winrate = "N/A"
-            trades  = None
-            metrics_payload = None
-
-            if xlsx_path and xlsx_path.exists():
+                folder_name = subdir.parent.name  # ex: AUDUSD_M5_ob_pullback_pure_2025-07-01to2025-07-31_sl100
                 try:
-                    wb = openpyxl.load_workbook(xlsx_path, data_only=True)
-                    if "Global" in wb.sheetnames:
-                        ws = wb["Global"]
+                    parts = folder_name.split("_")
+                    if not symbol and len(parts) >= 1:
+                        symbol = parts[0]
+                    if not timeframe and len(parts) >= 2 and parts[1].upper() in {"M1","M5","M15","M30","H1","H4","D1"}:
+                        timeframe = parts[1].upper()
+                    # 🔥 fallback pour la période
+                    if not period:
+                        for p in parts:
+                            if "to" in p and any(ch.isdigit() for ch in p):
+                                period = p.replace("__", "_")
+                                break
+                except Exception:
+                    pass
+                        
 
-                        # indexe toutes les métriques
-                        metrics = {}
-                        for row in ws.iter_rows(min_row=1, max_row=ws.max_row):
-                            key = (str(row[0].value) if row[0].value is not None else "").strip()
-                            val = row[1].value if len(row) > 1 else None
-                            if key:
-                                metrics[key] = val
+                # ---------------- Résolution tolérante du fichier XLSX ------------------
+                filename = f"analyse_{strategy}_{symbol}_SL{sl_pips}_{period}_resultats.xlsx"
+                xlsx_path = subdir.parent / filename
 
-                        # helpers
-                        def get_metric(*keys):
-                            for k in keys:
-                                if k in metrics and metrics[k] is not None:
-                                    return metrics[k]
-                            low = {k.lower().replace(" ", ""): k for k in metrics.keys()}
-                            for k in keys:
-                                t = k.lower().replace(" ", "")
-                                if t in low:
-                                    return metrics[low[t]]
-                            return None
+                if not xlsx_path.exists():
+                    variants = set()
+                    if period:
+                        variants.update({
+                            period,
+                            period.replace("_to_", " to "),
+                            period.replace(" to ", "_to_"),
+                            period.replace(" ", "_"),
+                            period.replace("_", " "),
+                            period.replace("to", " to ").replace("__", "_"),
+                        })
 
-                        def fmt_pct(x):
-                            if x is None: return None
-                            s = str(x).strip().replace(",", ".")
-                            try:
-                                n = float(s)
-                                return f"{n*100:.2f}%" if n <= 1 else f"{n:.2f}%"
-                            except:
-                                return s if s.endswith("%") else f"{s}%"
+                    # essaie les variantes de period
+                    for per in variants:
+                        cand = subdir.parent / f"analyse_{strategy}_{symbol}_SL{sl_pips}_{per}_resultats.xlsx"
+                        if cand.exists():
+                            xlsx_path, filename = cand, cand.name
+                            break
 
-                        def fmt_num(x):
-                            if x is None: return None
-                            s = str(x).strip().replace(",", ".")
-                            try:
-                                return round(float(s), 2)
-                            except:
+                    # fallback: prends le 1er résultat plausible
+                    if not xlsx_path.exists():
+                        cands = list(subdir.parent.glob(f"analyse_{strategy}_{symbol}_SL*_*resultats.xlsx")) \
+                                or list(subdir.parent.glob("analyse_*_resultats.xlsx"))
+                        if cands:
+                            xlsx_path, filename = cands[0], cands[0].name
+
+                # ---------------------- Lecture de la feuille Global ---------------------
+                winrate = "N/A"
+                trades  = None
+                metrics_payload = None
+
+                if xlsx_path and xlsx_path.exists():
+                    try:
+                        wb = openpyxl.load_workbook(xlsx_path, data_only=True)
+                        if "Global" in wb.sheetnames:
+                            ws = wb["Global"]
+
+                            # indexe toutes les métriques
+                            metrics = {}
+                            for row in ws.iter_rows(min_row=1, max_row=ws.max_row):
+                                key = (str(row[0].value) if row[0].value is not None else "").strip()
+                                val = row[1].value if len(row) > 1 else None
+                                if key:
+                                    metrics[key] = val
+
+                            # helpers
+                            def get_metric(*keys):
+                                for k in keys:
+                                    if k in metrics and metrics[k] is not None:
+                                        return metrics[k]
+                                low = {k.lower().replace(" ", ""): k for k in metrics.keys()}
+                                for k in keys:
+                                    t = k.lower().replace(" ", "")
+                                    if t in low:
+                                        return metrics[low[t]]
                                 return None
 
-                        def fmt_int(x):
-                            if x is None: return None
-                            s = str(x).strip().replace(",", ".")
-                            try:
-                                return int(float(s))
-                            except:
-                                return None
+                            def fmt_pct(x):
+                                if x is None: return None
+                                s = str(x).strip().replace(",", ".")
+                                try:
+                                    n = float(s)
+                                    return f"{n*100:.2f}%" if n <= 1 else f"{n:.2f}%"
+                                except:
+                                    return s if s.endswith("%") else f"{s}%"
 
-                        # winrate (priorité Global > TP1 > générique hors buy/sell)
-                        wr = get_metric("Winrate Gl", "Winrate Global", "WinrateGL", "WinrateGlobal")
-                        if wr is None:
-                            wr = get_metric("Winrate TP1", "TP1 Winrate")
-                        if wr is None:
-                            for k, v in metrics.items():
-                                kl = k.lower()
-                                if "winrate" in kl and "buy" not in kl and "sell" not in kl and v is not None:
-                                    wr = v
-                                    break
-                        if wr is not None:
-                            winrate = fmt_pct(wr)
+                            def fmt_num(x):
+                                if x is None: return None
+                                s = str(x).strip().replace(",", ".")
+                                try:
+                                    return round(float(s), 2)
+                                except:
+                                    return None
 
-                        # trades
-                        tr = get_metric("Total Trades", "Total Trad")
-                        if tr is not None:
-                            trades = fmt_int(tr)
+                            def fmt_int(x):
+                                if x is None: return None
+                                s = str(x).strip().replace(",", ".")
+                                try:
+                                    return int(float(s))
+                                except:
+                                    return None
 
-                        # payload détaillé pour le modal
-                        metrics_payload = {
-                            "winrate_global": fmt_pct(get_metric("Winrate Gl","Winrate Global","WinrateGL","WinrateGlobal")),
-                            "buy_winrate":  fmt_pct(get_metric("Buy Winrate","BuyWinrate","Winrate Buy","WinrateBuy")),
-                            "sell_winrate": fmt_pct(get_metric("Sell Winrate","SellWinrate","Winrate Sell","WinrateSell")),
-                            "pct_buy":        fmt_pct(get_metric("% Buy","%Buy")),
-                            "pct_sell":       fmt_pct(get_metric("% Sell","%Sell")),
-                            "tp1":            fmt_int(get_metric("TP1")),
-                            "sl":             fmt_int(get_metric("SL")),
-                            "rr_tp1":         fmt_num(get_metric("RR TP1 (avg)","RR TP1")),
-                            "rr_tp2":         fmt_num(get_metric("RR TP2 (avg)","RR TP2")),
-                           "sl_size":  fmt_num(get_metric("SL Size (avg,pips)", "SL Size", "Avg SL size", "SL (avg size)", "SL size avg")),
-                            "tp1_size": fmt_num(get_metric("TP1 Size (avg,pips)", "TP1 Size", "Avg TP1 size", "TP1 (avg size)", "TP1 size avg")),
-                        }
-                    wb.close()
-                except Exception as e:
-                    print(f"❌ Erreur lecture xlsx {xlsx_path}: {e}")
+                            # winrate (priorité Global > TP1 > générique hors buy/sell)
+                            wr = get_metric("Winrate Gl", "Winrate Global", "WinrateGL", "WinrateGlobal")
+                            if wr is None:
+                                wr = get_metric("Winrate TP1", "TP1 Winrate")
+                            if wr is None:
+                                for k, v in metrics.items():
+                                    kl = k.lower()
+                                    if "winrate" in kl and "buy" not in kl and "sell" not in kl and v is not None:
+                                        wr = v
+                                        break
+                            if wr is not None:
+                                winrate = fmt_pct(wr)
 
-            # -------------------------- Ajout de l'item -----------------------------
-            backtests.append({
-                "strategy": strategy,
-                "symbol": symbol,
-                "timeframe": timeframe,
-                "period": period,
-                "winrate": winrate,
-                "trades": trades,
-                "xlsx_filename": filename,
-                "folder": str(subdir.parent.name),
-                "metrics": metrics_payload,   # <— détails pour le modal
-            })
+                            # trades
+                            tr = get_metric("Total Trades", "Total Trad")
+                            if tr is not None:
+                                trades = fmt_int(tr)
 
-        except Exception as e:
-            print(f"❌ Erreur lecture {subdir.name} → {e}")
-            continue
+                            # payload détaillé pour le modal
+                            metrics_payload = {
+                                "winrate_global": fmt_pct(get_metric("Winrate Gl","Winrate Global","WinrateGL","WinrateGlobal")),
+                                "buy_winrate":  fmt_pct(get_metric("Buy Winrate","BuyWinrate","Winrate Buy","WinrateBuy")),
+                                "sell_winrate": fmt_pct(get_metric("Sell Winrate","SellWinrate","Winrate Sell","WinrateSell")),
+                                "pct_buy":        fmt_pct(get_metric("% Buy","%Buy")),
+                                "pct_sell":       fmt_pct(get_metric("% Sell","%Sell")),
+                                "tp1":            fmt_int(get_metric("TP1")),
+                                "sl":             fmt_int(get_metric("SL")),
+                                "rr_tp1":         fmt_num(get_metric("RR TP1 (avg)","RR TP1")),
+                                "rr_tp2":         fmt_num(get_metric("RR TP2 (avg)","RR TP2")),
+                            "sl_size":  fmt_num(get_metric("SL Size (avg,pips)", "SL Size", "Avg SL size", "SL (avg size)", "SL size avg")),
+                                "tp1_size": fmt_num(get_metric("TP1 Size (avg,pips)", "TP1 Size", "Avg TP1 size", "TP1 (avg size)", "TP1 size avg")),
+                            }
+                        wb.close()
+                    except Exception as e:
+                        print(f"❌ Erreur lecture xlsx {xlsx_path}: {e}")
+
+                # -------------------------- Ajout de l'item -----------------------------
+                backtests.append({
+                    "strategy": strategy,
+                    "symbol": symbol,
+                    "timeframe": timeframe,
+                    "period": period,
+                    "winrate": winrate,
+                    "trades": trades,
+                    "xlsx_filename": filename,
+                    "folder": str(subdir.parent.name),
+                    "metrics": metrics_payload,   # <— détails pour le modal
+                })
+
+            except Exception as e:
+                print(f"❌ Erreur lecture {subdir.name} → {e}")
+                continue
 
     print(f"📊 TOTAL BACKTESTS TROUVÉS : {len(backtests)}")
     return backtests
