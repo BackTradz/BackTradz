@@ -169,7 +169,8 @@ def admin_factures_list(request: Request, limit: int = 200):
 @router.get("/admin/factures_download")
 def admin_factures_download(request: Request, rel: str):
     """Télécharge un fichier de facture depuis le disk (admin-only)."""
-    require_admin(request)
+    # accepte Authorization en header OU ?apiKey=... en query (comme /admin/download_xlsx)
+    require_admin_from_request_or_query(request)
     target = (FACTURES_DIR / rel).resolve()
     if not _safe_under_data_root(target) or not str(target).startswith(str(FACTURES_DIR.resolve())):
         raise HTTPException(status_code=400, detail="Chemin non autorisé.")
@@ -183,6 +184,25 @@ def admin_factures_download(request: Request, rel: str):
         headers={"Content-Disposition": f'attachment; filename="{target.name}"'}
     )
 
+
+@router.post("/admin/factures_delete")
+def admin_factures_delete(request: Request, payload: dict):
+    """Supprime un fichier unique dans le dossier factures (admin-only)."""
+    require_admin_from_request_or_query(request)
+    rel = (payload or {}).get("rel")
+    if not rel:
+        raise HTTPException(status_code=400, detail="Paramètre 'rel' manquant.")
+    target = (FACTURES_DIR / rel).resolve()
+    if not _safe_under_data_root(target) or not str(target).startswith(str(FACTURES_DIR.resolve())):
+        raise HTTPException(status_code=400, detail="Chemin non autorisé.")
+    if not target.is_file():
+        raise HTTPException(status_code=404, detail="Fichier introuvable.")
+    try:
+        target.unlink(missing_ok=False)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Échec de suppression.")
+    # renvoyer stats à jour pour rafraîchir l'UI
+    return {"ok": True, "left": _factures_stats()}
 
 @router.get("/admin/stats/daily_summary")
 def daily_summary():

@@ -83,12 +83,10 @@ export default function AdminMaintenance() {
 
   const downloadInvoice = async (rel, name) => {
     try {
-      // récupère le token déjà utilisé par tes appels API
+      // token admin déjà stocké (même logique que api())
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      const res = await fetch(`/api/admin/factures_download?rel=${encodeURIComponent(rel)}`, {
-        method: "GET",
-        headers: token ? { "Authorization": token } : {},
-      });
+      const url = `/api/admin/factures_download?rel=${encodeURIComponent(rel)}${token ? `&apiKey=${encodeURIComponent(token)}` : ""}`;
+      const res = await fetch(url, { method: "GET" });
       if (!res.ok) throw new Error("Download failed");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -101,6 +99,20 @@ export default function AdminMaintenance() {
       URL.revokeObjectURL(url);
     } catch (e) {
       setErr("Impossible de télécharger ce fichier.");
+    }
+  };
+
+
+  const deleteInvoice = async (rel) => {
+    try {
+      await api("/api/admin/factures_delete", { method: "POST", body: { rel } });
+      // refresh liste + stats
+      const f = await api("/api/admin/factures_info");
+      setFactures({ count: f?.count || 0, bytes: f?.bytes || 0 });
+      const l = await api("/api/admin/factures_list");
+      setInvoiceFiles(Array.isArray(l?.items) ? l.items : []);
+    } catch (e) {
+      setErr("Échec de la suppression du fichier.");
     }
   };
 
@@ -192,6 +204,7 @@ export default function AdminMaintenance() {
                   <th className="text-left py-2">Nom</th>
                   <th className="text-left py-2">Taille</th>
                   <th className="text-left py-2">Modifié</th>
+                  <th className="text-left py-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -204,6 +217,11 @@ export default function AdminMaintenance() {
                     </td>
                     <td className="py-2">{fmtBytes(it.bytes)}</td>
                     <td className="py-2">{fmtDate(it.mtime)}</td>
+                    <td className="py-2">
+                      <button className="btn btn-danger" onClick={() => deleteInvoice(it.rel)}>
+                        Supprimer
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
