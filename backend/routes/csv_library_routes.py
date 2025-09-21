@@ -569,63 +569,79 @@ def extract_to_output_live(
         if df is None or df.empty:
             raise HTTPException(status_code=404, detail="Aucune donnée extraite")
 
-        # --- BTZ-PATCH: match par recouvrement de période (pas besoin du token de fin exact) ---
+        # --- BTZ-PATCH: chercher dans BTCUSD ET BTC-USD + renvoyer relative_path & path ---
         from datetime import datetime as _dt
 
         def _yyyymmdd(s: str) -> int:
-            # "20250901" -> 20250901 (int), robuste aux underscores etc.
             try:
                 return int(s)
             except Exception:
                 return 0
 
-        def _parse_range_from_name(name_upper: str, tf: str):
-            # Ex: "BTCUSD_H1_20250901_to_20250920.csv"
+        def _parse_range_from_name(name_upper: str):
+            # Ex: "BTC-USD_M30_20250901_to_20250915"
             try:
                 base = name_upper.split(".")[0]
-                # prend la dernière occurrence "XXXXXXX_to_YYYYYYY"
                 part = base.rsplit("_TO_", 1)
                 if len(part) != 2:
                     return (0, 0)
-                start_str = ''.join(ch for ch in part[0] if ch.isdigit())[-8:]  # ...20250901
-                end_str   = ''.join(ch for ch in part[1] if ch.isdigit())[-8:]  # 20250920
+                start_str = ''.join(ch for ch in part[0] if ch.isdigit())[-8:]
+                end_str   = ''.join(ch for ch in part[1] if ch.isdigit())[-8:]
                 return (_yyyymmdd(start_str), _yyyymmdd(end_str))
             except Exception:
                 return (0, 0)
 
         sym = symbol.upper()
         tf  = timeframe.upper()
-        sym_dir = sym.replace("-", "")
-        req_start_i = int(start_date.replace("-", ""))
-        req_end_i   = int(end_date.replace("-", ""))
+        sym_no_dash  = sym.replace("-", "")
+        req_start_i  = int(start_date.replace("-", ""))
+        req_end_i    = int(end_date.replace("-", ""))
 
-        base_dir = (OUTPUT_LIVE_DIR / sym_dir / tf)
+        # 🔎 Cherche dans les deux dossiers possibles (avec et sans tiret)
+        candidate_dirs = [
+            (OUTPUT_LIVE_DIR / sym_no_dash / tf),
+            (OUTPUT_LIVE_DIR / sym / tf),
+        ]
+
         offers = []
-        if base_dir.exists():
-            for f in base_dir.glob(f"{sym_dir}_{tf}_*.*"):
-                nameU = f.stem.upper()
-                f_start_i, f_end_i = _parse_range_from_name(nameU, tf)
+        for base_dir in candidate_dirs:
+            if not base_dir.exists():
+                continue
+            # 🔎 Motifs avec et sans tiret (selon comment le writer a nommé)
+            patterns = [
+                f"{sym_no_dash}_{tf}_*.*",
+                f"{sym}_{tf}_*.*",
+            ]
+            for pat in patterns:
+                for f in base_dir.glob(pat):
+                    nameU = f.stem.upper()
+                    f_start_i, f_end_i = _parse_range_from_name(nameU)
+                    # 🟢 recouvrement de période
+                    if f_start_i and f_end_i and not (f_end_i < req_start_i or f_start_i > req_end_i):
+                        rel_under_live = str(
+                            f.resolve().relative_to(OUTPUT_LIVE_DIR.resolve())
+                        ).replace("\\", "/")
+                        rel_path = f"output_live/{rel_under_live}"
 
-                # 🟢 Condition: recouvrement (file_range ∩ requested_range ≠ ∅)
-                if f_start_i and f_end_i and not (f_end_i < req_start_i or f_start_i > req_end_i):
-                    rel_under_live = str(
-                        f.resolve().relative_to(OUTPUT_LIVE_DIR.resolve())
-                    ).replace("\\", "/")
-                    rel_path = f"output_live/{rel_under_live}"
-
-                    offers.append({
-                        "symbol": sym,
-                        "timeframe": tf,
-                        "year": start_date[:4],
-                        "month": start_date[5:7],
-                        "filename": f.name,
-                        "relative_path": rel_path,   # ex: output_live/BTCUSD/H1/...
-                        "source": "live",
-                        "start_date": start_date,
-                        "end_date": end_date,
-                    })
+                        offers.append({
+                            "symbol": sym,
+                            "timeframe": tf,
+                            "year": start_date[:4],
+                            "month": start_date[5:7],
+                            "filename": f.name,
+                            "relative_path": rel_path,   # consommé par le front
+                            "path": rel_path,            # compat autres variantes du front
+                            "source": "live",
+                            "start_date": start_date,
+                            "end_date": end_date,
+                        })
+                        break
+                if offers:
                     break
+            if offers:
+                break
         # --- /BTZ-PATCH ---
+
 
         # Log des extractions (Niv.2) — une entrée par fichier proposé
         for off in offers:
