@@ -108,15 +108,7 @@ export default function AdminMaintenance() {
 
   const deleteInvoice = async (rel) => {
     try {
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      await fetch("/api/admin/factures_delete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { "X-API-Key": token } : {}),
-        },
-        body: JSON.stringify({ rel }),
-      });
+      await api("/api/admin/factures_delete", { method: "POST", body: { rel } });
       // refresh liste + stats
       const f = await api("/api/admin/factures_info");
       setFactures({ count: f?.count || 0, bytes: f?.bytes || 0 });
