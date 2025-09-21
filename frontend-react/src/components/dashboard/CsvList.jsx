@@ -18,15 +18,28 @@ import { pairsToOptions } from "../../lib/labels";
 // 🔧 normalise une paire pour comparaison (BTC-USD, btc/usd, btcusd → BTC-USD)
 function canonPair(s) {
   const x = String(s || "").toUpperCase().trim();
-  // remplace slash/underscore par tiret, compresse les doublons
+  // Si la chaîne ne contient que des lettres (ex: AUDCHF), injecter le tiret au milieu (3+3)
+  const letters = x.replace(/[^A-Z]/g, "");
+  if (letters.length === 6) {
+    return `${letters.slice(0, 3)}-${letters.slice(3)}`;
+  }
+  // Sinon: normalisations classiques /, _ → -
   return x.replace(/[\/_]/g, "-").replace(/-+/g, "-");
 }
+
 // 🔧 extrait la valeur d’un Select (objet {value} ou string)
 function readValue(v, fallback = "ALL") {
-  if (v && typeof v === "object") return v.value ?? fallback;
+  // Objet Select { value, label }
+  if (v && typeof v === "object") {
+    if ("value" in v) return v.value ?? fallback;
+    // Event natif <select>
+    if (v.target && typeof v.target.value === "string") return v.target.value;
+  }
+  // String directe
   if (typeof v === "string") return v;
   return fallback;
 }
+
 
 // Parse nom de fichier d'achat (mensuel/range/xlsx analyse)
 function parsePurchaseFilename(filename) {
