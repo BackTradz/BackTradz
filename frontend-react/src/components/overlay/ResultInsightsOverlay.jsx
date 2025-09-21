@@ -257,7 +257,7 @@ function PublicDataSheetView({ folder, sheet }) {
     let abort = false;
     (async () => {
       try {
-        const { headers: h, rows: r } = await xlsxSheet(folder, sheet);
+        const { headers: h, rows: r } = await xlsxSheet({ folder, sheet, offset: 0, limit: 500 });
         if (abort) return;
         setHeads(h || []);
         setRows(r || []);
