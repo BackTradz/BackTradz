@@ -63,6 +63,7 @@ from backend.routes import frontend_routes
 from backend.routes import pricing_routes
 from backend.routes.paypal_routes import router as paypal_router
 from backend.routes.crypto_routes import router as crypto_router
+from backend.routes.csv_library_routes import router as csv_router
 
 from fastapi_utils.tasks import repeat_every
 from backend.utils.subscription_utils import renew_all_subscriptions  # adapte au bon chemin
