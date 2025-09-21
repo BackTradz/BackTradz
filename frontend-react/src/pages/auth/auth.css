@@ -957,3 +957,32 @@
   }
 }
 
+/* =========================================================
+   AUTH (≤900px) — Espacement vertical propre entre champs
+   - Ajoute un row-gap sur les piles de formulaire
+   - Neutralise les margin-bottom redondants
+   - Laisse desktop inchangé
+   ========================================================= */
+@media (max-width: 900px) {
+  /* Tous les conteneurs de formulaires (wrappers + <form class="auth-form ...">) */
+  .auth-form {
+    display: flex !important;
+    flex-direction: column !important;
+    row-gap: 12px;        /* 👈 espacement vertical uniforme */
+  }
+
+  /* Les inputs n’ont plus besoin de margin-bottom quand row-gap gère le rythme */
+  .auth-form .form-input {
+    margin-bottom: 0 !important;
+  }
+
+  /* Lignes “mot de passe oublié / réinitialiser” : un peu d’air au-dessus */
+  .auth-form .form-inline {
+    margin-top: 4px !important;
+  }
+
+  /* Google et CTA suivent le même rythme ; pas besoin d’un gros margin-top */
+  .auth-form .google-button-wrapper {
+    margin-top: 0 !important;
+  }
+}
