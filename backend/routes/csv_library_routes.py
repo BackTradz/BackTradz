@@ -320,7 +320,7 @@ def download_csv_by_path(
     if user.credits < 1:
         raise HTTPException(status_code=403, detail="Pas assez de crédits")
 
-    # --- BTZ-PATCH: Débit + historique robuste pour OUTPUT et OUTPUT_LIVE ---
+    # --- BTZ-PATCH: Historique achat CSV (–1 crédit) complet + normalisé ---
     with open(USERS_FILE, "r+", encoding="utf-8") as f:
         users = json.load(f)
         if user.id not in users:
@@ -330,40 +330,41 @@ def download_csv_by_path(
         u.setdefault("credits", 0)
         u.setdefault("purchase_history", [])
 
+        # ✅ Sécurité: encore une vérif côté serveur
         if int(u["credits"]) < 1:
             raise HTTPException(status_code=403, detail="Pas assez de crédits")
 
-        # 1) Décrémente
+        # 1) Débit
         u["credits"] = int(u["credits"]) - 1
 
-        # 2) Normalise pour l’historique (quel que soit le root utilisé)
-        #    'rel_for_history' est déjà relatif au root (OUTPUT ou OUTPUT_LIVE)
-        #    On construit un prefix explicite pour que le front retrouve le fichier.
-        from pathlib import Path as _P
+        # 2) Normalisation du chemin pour l’historique (compatible output & output_live)
         try:
-            root_out = OUTPUT_DIR.resolve()
-            root_live = OUTPUT_LIVE_DIR.resolve()
-            used = root_used.resolve()
+            rel_out = str(file_path.resolve().relative_to(OUTPUT_DIR.resolve())).replace("\\", "/")
+            prefix = "output"
+            rel = rel_out
         except Exception:
-            used = root_used  # fallback
+            # si ce n'est pas sous OUTPUT_DIR, on essaie OUTPUT_LIVE_DIR
+            try:
+                rel_live = str(file_path.resolve().relative_to(OUTPUT_LIVE_DIR.resolve())).replace("\\", "/")
+                prefix = "output_live"
+                rel = rel_live
+            except Exception:
+                prefix = ""
+                rel = ""
 
-        prefix = "output_live" if used == OUTPUT_LIVE_DIR.resolve() else "output"
-        rel_generic = str(rel_for_history).replace("\\", "/")  # ex: BTCUSD/M5/xxxx.csv
-        path_for_ui = f"{prefix}/{rel_generic}" if rel_generic else ""  # ex: output/BTCUSD/...
-
-        # 3) Entrée d’historique (legacy + champs modernes)
+        # 3) Entrée d’historique RICHE (utilisée par user + admin)
         entry = {
             "label": "Téléchargement CSV",
-            "price_paid": -1,
-            "credits_delta": -1,          # BTZ-PATCH: permet d’afficher “–1 crédit”
-            "method": "credits",
             "type": "Téléchargement",
+            "method": "credits",
+            "price_paid": -1,          # legacy (affichage)
+            "credits_delta": -1,       # ✅ clé pour amount = “–1 crédits” dans l’UI
             "filename": file_path.name,
             "date": datetime.now().isoformat(),
         }
-        if rel_generic:
-            entry["relative_path"] = rel_generic        # ex: BTCUSD/M5/...
-            entry["path"] = f"backend/{path_for_ui}"    # ex: backend/output_live/BTCUSD/...
+        if rel:
+            entry["relative_path"] = rel                          # ex: BTCUSD/M5/2025-06.csv
+            entry["path"] = f"backend/{prefix}/{rel}"              # ex: backend/output/... ou backend/output_live/...
 
         u["purchase_history"].append(entry)
 
