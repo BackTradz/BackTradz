@@ -100,36 +100,29 @@ export default function AdminMaintenance() {
   };
 
 
-  // ✅ PATCH ciblé — remplace la fonction existante
-const deleteInvoice = async (rel) => {
-  setErr(null);
-  try {
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    if (!token) throw new Error("admin token manquant");
 
-    // Même pattern que download: GET + ?apiKey=..., pas de preflight CORS
-    const url =
-      `/api/admin/factures_delete` +
-      `?rel=${encodeURIComponent(rel)}` +
-      `&apiKey=${encodeURIComponent(token)}` +
-      `&t=${Date.now()}`; // bust cache
+  // ✅ PATCH ciblé : on utilise le même client `api()` que partout en admin,
+  // ce qui envoie déjà l'entête X-API-Key accepté par le backend.
+  const deleteInvoice = async (rel) => {
+    setErr(null);
+    try {
+      // POST tolérant: rel en body ET/OU en query (le backend supporte les 2)
+      await api(`/api/admin/factures_delete?rel=${encodeURIComponent(rel)}`, {
+        method: "POST",
+        body: { rel },
+      });
 
-    const res = await fetch(url, { method: "GET" });
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      throw new Error(`HTTP ${res.status} ${txt || ""}`);
+      // 🔄 Refresh liste + stats (comme avant)
+      const f = await api("/api/admin/factures_info");
+      setFactures({ count: f?.count || 0, bytes: f?.bytes || 0 });
+
+      const l = await api("/api/admin/factures_list");
+      setInvoiceFiles(Array.isArray(l?.items) ? l.items : []);
+    } catch (e) {
+      setErr("Échec de la suppression du fichier.");
     }
+  };
 
-    // 🔄 Refresh liste + stats
-    const f = await api("/api/admin/factures_info");
-    setFactures({ count: f?.count || 0, bytes: f?.bytes || 0 });
-
-    const l = await api("/api/admin/factures_list");
-    setInvoiceFiles(Array.isArray(l?.items) ? l.items : []);
-  } catch (e) {
-    setErr("Échec de la suppression du fichier.");
-  }
-};
 
   return (
     <div className="p-6 maint">
