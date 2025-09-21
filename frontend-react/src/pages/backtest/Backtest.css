@@ -569,3 +569,21 @@
   /* avant: 0 8px 18px rgba(56,189,248,.22);  ➜ halo réduit */
   box-shadow: 0 2px 6px rgba(56,189,248,.12);
 }
+
+.bt-result-actions{
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;       /* mobile : peut passer à la ligne si trop étroit */
+}
+
+@media (min-width: 768px){
+  .bt-result-actions{
+    flex-wrap: nowrap;   /* desktop : côte à côte */
+  }
+  .bt-result-actions .dbt-btn{
+    display: inline-flex;
+    width: auto;
+    max-width: none;
+  }
+}

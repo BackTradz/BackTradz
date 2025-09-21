@@ -355,7 +355,6 @@ export default function Backtest() {
               const parts = p.split("/");
               const filename = parts.pop();
               const folder = parts.pop();
-
               if (!folder || !filename) return null;
 
               const token = (localStorage.getItem("apiKey") || localStorage.getItem("token") || "");
@@ -365,7 +364,7 @@ export default function Backtest() {
                 e.preventDefault();
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "";          // hint navigateur
+                a.download = "";
                 a.target = "_blank";
                 a.rel = "noopener";
                 document.body.appendChild(a);
@@ -373,27 +372,30 @@ export default function Backtest() {
                 a.remove();
               };
 
+              // ✅ Wrapper unique et fermé correctement
               return (
-                <div className="flex gap-3 flex-wrap">
+                <div className="bt-result-actions">
                   <DetailButton as="button" onClick={handleDownload}>
                     📥 Télécharger le rapport (.xlsx)
                   </DetailButton>
-                  <DetailButton as="button" onClick={(e) => {
-                    e.preventDefault();
-                    setOverlayFolder(folder);
-                    setOverlayPeriod(""); // si tu n’as pas de période
-                    setShowOverlay(true);
-                  }}>
+
+                  <DetailButton
+                    as="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setOverlayFolder(folder);
+                      setOverlayPeriod(""); // si tu n’as pas de période
+                      setShowOverlay(true);
+                    }}
+                  >
                     👁️ Voir les résultats
                   </DetailButton>
                 </div>
-
-
               );
             })()}
-
           </div>
-        
+
+                  
 
         {result.golden_hours && (
           <div className="bt-card">
