@@ -320,8 +320,7 @@ def download_csv_by_path(
     if user.credits < 1:
         raise HTTPException(status_code=403, detail="Pas assez de crédits")
 
-    # --- après avoir validé le token et résolu file_path, AVANT le FileResponse ---
-    # Débit + historique (format legacy attendu par le front)
+    # --- BTZ-PATCH: Débit + historique robuste pour OUTPUT et OUTPUT_LIVE ---
     with open(USERS_FILE, "r+", encoding="utf-8") as f:
         users = json.load(f)
         if user.id not in users:
@@ -334,35 +333,44 @@ def download_csv_by_path(
         if int(u["credits"]) < 1:
             raise HTTPException(status_code=403, detail="Pas assez de crédits")
 
-        # 1) décrémente
+        # 1) Décrémente
         u["credits"] = int(u["credits"]) - 1
 
-        # 2) normalise un chemin relatif propre pour l’historique
+        # 2) Normalise pour l’historique (quel que soit le root utilisé)
+        #    'rel_for_history' est déjà relatif au root (OUTPUT ou OUTPUT_LIVE)
+        #    On construit un prefix explicite pour que le front retrouve le fichier.
+        from pathlib import Path as _P
         try:
-            rel_out = str(file_path.resolve().relative_to(OUTPUT_DIR.resolve())).replace("\\", "/")
+            root_out = OUTPUT_DIR.resolve()
+            root_live = OUTPUT_LIVE_DIR.resolve()
+            used = root_used.resolve()
         except Exception:
-            rel_out = ""  # si pas sous OUTPUT_DIR (ex: output_live), on laisse vide
+            used = root_used  # fallback
 
-        # 3) ajoute l’entrée EXACTEMENT comme avant (legacy)
+        prefix = "output_live" if used == OUTPUT_LIVE_DIR.resolve() else "output"
+        rel_generic = str(rel_for_history).replace("\\", "/")  # ex: BTCUSD/M5/xxxx.csv
+        path_for_ui = f"{prefix}/{rel_generic}" if rel_generic else ""  # ex: output/BTCUSD/...
+
+        # 3) Entrée d’historique (legacy + champs modernes)
         entry = {
             "label": "Téléchargement CSV",
             "price_paid": -1,
+            "credits_delta": -1,          # BTZ-PATCH: permet d’afficher “–1 crédit”
             "method": "credits",
             "type": "Téléchargement",
             "filename": file_path.name,
             "date": datetime.now().isoformat(),
         }
-        if rel_out:
-            entry["relative_path"] = rel_out
-            entry["path"] = f"backend/{rel_out}"
+        if rel_generic:
+            entry["relative_path"] = rel_generic        # ex: BTCUSD/M5/...
+            entry["path"] = f"backend/{path_for_ui}"    # ex: backend/output_live/BTCUSD/...
 
         u["purchase_history"].append(entry)
 
-        # 4) persiste (écrase le fichier proprement)
-        users[user.id] = u
         f.seek(0)
         json.dump(users, f, indent=2, ensure_ascii=False)
         f.truncate()
+    # --- /BTZ-PATCH ---
 
     return FileResponse(file_path, filename=file_path.name, media_type="text/csv")
 

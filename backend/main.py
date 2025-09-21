@@ -57,7 +57,6 @@ from backend.routes.analyse_routes import router as download_xlsx
 from backend.routes.csv_library_routes import router as csv_library_router
 #from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from backend.routes.csv_library_routes import router as csv_router
 from backend.routes.admin_routes import router as admin_router
 from backend.routes.user_dashboard_routes import router as user_dashboard_router
 from backend.routes import frontend_routes
