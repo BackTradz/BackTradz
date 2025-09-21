@@ -33,14 +33,36 @@ function readValue(v, fallback = "ALL") {
   return fallback;
 }
 
+function normDownloadPathFromUrl(u) {
+  const raw = baseUrl(u);
+  const idx = raw.indexOf("/api/download_csv_by_path/");
+  if (idx === -1) return raw;
+  // extrait la partie après le prefix API, ex:
+  // /api/download_csv_by_path/output/BTC-USD/2025-08/xxx.csv -> output/BTC-USD/2025-08/xxx.csv
+  let rel = raw.slice(idx + "/api/download_csv_by_path/".length);
+  rel = rel.replace(/^backend\//i, "");
+  rel = rel.replace(/^output_live\//i, "");
+  rel = rel.replace(/^output\//i, "");
+  return rel.toLowerCase(); // clé insensitive à la casse/préfixes
+}
+
+
 // clé stable pour dédup : priorité au chemin ou à l’URL sans ?token
 function baseUrl(u) { return String(u || "").split("?")[0]; }
 function keyForItem(it) {
-  return (
-    it.delete_path ||
-    baseUrl(it.downloadUrl) ||
-    `${canonPair(it.symbol)}|${String(it.timeframe || "").toUpperCase()}|${it.period || ""}`
-  );
+  // 1) priorité au chemin "delete_path" (déjà relatif côté live)
+  if (it.delete_path) {
+    return String(it.delete_path)
+      .replace(/^backend\//i, "")
+      .replace(/^output_live\//i, "")
+      .replace(/^output\//i, "")
+      .toLowerCase();
+  }
+  // 2) sinon, URL de download normalisée (sans host, sans ?token, sans output/)
+  if (it.downloadUrl) return normDownloadPathFromUrl(it.downloadUrl);
+
+  // 3) fallback : triplet canonisé
+  return `${canonPair(it.symbol)}|${String(it.timeframe || "").toUpperCase()}|${(it.period || "").toLowerCase()}`;
 }
 
 
@@ -221,7 +243,8 @@ export default function CsvList() {
   }, [items, pairFilter]);
 
   const visible = filtered.slice(0, limit);
-  const canShowMore = items.length >= 20 && filtered.length > limit; // bouton seulement si 20+ CSV
+  // Afficher le bouton dès que le filtre courant a plus d'items que la limite
+  const canShowMore = filtered.length > limit;
 
   // reset pagination si on change le filtre
   useEffect(() => { setLimit(10); }, [pairFilter]);
