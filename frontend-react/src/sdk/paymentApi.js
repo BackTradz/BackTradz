@@ -22,12 +22,22 @@ export const paypalCapture = (orderID, offer_id) =>
     body: { orderID, offer_id, user_token: localStorage.getItem("apiKey") },
   });
 
-// Crypto (NowPayments, etc.) : renvoie souvent { payment_url }
+// --- BTZ-PATCH: token robuste pour init crypto ---
+function getApiTokenSafe() {
+  const k = localStorage.getItem("apiKey");
+  if (k) return k;
+  try {
+    const u = JSON.parse(localStorage.getItem("user") || "{}");
+    return u?.token || "";
+  } catch { return ""; }
+}
+//-- CRYPTO 
 export const cryptoOrder = (offer_id, currency = "usdttrc20") =>
   api("/api/payment/crypto/create-order", {
     method: "POST",
-    body: { offer_id, user_token: localStorage.getItem("apiKey"), currency },
+    body: { offer_id, user_token: getApiTokenSafe(), currency },
   });
+
 
   // Vérifie la session Stripe après redirection (pas de webhook en local)
 export const stripeConfirm = (session_id) =>

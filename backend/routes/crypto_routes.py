@@ -143,8 +143,8 @@ async def nowpayments_webhook(request: Request):
 
     logger.debug(f"📨 Webhook reçu pour order_id={order_id}, status={payment_status}")
 
-    # Accepte finished (reco). Si tu veux accepter "confirmed", ajoute-le dans le set.
-    if payment_status not in {"finished"}:
+    # --- BTZ-PATCH: accepter 'finished' ET 'confirmed' ---
+    if payment_status not in {"finished", "confirmed"}:
         return {"status": "waiting", "seen": payment_status}
 
     # ✅ Traitement du paiement validé
