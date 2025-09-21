@@ -931,3 +931,28 @@
      le <form> interne ne doit JAMAIS forcer l'affichage */
   .auth-form-inner{ display: block !important; }
 }
+
+/* ===== MOBILE: rythme vertical propre sur le formulaire (SAFE override) ===== */
+@media (max-width: 900px) {
+  /* + d'air entre les champs */
+  .auth-form-inner .form-input {
+    margin-bottom: 18px !important;   /* était ~16px -> un peu plus de souffle */
+  }
+
+  /* le bouton "Se connecter / Créer un compte" ne colle pas aux inputs */
+  .auth-form-inner .dbt-btn {
+    margin-top: 8px !important;
+  }
+
+  /* la ligne "Mot de passe oublié ? / Réinitialiser" respire */
+  .auth-form-inner .form-inline {
+    margin-top: 12px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* espace au-dessus du bouton Google */
+  .auth-form-inner .google-button-wrapper {
+    margin-top: 14px !important;
+    margin-bottom: 4px !important; /* petit amorti avant le footer */
+  }
+}
