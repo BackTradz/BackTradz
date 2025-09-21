@@ -112,45 +112,54 @@ def _load_recent_extractions(user):
 
 def _resolve_storage_path_for_download(req_path: str):
     """
-    Retourne (file_path_abs, root_used_abs, rel_for_history) en sécurisant:
-    - accepte un chemin relatif (ex: "AUDUSD/M15/x.csv") ou "backend/output_live/…"
-    - accepte un chemin ABSOLU sous OUTPUT_DIR / OUTPUT_LIVE_DIR (/var/data/backtradz/…)
-    - refuse tout ce qui sort de ces deux racines
+    Retourne (file_path_abs, root_used_abs, rel_for_history) :
+    - accepte "output/..."/"output_live/..." (relatif) ou absolu sous nos racines
+    - choisit en priorité le root correspondant au préfixe
+    - NE renvoie que si le fichier existe réellement
     """
-    # 1) normalisation "backend/…" -> retire le préfixe si présent
     s = str(req_path or "").replace("\\", "/")
     if s.lower().startswith("backend/"):
-        s = s[8:]  # retire "backend/"
+        s = s[8:]
     s_path = Path(s)
 
-    # 2) liste des racines autorisées
     roots = [
         (OUTPUT_DIR.resolve(), "output"),
         (OUTPUT_LIVE_DIR.resolve(), "output_live"),
     ]
 
-    # 3) essaie chaque racine autorisée
-    for root_abs, _tag in roots:
-        try:
-            # a) si le chemin est RELATIF -> join sur la racine
-            cand = (root_abs / s_path).resolve()
+    # 1) S'il y a un préfixe explicite, on essaie ce root en premier
+    order = roots
+    low = s.lower()
+    if low.startswith("output_live/"):
+        order = [roots[1], roots[0]]
+        s_path = Path(low[len("output_live/"):])
+    elif low.startswith("output/"):
+        order = [roots[0], roots[1]]
+        s_path = Path(low[len("output/"):])
+
+    # 2) Essais en relatif (existe ?)
+    for root_abs, _tag in order:
+        cand = (root_abs / s_path).resolve()
+        if cand.exists():
             rel = cand.relative_to(root_abs)
             return cand, root_abs, str(rel).replace("\\", "/")
-        except Exception:
-            pass
-        try:
-            # b) si le chemin est ABSOLU sous cette racine -> accepte tel quel
-            cand_abs = s_path.resolve()
-            rel = cand_abs.relative_to(root_abs)
-            return cand_abs, root_abs, str(rel).replace("\\", "/")
-        except Exception:
-            pass
 
-    # 4) si aucune racine ne matche -> refuse proprement
-    raise HTTPException(
-        status_code=400,
-        detail="Chemin hors stockage autorisé (output/output_live)"
-    )
+    # 3) Essais en absolu (existe ?)
+    try:
+        cand_abs = Path(s).resolve()
+    except Exception:
+        cand_abs = None
+    if cand_abs and cand_abs.exists():
+        for root_abs, _tag in roots:
+            try:
+                rel = cand_abs.relative_to(root_abs)
+                return cand_abs, root_abs, str(rel).replace("\\", "/")
+            except Exception:
+                pass
+
+    # 4) Introuvable
+    raise HTTPException(status_code=404, detail="Fichier introuvable")
+# --- /BTZ-PATCH ---
 
 @router.get("/list_csv_library")
 def list_csv_library():
@@ -409,8 +418,12 @@ def download_csv_by_path(
         json.dump(users, f, indent=2, ensure_ascii=False)
         f.truncate()
     # --- /BTZ-PATCH ---
+    # ... après écriture historique, juste avant le return
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Fichier introuvable")
 
     return FileResponse(file_path, filename=file_path.name, media_type="text/csv")
+
 
 
 @router.get("/download_owned_csv_by_path/{path:path}")
