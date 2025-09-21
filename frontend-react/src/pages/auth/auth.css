@@ -936,7 +936,7 @@
 @media (max-width: 900px) {
   /* + d'air entre les champs */
   .auth-form-inner .form-input {
-    margin-bottom: 12px !important;   /* était ~16px -> un peu plus de souffle */
+    margin-bottom: 10px !important;   /* était ~16px -> un peu plus de souffle */
   }
 
   /* le bouton "Se connecter / Créer un compte" ne colle pas aux inputs */
@@ -987,5 +987,5 @@
 
 /* === AUTH — MOBILE spacing (source unique) ================== */
 @media (max-width: 900px){
-    .auth-form-inner > * + * { margin-top: 12px; }  /* espace régulier entre champs/boutons */
+    .auth-form-inner > * + * { margin-top: 10px; }  /* espace régulier entre champs/boutons */
 }
