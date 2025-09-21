@@ -143,6 +143,28 @@ def _resolve_storage_path_for_download(req_path: str):
         if cand.exists():
             rel = cand.relative_to(root_abs)
             return cand, root_abs, str(rel).replace("\\", "/")
+        
+    # --- BTZ-PATCH: fallback symbole sans tirets (output_live) ---
+    # 2-bis) si pas trouvé, et si on est en output_live/<SYMB>/..., tenter sans '-'
+    from pathlib import Path as _P
+    parts = list(s_path.parts)
+    if len(parts) >= 3:
+        # ex: ["output_live", "BTC-USD", "H1", "BTC-USD_H1_20250901_to_20250920.csv"]
+        first, sym_dir = parts[0], parts[1]
+        if str(first).lower() == "output_live" and "-" in sym_dir:
+            # normalise dossier et nom de fichier
+            parts2 = parts[:]
+            parts2[1] = sym_dir.replace("-", "")  # dossier BTCUSD
+            # si un nom de fichier existe, on retire aussi les '-' dans le fichier
+            if "." in parts2[-1]:
+                parts2[-1] = parts2[-1].replace("-", "")
+            sp2 = _P(*parts2)
+            for root_abs, _tag in order:  # garde la même préférence de root
+                cand2 = (root_abs / sp2).resolve()
+                if cand2.exists():
+                    rel2 = cand2.relative_to(root_abs)
+                    return cand2, root_abs, str(rel2).replace("\\", "/")
+# --- /BTZ-PATCH ---
 
     # 3) Essais en absolu (existe ?)
     try:
