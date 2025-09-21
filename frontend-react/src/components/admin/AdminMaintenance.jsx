@@ -85,8 +85,11 @@ export default function AdminMaintenance() {
     try {
       // token admin déjà stocké (même logique que api())
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      const downloadUrl = `/api/admin/factures_download?rel=${encodeURIComponent(rel)}${token ? `&apiKey=${encodeURIComponent(token)}` : ""}`;
-      const res = await fetch(downloadUrl, { method: "GET" });
+      const downloadUrl = `/api/admin/factures_download?rel=${encodeURIComponent(rel)}`;
+      const res = await fetch(downloadUrl, {
+        method: "GET",
+        headers: token ? { "X-API-Key": token } : {},
+      });
       if (!res.ok) throw new Error("Download failed");
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
@@ -105,7 +108,15 @@ export default function AdminMaintenance() {
 
   const deleteInvoice = async (rel) => {
     try {
-      await api("/api/admin/factures_delete", { method: "POST", body: { rel } });
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      await fetch("/api/admin/factures_delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "X-API-Key": token } : {}),
+        },
+        body: JSON.stringify({ rel }),
+      });
       // refresh liste + stats
       const f = await api("/api/admin/factures_info");
       setFactures({ count: f?.count || 0, bytes: f?.bytes || 0 });
