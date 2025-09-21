@@ -257,10 +257,21 @@ function PublicDataSheetView({ folder, sheet }) {
     let abort = false;
     (async () => {
       try {
-        const { headers: h, rows: r } = await xlsxSheet({ folder, sheet, offset: 0, limit: 500 });
+        const j = await xlsxSheet({ folder, sheet, offset: 0, limit: 500, use_header: 1 });
         if (abort) return;
-        setHeads(h || []);
-        setRows(r || []);
+        // Tolérance: {headers,rows} OU {columns,rows} OU {data}
+        const r = Array.isArray(j?.rows)
+          ? j.rows
+          : Array.isArray(j?.data)
+          ? j.data
+          : [];
+        const h = Array.isArray(j?.headers) && j.headers.length
+          ? j.headers
+          : Array.isArray(j?.columns) && j.columns.length
+          ? j.columns
+          : (r[0] ? Object.keys(r[0]) : []);
+        setHeads(h);
+        setRows(r);
       } catch {
         setHeads([]);
         setRows([]);
