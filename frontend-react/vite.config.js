@@ -7,12 +7,12 @@ export default defineConfig({
     postcss: './postcss.config.js',
   },
   server: {
-    port: 5173,
+    port: 5174,                 // BTZ-PATCH: on met ton port actuel
     proxy: {
-      // tout ce que le front appelle (ex: /profile/update) sera préfixé en /api/... par apiClient (voir plus bas),
       '/api': {
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
+        secure: false,
       },
       '/auth': { target: 'http://127.0.0.1:8000', changeOrigin: true },
     },

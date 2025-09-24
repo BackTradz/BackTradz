@@ -9,8 +9,12 @@ import './analytics/posthog';
 // 🔗 Route tous les appels '/api/*' vers l'API (sans jamais doubler /api)
 (function patchFetchBaseURL() {
   try {
-    const RAW   = (import.meta.env.VITE_API_URL || "https://api.backtradz.com/api").trim().replace(/\/+$/, "");
-    const ROOT  = RAW.replace(/\/api$/i, "");         // ✅ base SANS /api
+    // ✅ En local: rester sur la même origine (localhost:5174) -> passe par proxy Vite
+    // ✅ En prod: fallback vers api.backtradz.com (ou VITE_API_URL si fourni)
+    const isLocal = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
+    const ENV     = (import.meta.env.VITE_API_URL || "").trim().replace(/\/+$/, "");
+    const DEFAULT = isLocal ? window.location.origin : "https://api.backtradz.com";
+    const ROOT    = (ENV || DEFAULT).replace(/\/api$/i, "");   // base SANS /api
     const _fetch = window.fetch.bind(window);
     const ORIGIN = window.location.origin.replace(/\/+$/, "");
 
