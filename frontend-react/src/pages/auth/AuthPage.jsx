@@ -63,10 +63,10 @@ export default function AuthPage() {
           // ✅ 1) Peuple le contexte tout de suite (Navbar voit les crédits sans refresh)
           // ✅ attendre la fin de l’hydratation pour éviter le bounce
           loginSuccess(apiKey)
-            .then(() => {
+            .then(async () => {
               try { posthog.capture('login_success', { provider: 'google' }); } catch {}
               // ✅ On récupère l'email via /api/me puis on applique le blocage interne
-+             await safeIdentifyAfterLogin(() => apiKey);
+              await safeIdentifyAfterLogin(() => apiKey);
               setShowSignupSuccess(true);
               navigate("/home", { replace: true });
             })
