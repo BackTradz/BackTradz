@@ -60,3 +60,4 @@ var/**
 # laisser les readme et example 
 !backend/data/README.md
 !backend/data/example.csv
+".env.racine" 

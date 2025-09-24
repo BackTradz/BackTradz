@@ -11,7 +11,7 @@
 // - POST /profile/delete                    -> suppression compte
 // ============================================================
 import { api } from './apiClient';
-import { API_BASE } from "./apiClient"; 
+import { absApi } from "./apiClient"; 
 
 export const myBacktests = () =>
   api('api/user/backtests'); // besoin d'être connecté (X-API-Key)
@@ -25,7 +25,8 @@ export function downloadXlsxUrl(folder, filename) {
   const apiKey = localStorage.getItem("apiKey") || "";
   const f = encodeURIComponent(folder || "");
   const name = encodeURIComponent(filename || "");
-  return `${API_BASE}/api/download/${name}?folder=${f}&apiKey=${encodeURIComponent(apiKey)}`;
+  // Utilise absApi pour gérer BASE="" (dev) ou BASE absolu (prod)
+  return absApi(`/api/download/${name}?folder=${f}&apiKey=${encodeURIComponent(apiKey)}`);
 }
 
 // Update profil : accepte un FormData ou un <form>, mappe vers { email, full_name }

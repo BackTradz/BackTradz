@@ -18,35 +18,39 @@
 // - Si "body" est un objet => JSON ; si FormData => on laisse tel quel.
 // ============================================================
 
-const BASE = (
-  import.meta.env.VITE_API_BASE && import.meta.env.VITE_API_BASE.trim()
-    ? import.meta.env.VITE_API_BASE.trim().replace(/\/$/, '')
-    : 'https://api.backtradz.com' // ✅ fallback PROD sûr
+// PATCH BTZ V1.1 --- Base API détectée (supporte VITE_API_URL ou VITE_API_BASE) ---
+const ENV_URL = (
+  (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE || "")
+    .trim()
+    .replace(/\/+$/, "")
 );
+const isBrowser = typeof window !== "undefined";
+const isLocalhost = isBrowser && /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
 
-// --- Détection contexte
-const onProdDomain =
-  typeof window !== "undefined" &&
-  /(^|\.)backtradz\.com$/i.test(window.location.hostname);
+// Règle:
+// - Si ENV_URL défini → on l'utilise tel quel (prod ou dev).
+// - Sinon:
+//   - en local: BASE = "" (appels relatifs → passent par le proxy Vite /api)
+//   - en prod:  BASE = https://api.backtradz.com
+let BASE = ENV_URL || (isLocalhost ? "" : "https://api.backtradz.com");
 
-// --- Base URL issue de l'env (si présente)
-const envBase = (import.meta.env?.VITE_API_BASE || "").trim();
-
-// --- Si on est en prod et que l'env pointe sur localhost → on l'ignore
-const looksLikeLocal = /localhost|127\.0\.0\.1|:\d{2,5}/i.test(envBase);
-const effectiveBase = onProdDomain && looksLikeLocal ? "" : envBase;
-
-// --- Join sûr BASE + path
+// --- Join sûr BASE + path (gère BASE vide = appels relatifs) ---
 const j = (path = "") => {
   const isAbs = /^https?:\/\//i.test(path);
   if (isAbs) return path;
+  if (BASE === "") {
+    return path.startsWith("/") ? path : `/${path}`;
+  }
   return `${BASE}${path.startsWith("/") ? "" : "/"}${path}`;
 };
-// 🔥 expose la base API pour construire des HREF absolus (téléchargements)
+
+// PATCH BTZ V1.1🔥 expose la base API (si vide => relative) + helper URL absolue
 export const API_BASE = BASE;
 export const absApi = (path) => {
   const p = String(path || "");
-  return /^https?:\/\//i.test(p) ? p : `${API_BASE}${p.startsWith("/") ? "" : "/"}${p}`;
+  if (/^https?:\/\//i.test(p)) return p;
+  if (API_BASE === "") return p.startsWith("/") ? p : `/${p}`;
+  return `${API_BASE}${p.startsWith("/") ? "" : "/"}${p}`;
 };
 
 export async function api(path, { method = 'GET', headers = {}, body, auth = true } = {}) {
