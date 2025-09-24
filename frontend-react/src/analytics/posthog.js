@@ -68,3 +68,13 @@ export function posthogReset() {
     posthog.reset();
   } catch {}
 }
+
+// DEBUG: expose pour vérifier dans la console
+// (retire-le après validation)
+// eslint-disable-next-line no-undef
+window.posthogIdentify = posthogIdentify;
+// eslint-disable-next-line no-undef
+window.__PH_INTERNALS__ = {
+  INTERNAL_EMAILS,
+  INTERNAL_DOMAINS
+};
