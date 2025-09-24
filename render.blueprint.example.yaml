@@ -1,0 +1,37 @@
+# Exemple de blueprint Render (désactivé car déplacé/renommé)
+# Si un jour tu veux tout repasser en Blueprint, renomme ce fichier en `render.yaml`
+# à la racine et aligne les noms EXACTS des services ci-dessous.
+
+envVarGroups:
+  - name: backtradz-prod
+
+services:
+  - type: web
+    # ⚠️ Si tu migres vers Blueprint un jour, mets EXACTEMENT:
+    # name: backtradz-backend    (pour matcher ton service prod actuel)
+    name: backtradz-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    autoDeploy: true
+    envVars:
+      - key: ENV
+        value: render
+      - key: FRONTEND_URL
+        value: https://www.backtradz.com
+      - key: PUBLIC_API_URL
+        value: https://api.backtradz.com
+    # disk:
+    #   name: backtradz-data
+    #   mountPath: /var/data/backtradz
+    #   sizeGB: 5
+
+  - type: web
+    # ⚠️ Si tu veux gérer aussi le front via blueprint plus tard:
+    name: BackTradz-front
+    env: static
+    rootDir: frontend-react
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeploy: true
