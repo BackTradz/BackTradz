@@ -1,15 +1,23 @@
-# render.yaml — backend only (start at repo root)
 envVarGroups:
   - name: backtradz-prod
 
 services:
   - type: web
-    name: backtradz-backend
+    name: backtradz-api
     env: python
-    plan: free
     rootDir: backend
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     autoDeploy: true
     envVars:
-      - fromGroup: backtradz-prod
+      - key: ENV
+        value: render
+      - key: FRONTEND_URL
+        value: https://www.backtradz.com
+      - key: PUBLIC_API_URL
+        value: https://api.backtradz.com
+    # (facultatif) disque persistant si tu l'utilises :
+    # disk:
+    #   name: backtradz-data
+    #   mountPath: /var/data/backtradz
+    #   sizeGB: 5

@@ -1,0 +1,43 @@
+{
+  "invoice_id": "INV-202509-0013",
+  "issued_at": "2025-09-11T23:54:43",
+  "company": {
+    "name": "BackTradz",
+    "vat_number": "N/A",
+    "address_lines": [
+      "—",
+      "—"
+    ],
+    "email": "support@backtradz.app",
+    "website": "https://backtradz.app"
+  },
+  "customer": {
+    "user_id": "169047fc-7a47-4650-9865-75c9678a4e9d",
+    "name": "admin admin",
+    "email": "backtradz@outlook.com",
+    "billing_address": {}
+  },
+  "payment": {
+    "method": "Stripe",
+    "transaction_id": "in_1S6KK9J7lIaOTbzgSbBnI8r7",
+    "currency": "EUR"
+  },
+  "items": [
+    {
+      "sku": "SUB_25",
+      "label": "25€/mois - 30 crédits et plus",
+      "qty": 1,
+      "unit_amount": 25.0
+    }
+  ],
+  "amounts": {
+    "total_ht": 25.0,
+    "tax_rate": 0.0,
+    "tax_amount": 0.0,
+    "total_ttc": 25.0
+  },
+  "meta": {
+    "note": "Facture générée automatiquement – BackTradz",
+    "version": 1
+  }
+}

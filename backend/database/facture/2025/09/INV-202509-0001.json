@@ -1,0 +1,43 @@
+{
+  "invoice_id": "INV-202509-0001",
+  "issued_at": "2025-09-10T21:34:20",
+  "company": {
+    "name": "BackTradz",
+    "vat_number": "N/A",
+    "address_lines": [
+      "—",
+      "—"
+    ],
+    "email": "support@backtradz.app",
+    "website": "https://backtradz.app"
+  },
+  "customer": {
+    "user_id": "c199143b-2550-4856-b54d-d02b07e65fc7",
+    "name": "florian boulinguez",
+    "email": "florian.boulinguez@outlook.com",
+    "billing_address": {}
+  },
+  "payment": {
+    "method": "PayPal",
+    "transaction_id": "2BA43879UM0465500",
+    "currency": "EUR"
+  },
+  "items": [
+    {
+      "sku": "CREDIT_20",
+      "label": "25 crédits pour 20€",
+      "qty": 1,
+      "unit_amount": 20.0
+    }
+  ],
+  "amounts": {
+    "total_ht": 20.0,
+    "tax_rate": 0.0,
+    "tax_amount": 0.0,
+    "total_ttc": 20.0
+  },
+  "meta": {
+    "note": "Facture générée automatiquement – BackTradz",
+    "version": 1
+  }
+}
