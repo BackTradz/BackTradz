@@ -19,7 +19,7 @@ export default function usePip(symbol) {
       try {
         setLoading(true);
         // 1) backend
-        const res = await fetch(`/api/meta/pip?symbol=${encodeURIComponent(symbol)}`);
+        const res = await fetch(`/api/pip?symbol=${encodeURIComponent(symbol)}`);
         if (res.ok) {
           const data = await res.json();
           if (!abort && data && typeof data.pip !== "undefined" && data.pip !== null) {
