@@ -202,7 +202,7 @@ def launch_backtest(req: BacktestRequest, authorization: str = Header(None, alia
             return {"error": "Aucune donnée trouvée pour cette période."}
 
         # 2. Import dynamique de la stratégie
-        module_path = f"backend.strategies.{req.strategy}"
+        module_path = f"app.strategies.{req.strategy}"
         print("📦 Chargement module :", module_path)
         strategy_module = importlib.import_module(module_path)
         strategy_func = getattr(strategy_module, f"detect_{req.strategy}")
@@ -415,7 +415,7 @@ async def upload_csv_and_backtest(
         print(f"🧭 Symbol/TF utilisés → {sym} / {tf} (filename='{csv_file.filename}')")
 
         # 🧠 Chargement dynamique de la stratégie
-        module_path = f"backend.strategies.{strategy}"
+        module_path = f"app.strategies.{strategy}"
         print("📦 Import :", module_path)
         strategy_module = importlib.import_module(module_path)
         strategy_func = getattr(strategy_module, f"detect_{strategy}")

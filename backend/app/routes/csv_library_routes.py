@@ -41,7 +41,7 @@ router = APIRouter()
 
 
 # -------- Extractions récentes (Niv.2) --------
-RECENT_STORE_DIR = Path("backend/storage/extractions")
+RECENT_STORE_DIR = Path("app/storage/extractions")
 RECENT_TTL_HOURS = 48  # TTL 48h
 RECENT_MAX_RETURN = 10
 
@@ -141,7 +141,7 @@ def _resolve_storage_path_for_download(req_path: str):
     - NE renvoie que si le fichier existe réellement
     """
     s = str(req_path or "").replace("\\", "/")
-    if s.lower().startswith("backend/"):
+    if s.lower().startswith("app/"):
         s = s[8:]
     s_path = Path(s)
 
@@ -341,7 +341,7 @@ def download_csv(filename: str, x_api_key: str = Header(None)):
     """
     from app.models.users import USERS_FILE, get_user_by_token
 
-    file_path = Path("backend/assets/csv_library") / filename
+    file_path = Path("app/assets/csv_library") / filename
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Fichier introuvable")
 
@@ -526,8 +526,8 @@ def download_owned_csv_by_path(
             (r.get("filename") == filename)
             or (rel_out and r.get("relative_path") == rel_out)
             or (rel_live and r.get("relative_path") == rel_live)
-            or (rel_out and r.get("path") == f"backend/output/{rel_out}")
-            or (rel_live and r.get("path") == f"backend/output_live/{rel_live}")
+            or (rel_out and r.get("path") == f"app/output/{rel_out}")
+            or (rel_live and r.get("path") == f"app/output_live/{rel_live}")
             for r in ph
         )
 
@@ -536,8 +536,8 @@ def download_owned_csv_by_path(
         rows = _load_recent_extractions(user)
         owned = any(
             (r.get("filename") == filename)
-            or (rel_out and (r.get("relative_path") == rel_out or r.get("path") == f"backend/output/{rel_out}"))
-            or (rel_live and (r.get("relative_path") == rel_live or r.get("path") == f"backend/output_live/{rel_live}"))
+            or (rel_out and (r.get("relative_path") == rel_out or r.get("path") == f"app/output/{rel_out}"))
+            or (rel_live and (r.get("relative_path") == rel_live or r.get("path") == f"app/output_live/{rel_live}"))
             for r in rows
         )
         if not owned:
@@ -702,7 +702,7 @@ def my_recent_extractions(x_api_key: str = Header(None)):
 
     # Normalisation front-friendly
     out = []
-    backend_root = Path("backend").resolve()
+    backend_root = Path("app").resolve()
     for r in rows:
         rel = r.get("relative_path") or r.get("path") or ""
         name = r.get("filename") or Path(rel).name
