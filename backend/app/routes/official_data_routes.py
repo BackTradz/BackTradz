@@ -18,6 +18,10 @@ from app.auth import get_current_user
 from app.models.users import decrement_credits, User
 from pathlib import Path
 import os
+# BTZ-PATCH v1.1: centraliser via paths.py
+from app.core.paths import DATA_ROOT
+
+OFFICIAL_DIR = DATA_ROOT / "official"
 
 router = APIRouter()
 
@@ -29,23 +33,19 @@ def list_official_csvs():
     Retour:
         { "files": [ { filename, size_kb, path }, ... ] }
     """
-    folder = Path(__file__).resolve().parent.parent.parent / "backend" / "data" / "official"
     csv_files = []
-
-    if not folder.exists():
+    if not OFFICIAL_DIR.exists():
         return {"files": []}
 
-    for filename in os.listdir(folder):
+    for filename in os.listdir(OFFICIAL_DIR):
         if filename.endswith(".csv"):
-            filepath = folder / filename
+            filepath = OFFICIAL_DIR / filename
             size_kb = round(filepath.stat().st_size / 1024, 2)
-
             csv_files.append({
                 "filename": filename,
                 "size_kb": size_kb,
                 "path": str(filepath)
             })
-
     return {"files": csv_files}
 
 @router.get("/download/{filename}")
@@ -60,9 +60,7 @@ async def download_file(filename: str, user: User = Depends(get_current_user)):
     Effets:
         - décrémente crédits du user avant de renvoyer le fichier.
     """
-    folder = Path(__file__).resolve().parent.parent.parent / "backend" / "data" / "official"
-    file_path = folder / filename
-
+    file_path = OFFICIAL_DIR / filename
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Fichier non trouvé")
 

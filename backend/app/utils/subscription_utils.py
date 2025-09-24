@@ -2,10 +2,10 @@
 
 from datetime import datetime, timedelta
 import json
-from pathlib import Path
 from app.models.offers import get_offer_by_id
 
-USERS_FILE = Path("backend/database/users.json")
+# BTZ-PATCH v1.1: centraliser → on prend USERS_FILE depuis app.core.paths
+from app.core.paths import USERS_JSON as USERS_FILE
 
 def renew_all_subscriptions():
     """

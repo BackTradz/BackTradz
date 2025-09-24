@@ -41,10 +41,10 @@ router = APIRouter()
 
 
 # -------- Extractions récentes (Niv.2) --------
-RECENT_STORE_DIR = Path("app/storage/extractions")
+# BTZ-PATCH v1.1: stockage recent_extractions sous DATA_ROOT (géré par dev.py)
+RECENT_STORE_DIR = DATA_ROOT / "storage" / "extractions"
 RECENT_TTL_HOURS = 48  # TTL 48h
 RECENT_MAX_RETURN = 10
-
 
 def _ensure_store_dir():
     RECENT_STORE_DIR.mkdir(parents=True, exist_ok=True)
@@ -341,7 +341,9 @@ def download_csv(filename: str, x_api_key: str = Header(None)):
     """
     from app.models.users import USERS_FILE, get_user_by_token
 
-    file_path = Path("app/assets/csv_library") / filename
+    # BTZ-PATCH v1.1: chemin centralisé pour assets CSV (sous DATA_ROOT)
+    assets_dir = DATA_ROOT / "assets" / "csv_library"
+    file_path = assets_dir / filename
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Fichier introuvable")
 

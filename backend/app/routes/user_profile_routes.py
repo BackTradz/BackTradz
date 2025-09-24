@@ -23,9 +23,14 @@ from fastapi.responses import HTMLResponse
 from app.utils.templates import templates
 from fastapi import Depends
 from app.auth import get_current_user
-from app.models.users import User
 from fastapi.responses import JSONResponse
-from app.models.users import delete_user_by_id, User
+from app.models.users import (
+    User,
+    delete_user_by_id,
+    get_user_by_token,
+    update_user,
+    cancel_subscription,
+)
 
 import json
 import os
@@ -46,12 +51,12 @@ def profile_page(request: Request, token: str = Query(None)):
     if not token:
         return RedirectResponse(url="/login", status_code=303)
 
-    user = users.get_user_by_token(token)
+    user = get_user_by_token(token)
     if not user:
         return RedirectResponse(url="/login", status_code=303)
 
     return templates.TemplateResponse("user_profile.html", {
-        "request": request,
+        "request": request, 
         "user": user,
         "token": token
     })
@@ -69,7 +74,7 @@ async def update_profile(
         return {"status": "error", "message": "Non authentifié"}
 
     # ✅ on passe uniquement ce que update_user sait gérer
-    updated = users.update_user(
+    updated = update_user(
         user.id,
         email=email.strip(),
         full_name=(full_name or "").strip(),
@@ -96,7 +101,7 @@ async def unsubscribe(user: User = Depends(get_current_user)):
     """
     Annule l'abonnement (si présent) de l'utilisateur courant.
     """
-    success = users.cancel_subscription(user.id)
+    success = cancel_subscription(user.id)
     if success:
         return {"status": "success"}
     return {"status": "error", "message": "Impossible de se désabonner"}

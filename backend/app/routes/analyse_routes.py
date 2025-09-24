@@ -32,11 +32,9 @@ def download_xlsx(
     - Fallback sous backend/data/analysis (ancien emplacement).
     - Si `?folder=` est fourni, on privilégie ce sous-dossier.
     """
-    # 1) candidats par ordre de priorité
-    roots = [
-        ANALYSIS_DIR.resolve(),
-        (Path("backend") / "data" / "analysis").resolve(),
-    ]
+
+    # BTZ-PATCH v1.1: unifie → ANALYSIS_DIR gère déjà local/prod (via paths/dev)
+    roots = [ANALYSIS_DIR.resolve()]
 
     candidates: list[Path] = []
 

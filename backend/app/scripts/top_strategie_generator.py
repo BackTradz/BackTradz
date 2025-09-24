@@ -53,19 +53,15 @@ def generate_top_strategies():
         for item in top
     ]
 
-    # 📂 Sauvegarde du fichier JSON dans backend/data/public/top_strategies.json
-    BASE_DIR = Path(__file__).resolve().parent.parent  # → dossier backend/
-    output_path = BASE_DIR / "data" / "public" / "top_strategies.json"
-
-    # Crée le dossier si inexistant
+    # BTZ-PATCH v1.1 : centralisé → stocker sous DATA_ROOT/public/top_strategies.json
+    from app.core.paths import DATA_ROOT
+    output_path = DATA_ROOT / "public" / "top_strategies.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Écrit le JSON final
-    with open(output_path, "w") as f:
-        json.dump(output, f, indent=2)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(output, f, indent=2, ensure_ascii=False)
 
-    print("✅ top_strategies.json mis à jour depuis l'API")
-
+    print(f"✅ top_strategies.json mis à jour: {output_path}")
 
 # 🏃‍♂️ Lancement direct si exécuté en script
 if __name__ == "__main__":

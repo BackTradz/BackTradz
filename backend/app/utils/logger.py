@@ -6,15 +6,18 @@ import json
 import re
 from datetime import datetime
 from typing import Optional, Mapping, Any
+from app.core.paths import DATA_ROOT
 
-LOG_DIR = "logs"
-os.makedirs(LOG_DIR, exist_ok=True)
 
-# === Nom du fichier = stratify_2025-08-27.log
-log_filename = os.path.join(LOG_DIR, f"stratify_{datetime.now().strftime('%Y-%m-%d')}.log")
+# BTZ-PATCH v1.1: logs sous DATA_ROOT/logs (local/prod unifié)
+LOG_DIR = DATA_ROOT / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+# Nom du fichier = stratify_YYYY-MM-DD.log
+log_filename = LOG_DIR / f"BackTradz_{datetime.now().strftime('%Y-%m-%d')}.log"
 
 # === Création du logger global
-logger = logging.getLogger("stratify")
+logger = logging.getLogger("BackTradz")
 logger.setLevel(logging.DEBUG)  # Par défaut : tout capter, on filtre dans les handlers
 
 # === Formatage

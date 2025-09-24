@@ -36,22 +36,11 @@ def get_user_backtests(request: Request, user=Depends(get_current_user)):
     et renvoie des items prêts à afficher (incluant metrics détaillées).
     """
     print(f"✅ USER CONNECTÉ → {user.id}")
-    base_dir = ANALYSIS_DIR
-    alt_dir = Path("backend/data/analysis").resolve()
-
-    search_dirs = []
-    if base_dir.exists():
-        search_dirs.append(base_dir)
-    if alt_dir.exists() and alt_dir != base_dir:
-        search_dirs.append(alt_dir)
-
+    # BTZ-PATCH v1.1 : unifie → ANALYSIS_DIR gère déjà local/prod
     backtests = []
     seen_folders = set()
 
-    # 📂 PROD UNIQUEMENT (Render disk)
-    search_root = ANALYSIS_DIR  # ex: /var/data/backtradz/analysis
-
-    # Parcours récursif de params.json
+    search_root = ANALYSIS_DIR
     for meta_path in search_root.glob("**/params.json"):
         try:
             data = json.loads(meta_path.read_text(encoding="utf-8"))
