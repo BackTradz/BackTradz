@@ -319,8 +319,10 @@ def run_backtest(df, strategy_name, strategy_func, sl_pips=100, tp1_pips=100, tp
         run_id = hashlib.sha1(payload).hexdigest()[:10]
 
         
+    from app.core.paths import ANALYSIS_DIR
     full_name = f"{base_name}__h{run_id}"
-    output_path = Path("backend/data/analysis") / full_name
+    # ✅ Utilisation du dossier centralisé
+    output_path = ANALYSIS_DIR / full_name
     output_path.mkdir(parents=True, exist_ok=True)
 
     # 💾 Sauvegarde CSV résultat

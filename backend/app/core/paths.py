@@ -1,18 +1,41 @@
-from pathlib import Path
+"""
+paths.py
+--------------------------------
+Wrapper centralisé autour de dev.py
+→ Permet de gérer Render + Local sans casser l’existant.
+"""
 import os
+from pathlib import Path
 
-DATA_ROOT       = Path(os.getenv("DATA_ROOT", "/var/data/backtradz")).resolve()
-OUTPUT_DIR      = DATA_ROOT / "output"
-OUTPUT_LIVE_DIR = DATA_ROOT / "output_live"
-ANALYSIS_DIR    = DATA_ROOT / "analysis"
-DB_DIR          = DATA_ROOT / "db"
-USERS_JSON      = DB_DIR / "users.json"
+try:
+    # ✅ Importer depuis dev.py si dispo
+    from app.core.dev import DATA_ROOT, DB_ROOT
+    # Compatibilité avec les anciens noms utilisés ailleurs
+    OUTPUT_DIR      = DATA_ROOT / "output"
+    OUTPUT_LIVE_DIR = DATA_ROOT / "output_live"
+    ANALYSIS_DIR    = DATA_ROOT / "analysis"
+    DB_DIR          = DB_ROOT
+    USERS_JSON      = DB_DIR / "users.json"
+    PRIVATE_DIR     = DATA_ROOT / "private"
+    INVOICES_DIR    = PRIVATE_DIR / "invoices"
+    STRATEGIES_DIR  = PRIVATE_DIR / "strategies"
+except Exception:
+    # 🔒 Fallback → logique historique (Render only)
+    DATA_ROOT       = Path(os.getenv("DATA_ROOT", "/var/data/backtradz")).resolve()
+    OUTPUT_DIR      = DATA_ROOT / "output"
+    OUTPUT_LIVE_DIR = DATA_ROOT / "output_live"
+    ANALYSIS_DIR    = DATA_ROOT / "analysis"
+    DB_DIR          = DATA_ROOT / "db"
+    USERS_JSON      = DB_DIR / "users.json"
+    PRIVATE_DIR     = DATA_ROOT / "private"
+    INVOICES_DIR    = PRIVATE_DIR / "invoices"
+    STRATEGIES_DIR  = PRIVATE_DIR / "strategies"
 
-# Coffre privé (si tu l’as ajouté)
-PRIVATE_DIR     = DATA_ROOT / "private"
-INVOICES_DIR    = PRIVATE_DIR / "invoices"
-STRATEGIES_DIR  = PRIVATE_DIR / "strategies"
 
 def ensure_storage_dirs():
+    """Crée tous les dossiers requis (safe en local, no-op en prod)."""
     for d in (OUTPUT_DIR, OUTPUT_LIVE_DIR, ANALYSIS_DIR, DB_DIR, PRIVATE_DIR, INVOICES_DIR, STRATEGIES_DIR):
-        d.mkdir(parents=True, exist_ok=True)
+        try:
+            d.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
