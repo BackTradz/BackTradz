@@ -56,7 +56,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 # --- Resolver de Price Stripe (ENV -> lookup_key -> fallback offers)
 def resolve_price_for_offer(offer_id: str) -> str:
-    from backend.models.offers import get_offer_by_id  # local import pour éviter cycles
+    from app.models.offers import get_offer_by_id  # local import pour éviter cycles
     offer = get_offer_by_id(offer_id) or {}
     # 1) ENV direct par convention STRIPE_PRICE_<OFFER_ID>
     env_direct = os.getenv(f"STRIPE_PRICE_{offer_id}")

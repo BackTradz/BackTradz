@@ -87,10 +87,15 @@ except Exception:
     except Exception:
         ProxyHeadersMiddleware = None  # on désactive si vraiment indisponible
 
-
 app = FastAPI()
 
+# 1) Session d’abord (sera exécuté APRES CORS côté requêtes)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SECRET_KEY", "dev_fallback_secret")
+)
 
+# 2) CORS ensuite (sera exécuté EN PREMIER côté requêtes)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -100,15 +105,10 @@ app.add_middleware(
         "http://127.0.0.1:5173",
     ],
     allow_credentials=True,
-    allow_methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
-# Session (utilisé par OAuth)
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=os.getenv("SECRET_KEY", "dev_fallback_secret")
-)
 
 # Corrige scheme/host depuis X-Forwarded-* derrière Render/NGINX
 if ProxyHeadersMiddleware is not None:
@@ -253,7 +253,7 @@ def _env_oauth(request: Request):
         "SECRET": bool(os.getenv("BACKTRADZ_GOOGLE_CLIENT_SECRET") or os.getenv("GOOGLE_CLIENT_SECRET")),
         "REDIRECT": os.getenv("BACKTRADZ_GOOGLE_REDIRECT_URI") or os.getenv("GOOGLE_REDIRECT_URI") or "",
         "base_url_seen": str(request.base_url),
-        "module_auth_file": getattr(__import__("backend").auth, "__file__", "n/a"),
+        "module_auth_file": getattr(__import__("app").auth, "__file__", "n/a"),
     })
 
 # 🔒 Custom doc avec champ X-API-Key
