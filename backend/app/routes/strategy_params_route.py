@@ -54,7 +54,7 @@ def get_strategy_params(strategy_name: str):
           → Évite que "kwargs" apparaisse en champ à l'écran.
     """
     try:
-        module_path = f"backend.strategies.{strategy_name}"
+        module_path = f"app.strategies.{strategy_name}"
         strategy_module = importlib.import_module(module_path)
 
         func_name = f"detect_{strategy_name}"
@@ -102,7 +102,7 @@ def list_strategies():
     Notes:
         - Ignore __init__.py et fichiers non .py.
     """
-    folder = "backend/strategies"
+    folder = "app/strategies"
     strats = []
     for file in os.listdir(folder):
         if file.endswith(".py") and not file.startswith("__"):
