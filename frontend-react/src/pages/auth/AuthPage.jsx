@@ -9,7 +9,7 @@ import SignupSuccessOverlay from "../../components/auth/SignupSuccessOverlay";
 import "./auth.css";
 import { login } from "../../sdk/authApi";
 import { useAuth } from "../../auth/AuthContext"; 
-import posthog from '../../analytics/posthog';
+import posthog, { posthogIdentify } from '../../analytics/posthog';
 
 export default function AuthPage() {
   const [isLoginActive, setIsLoginActive] = useState(true);
@@ -42,6 +42,8 @@ export default function AuthPage() {
           loginSuccess(apiKey)
             .then(() => {
               try { posthog.capture('login_success', { provider: 'google' }); } catch {}
++             // ℹ️ On ne connaît pas encore l'email côté front sur ce flow.
++             // Si tu exposes /me après loginSuccess, tu pourras appeler posthogIdentify(user) ici.
               setShowSignupSuccess(true);
               navigate("/home", { replace: true });
             })
@@ -74,6 +76,8 @@ export default function AuthPage() {
       const data = await res.json();
       if (data.status === "success") {
         loginSuccess(data.token); // << idem : on peuple le contexte
+        // 🔐 Bloque tes comptes PostHog si email interne (et identifie sinon)
+        posthogIdentify({ email, username, first_name: firstName, last_name: lastName });
         setShowSignupSuccess(true);
       } else {
         alert(data.message || "Erreur lors de l'inscription");
@@ -89,6 +93,10 @@ export default function AuthPage() {
       const data = await login(identifier, password);
       if (data?.token) {
         loginSuccess(data.token);      // << met le user dans le contexte maintenant
+        // ✅ L’API login renvoie déjà "user" ? Si oui, passe-le à identify.
+        //    Sinon, on envoie au moins l’identifier pour déclencher l’opt-out si c’est ton email.
+        const user = data.user || { email: identifier, username: identifier };
+        posthogIdentify(user);
         navigate("/home");
       } else {
         alert(data.message || "Identifiants invalides");
