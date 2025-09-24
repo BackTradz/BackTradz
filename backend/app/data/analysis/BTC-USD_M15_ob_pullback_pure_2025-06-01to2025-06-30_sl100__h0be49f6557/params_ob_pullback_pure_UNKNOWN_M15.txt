@@ -1,0 +1,12 @@
+--- 2025-09-11 00:59:13 ---
+strategy = ob_pullback_pure
+symbol   = UNKNOWN
+timeframe= M15
+min_wait_candles = 3
+max_wait_candles = 20
+allow_multiple_entries = False
+sl_pips = 100
+tp1_pips = 100
+tp2_pips = 200
+pip_used = 1
+

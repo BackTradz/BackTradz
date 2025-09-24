@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-09-11 20:06:13",
+  "strategy": "englobante_entry",
+  "symbol": "UNKNOWN",
+  "timeframe": "M30",
+  "start_date": null,
+  "end_date": null,
+  "user_id": "c199143b-2550-4856-b54d-d02b07e65fc7",
+  "params": {
+    "sl_pips": 50,
+    "tp1_pips": 50,
+    "tp2_pips": 100,
+    "pip_used": 0.0001
+  },
+  "run_id": "d41ec4d46d"
+}

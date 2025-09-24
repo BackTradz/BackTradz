@@ -1,0 +1,13 @@
+--- 2025-09-11 18:26:30 ---
+strategy = ob_pullback_gap_ema_simple
+symbol   = UNKNOWN
+timeframe= M5
+min_wait_candles = 3
+max_wait_candles = 20
+allow_multiple_entries = False
+ema_key = EMA_50
+sl_pips = 100
+tp1_pips = 100
+tp2_pips = 200
+pip_used = 1
+
