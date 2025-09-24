@@ -11,6 +11,29 @@ import { login } from "../../sdk/authApi";
 import { useAuth } from "../../auth/AuthContext"; 
 import posthog, { posthogIdentify } from '../../analytics/posthog';
 
+// Helper: identifie après login en tentant /api/me (pour récupérer l'email)
+async function safeIdentifyAfterLogin(getToken, identifierMaybeEmail) {
+  try {
+    const token = typeof getToken === 'function' ? getToken() : getToken;
+    let user = null;
+    if (token) {
+      const meRes = await fetch('/api/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (meRes.ok) user = await meRes.json().catch(() => null);
+    }
+    if (!user) {
+      const id = identifierMaybeEmail || '';
+      user = {
+        email: (id && id.includes('@')) ? id : '',
+        username: id || 'anonymous'
+      };
+    }
+    posthogIdentify(user); // ⛔ bloquera tes emails internes
+  } catch { /* no-op */ }
+}
+
+
 export default function AuthPage() {
   const [isLoginActive, setIsLoginActive] = useState(true);
   const [showSignupSuccess, setShowSignupSuccess] = useState(false);
@@ -42,8 +65,8 @@ export default function AuthPage() {
           loginSuccess(apiKey)
             .then(() => {
               try { posthog.capture('login_success', { provider: 'google' }); } catch {}
-+             // ℹ️ On ne connaît pas encore l'email côté front sur ce flow.
-+             // Si tu exposes /me après loginSuccess, tu pourras appeler posthogIdentify(user) ici.
+              // ✅ On récupère l'email via /api/me puis on applique le blocage interne
++             await safeIdentifyAfterLogin(() => apiKey);
               setShowSignupSuccess(true);
               navigate("/home", { replace: true });
             })
@@ -93,10 +116,8 @@ export default function AuthPage() {
       const data = await login(identifier, password);
       if (data?.token) {
         loginSuccess(data.token);      // << met le user dans le contexte maintenant
-        // ✅ L’API login renvoie déjà "user" ? Si oui, passe-le à identify.
-        //    Sinon, on envoie au moins l’identifier pour déclencher l’opt-out si c’est ton email.
-        const user = data.user || { email: identifier, username: identifier };
-        posthogIdentify(user);
+        // ✅ Identifie proprement (email via /api/me si possible)
+        await safeIdentifyAfterLogin(() => data.token, identifier);
         navigate("/home");
       } else {
         alert(data.message || "Identifiants invalides");
