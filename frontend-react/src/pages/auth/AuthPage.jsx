@@ -15,12 +15,17 @@ import posthog, { posthogIdentify } from '../../analytics/posthog';
 async function safeIdentifyAfterLogin(getToken, identifierMaybeEmail) {
   try {
     const token = typeof getToken === 'function' ? getToken() : getToken;
+    if (!token) return; // pas connecté → on sort sans rien faire
     let user = null;
     if (token) {
-      const meRes = await fetch('/api/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (meRes.ok) user = await meRes.json().catch(() => null);
+      // construit un header propre (évite "Bearer Bearer ...")
+      const auth = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      const meRes = token ? await fetch('/api/me', {
+        headers: { 'Authorization': auth }
+      }).catch(() => null) : null;
+      if (meRes && meRes.ok) {
+      user = await meRes.json().catch(() => null); // silencieux
+    }
     }
     if (!user) {
       const id = identifierMaybeEmail || '';
