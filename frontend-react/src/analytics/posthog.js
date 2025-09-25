@@ -50,10 +50,9 @@ export function posthogIdentify(user) {
       return;
     }
 
-    // ✅ user normal → on (re)autorise et on identifie + $pageview immédiat
+    // user normal → on autorise et on identifie
     posthog.opt_in_capturing();
     posthog.identify(id, { email, username: user.username, role: user.role || 'user' });
-    try { posthog.capture('$pageview'); } catch {}
   } catch {}
 }
 
