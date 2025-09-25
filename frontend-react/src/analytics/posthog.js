@@ -45,12 +45,8 @@ export function posthogIdentify(user) {
     const id = String(user.id || user.user_id || user.username || email || 'anonymous');
     
     if (isInternalEmail(email)) {
-      // 🔒 Email INTERNE détecté :
-      // 1) on RESET d'abord pour casser toute liaison avec l'ID anonyme (évite
-      //    que la visite "avant login" soit rattachée à ton user via alias).
-      try { posthog.reset(); } catch {}
-      // 2) on coupe la capture et on persiste un flag navigateur
-      posthog.opt_out_capturing();
+      // 🔒 Email interne → on coupe les events UNIQUEMENT pour cette session
+      posthog.opt_out_capturing();   // pas d'identify, pas d'events
       return;
     }
     // user normal → on autorise et on identifie
@@ -62,7 +58,6 @@ export function posthogIdentify(user) {
 // À appeler au logout (facultatif)
 export function posthogReset() {
   try {
-    if (localStorage.getItem('__BTZ_INTERNAL_OPTOUT__') === '1') return;
     posthog.reset();
   } catch {}
 }
