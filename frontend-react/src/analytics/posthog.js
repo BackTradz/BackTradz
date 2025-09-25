@@ -20,7 +20,9 @@ if (!KEY || !HOST) {
 } else {
   posthog.init(KEY, {
     api_host: HOST,
-    capture_pageview: true,           // 1er pageview auto
+    // ✅ On laisse PostHog CAPTER PAR DÉFAUT pour tous les users normaux
+    //    (on ne coupera que pour tes emails internes au moment de l'identify)
+    capture_pageview: true,
     disable_session_recording: true,  // safe par défaut
   });
   // expose pour test console
@@ -49,7 +51,11 @@ export function posthogIdentify(user) {
     const id = String(user.id || user.user_id || user.username || email || 'anonymous');
     
     if (isInternalEmail(email)) {
-      // blocage durable (localStorage) pour tes comptes
+      // 🔒 Email INTERNE détecté :
+      // 1) on RESET d'abord pour casser toute liaison avec l'ID anonyme (évite
+      //    que la visite "avant login" soit rattachée à ton user via alias).
+      try { posthog.reset(); } catch {}
+      // 2) on coupe la capture et on persiste un flag navigateur
       posthog.opt_out_capturing();
       localStorage.setItem('__BTZ_INTERNAL_OPTOUT__', '1');
       return;
