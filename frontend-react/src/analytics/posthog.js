@@ -30,14 +30,8 @@ if (!KEY || !HOST) {
   window.posthog = posthog;
   console.log('[PostHog] initialized');
   
-  // En local: on ne trace jamais
+  // En local: on ne trace jamais (⚠️ sans poser de flag persistant)
   if (IS_LOCAL) {
-    posthog.opt_out_capturing();
-    localStorage.setItem('__BTZ_INTERNAL_OPTOUT__', '1');
-  }
-
-  // Si on avait déjà optout précédemment (compte interne), on garde le blocage
-  if (localStorage.getItem('__BTZ_INTERNAL_OPTOUT__') === '1') {
     posthog.opt_out_capturing();
   }
 }
@@ -57,11 +51,9 @@ export function posthogIdentify(user) {
       try { posthog.reset(); } catch {}
       // 2) on coupe la capture et on persiste un flag navigateur
       posthog.opt_out_capturing();
-      localStorage.setItem('__BTZ_INTERNAL_OPTOUT__', '1');
       return;
     }
     // user normal → on autorise et on identifie
-    localStorage.removeItem('__BTZ_INTERNAL_OPTOUT__');
     posthog.opt_in_capturing();
     posthog.identify(id, { email, username: user.username, role: user.role || 'user' });
   } catch {}
