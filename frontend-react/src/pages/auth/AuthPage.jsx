@@ -1,6 +1,6 @@
 // src/pages/auth/AuthPage.jsx
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ AJOUT
+import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; // ✅ gère la redirection next
 import LoginForm from "../../components/auth/LoginForm";
 import RegisterForm from "../../components/auth/RegisterForm";
 import CTAButton from "../../components/ui/button/CTAButton";
@@ -12,17 +12,16 @@ import { useAuth } from "../../auth/AuthContext";
 import posthog, { posthogIdentify } from '../../analytics/posthog';
 
 // Helper: identifie après login en tentant /api/me (pour récupérer l'email)
+// v1.2: utilise le header attendu par le backend: X-API-Key
 async function safeIdentifyAfterLogin(getToken, identifierMaybeEmail) {
   try {
     const token = typeof getToken === 'function' ? getToken() : getToken;
     if (!token) return; // pas connecté → on sort sans rien faire
     let user = null;
     if (token) {
-      // construit un header propre (évite "Bearer Bearer ...")
-      const auth = token && token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      const meRes = token ? await fetch('/api/me', {
-        headers: { 'Authorization': auth }
-      }).catch(() => null) : null;
+      const meRes = await fetch('/api/me', {
+        headers: { 'X-API-Key': token }
+      }).catch(() => null);
       if (meRes && meRes.ok) {
       user = await meRes.json().catch(() => null); // silencieux
     }
@@ -45,11 +44,23 @@ export default function AuthPage() {
   const [resendLoading, setResendLoading] = useState(false);
   const [oauthError, setOauthError] = useState("");
   const [verifyUrl, setVerifyUrl] = useState("");
-  const navigate = useNavigate(); // ✅ AJOUT
+  const navigate = useNavigate();
+  const location = useLocation();
   const { loginSuccess } = useAuth(); // << récupère le helper du contexte
   
+  // v1.2 — Lit et sécurise le paramètre ?next=… (interne uniquement)
+  const nextTarget = useMemo(() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const raw = params.get('next') || '';
+      // sécurité anti open-redirect: on n’accepte que les chemins internes
+      if (!raw) return '/home';
+      if (/^https?:\/\//i.test(raw)) return '/home';
+      return raw.startsWith('/') ? raw : '/home';
+    } catch { return '/home'; }
+  }, [location.search]);
   
-  // ✅ Remplace tout ton useEffect par celui-ci
+  // ✅ Gère le retour OAuth Google + affichage overlay succès
   useEffect(() => {
     document.body.classList.add("auth-page");
     try {
@@ -73,7 +84,8 @@ export default function AuthPage() {
               // ✅ On récupère l'email via /api/me puis on applique le blocage interne
               await safeIdentifyAfterLogin(() => apiKey);
               setShowSignupSuccess(true);
-              navigate("/home", { replace: true });
+              // v1.2 — respecte ?next=… (sécurisé)
+              navigate(nextTarget, { replace: true });
             })
             .catch(() => {
               // en cas d’échec rarissime de /me, on reste sur /login et on affiche l’erreur si besoin
@@ -85,7 +97,7 @@ export default function AuthPage() {
     }
 
     return () => document.body.classList.remove("auth-page");
-  }, [navigate]);
+  }, [navigate, nextTarget]);
 
 
   const handleRegister = async ({ firstName, lastName, email, username, password }) => {
@@ -107,6 +119,8 @@ export default function AuthPage() {
         // 🔐 Bloque tes comptes PostHog si email interne (et identifie sinon)
         posthogIdentify({ email, username, first_name: firstName, last_name: lastName });
         setShowSignupSuccess(true);
+        // v1.2 — Redirige vers next (si overlay fermé par le CTA onClose, tu restes couvert)
+        navigate(nextTarget, { replace: true });
       } else {
         alert(data.message || "Erreur lors de l'inscription");
       }
@@ -123,7 +137,8 @@ export default function AuthPage() {
         loginSuccess(data.token);      // << met le user dans le contexte maintenant
         // ✅ Identifie proprement (email via /api/me si possible)
         await safeIdentifyAfterLogin(() => data.token, identifier);
-        navigate("/home");
+        // v1.2 — Respecte le retour vers la page initiale
+        navigate(nextTarget);
       } else {
         alert(data.message || "Identifiants invalides");
       }
@@ -238,9 +253,10 @@ export default function AuthPage() {
 
 
       <div className="auth-legal">
-        <a href="/legal/mentions">Mentions légales</a>
+        {/* v1.2 — aligne sur App.jsx */}
+        <a href="/legal/mentions-legales">Mentions légales</a>
         <a href="/legal/cgu">Conditions d’utilisation</a>
-        <a href="/legal/confidentialite">Confidentialité</a>
+        <a href="/legal/politique-confidentialite">Confidentialité</a>
       </div>
     </div>
   );
