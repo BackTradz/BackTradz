@@ -210,14 +210,27 @@ export default function CSVShop() {
         setExtractStatus("❌ Renseigne paire, TF, dates.");
         return;
       }
-      const token = getApiTokenSafe();  // ✅ au lieu de localStorage.apiKey
+      const token = getApiTokenSafe();  // ✅ token robuste (apiKey/user.token)
+      // v1.2 — Public: on ne bloque pas l’UI, on remplace juste l'erreur "token invalide"
+      if (!token) {
+        setExtractStatus('❌ Inscrivez-vous pour lancer une extraction. ' +
+          '<a class="bt-link" href="/login?next=/csv-shop">Se connecter</a>');
+        return;
+      }
       const res = await fetch(
         `/api/extract_to_output_live?symbol=${encodeURIComponent(exSymbol)}&timeframe=${encodeURIComponent(exTimeframe)}&start_date=${encodeURIComponent(exStart)}&end_date=${encodeURIComponent(exEnd)}`,
         { headers: { "X-API-Key": token || "" } }
       );
       const js = await res.json();
       if (!res.ok || js?.error) {
-        setExtractStatus(`❌ ${js?.detail || js?.error || "Erreur extraction"}`);
+        // v1.2 — Si 401 / token invalide → message friendly + lien login
+        const raw = (js?.detail || js?.error || "").toLowerCase();
+        if (res.status === 401 || raw.includes("token")) {
+          setExtractStatus('❌ Inscrivez-vous pour lancer une extraction. ' +
+            '<a class="bt-link" href="/login?next=/csv-shop">Se connecter</a>');
+        } else {
+          setExtractStatus(`❌ ${js?.detail || js?.error || "Erreur extraction"}`);
+        }
       } else {
         setExtractStatus("✅ Extraction OK. Fichiers prêts à être téléchargés.");
         const files = Array.isArray(js.files) ? js.files : [];
