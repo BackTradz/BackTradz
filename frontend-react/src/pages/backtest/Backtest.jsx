@@ -256,6 +256,12 @@ export default function Backtest() {
   // ───────────────────────────── Run OFFICIEL ─────────────────────────────
   const onRunOfficial = async (e) => {
     e.preventDefault();
+    // v1.2 — Guard public : pas d'appel API, juste un message + lien login
+    const token = localStorage.getItem("apiKey") || localStorage.getItem("token") || "";
+    if (!token) {
+      setError("Inscrivez-vous pour lancer votre premier backtest gratuit — /login?next=/backtest");
+      return;
+    }
     setError(""); setResult(null); setLoading(true);
     beginProgress();
     try {
@@ -285,7 +291,14 @@ export default function Backtest() {
   // ───────────────────────────── Run CUSTOM ─────────────────────────────
   const onRunCustom = async (e) => {
     e.preventDefault();
+    // v1.2 — Guard public : pas d'appel API, juste un message + lien login
+    const token = localStorage.getItem("apiKey") || localStorage.getItem("token") || "";
+    if (!token) {
+      setError("Inscrivez-vous pour lancer votre premier backtest gratuit — /login?next=/backtest");
+      return;
+    }
     setError(""); setResult(null);
+
     if (!csvFile) { setError("Aucun fichier CSV sélectionné"); return; }
     setError(""); setResult(null); setLoading(true);
     beginProgress();
@@ -770,7 +783,15 @@ export default function Backtest() {
             {error && (
               <section className="bt-card">
                 <h3 className="bt-section-title">❌ Erreur</h3>
-                <div className="bt-error">{error}</div>
+                <div className="bt-error">
+                  {error.includes("/login?next=") ? (
+                    <>
+                      Inscrivez-vous pour lancer votre premier backtest gratuit.{" "}
+                      <a className="bt-link" href="/login?next=/backtest">Se connecter</a>
+                    </>
+                  ) : error}
+                </div>
+
               </section>
             )}
 

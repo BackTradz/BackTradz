@@ -49,25 +49,34 @@ export default function Pricing() {
   }, []);
 
 
+
   useEffect(() => {
     (async () => {
       try {
-        const u = await me(); // contient plan / has_discount
+        const token = localStorage.getItem("apiKey");
+        if (!token) {
+          // 👇 Mode visiteur (page 100% publique, aucun appel authed)
+          setHasDiscount(false);
+          setUserPlan(null);
+          setIsSubscriber(false);
+          return;
+        }
+        // ✅ Connecté : on peut charger les infos
+        const u = await me();
         const sub = u?.plan === "SUB_9" || u?.plan === "SUB_25";
-        // 👇 lie les events à l'id du user si présent
         if (u?.id) {
-          posthog.identify(String(u.id), {
-            is_subscriber: sub,
-            plan: u?.plan || null,
-          });
+          posthog.identify(String(u.id), { is_subscriber: sub, plan: u?.plan || null });
         }
         setHasDiscount(Boolean(u?.has_discount || sub));
-        // ➜ on stocke le plan et le statut d’abonnement
-        setUserPlan(sub ? u.plan : null);     // "SUB_9" | "SUB_25" | null
-        setIsSubscriber(sub);   
-      } catch {}
-      finally{
-         setLoadingInit(false); // fin du chargement initial
+        setUserPlan(sub ? u.plan : null);
+        setIsSubscriber(sub);
+      } catch {
+        // En cas d’erreur on reste en mode visiteur
+        setHasDiscount(false);
+        setUserPlan(null);
+        setIsSubscriber(false);
+      } finally {
+        setLoadingInit(false);
       }
     })();
   }, []);
@@ -98,13 +107,18 @@ export default function Pricing() {
       if (!payment || !status) return;
 
       try {
-        // ✅ Ce bloc ICI (avant paypal/stripe/crypto)
-        // On récupère l'utilisateur pour savoir si la remise s'applique,
-        // indépendamment de hasDiscount.
+        // ✅ Avant de finaliser l’overlay, on tente /api/me *uniquement si connecté*
         let user = null;
-        try { user = await me(); } catch {}
-        const subFlag = !!(user?.plan === "SUB_9" || user?.plan === "SUB_25" || user?.has_discount);
-
+        let subFlag = false;
+        try {
+          const token = localStorage.getItem("apiKey");
+          if (token) {
+            user = await me();
+            subFlag = !!(user?.plan === "SUB_9" || user?.plan === "SUB_25" || user?.has_discount);
+          }
+        } catch {
+          subFlag = false; // visiteur
+        }
        
         // Helper fallback : on n’applique plus aucune remise prix
         const resolvePaidLocal = (offer) => (offer?.price_eur ?? 0);
@@ -208,6 +222,11 @@ export default function Pricing() {
   // Handlers paiements (identiques)
   const payStripe = async (offer_id) => {
     setMsg("");
+    // v1.2 — Guard public : message + lien login
+    if (!localStorage.getItem("apiKey")) {
+      setMsg("Inscrivez-vous pour acheter des crédits — /login?next=/pricing");
+      return;
+    }
     try {
       localStorage.setItem("lastOfferId", offer_id);
       const { url } = await stripeSession(offer_id);
@@ -217,6 +236,11 @@ export default function Pricing() {
   };
   const payPayPal = async (offer_id) => {
     setMsg("");
+    // v1.2 — Guard public : message + lien login
+    if (!localStorage.getItem("apiKey")) {
+      setMsg("Inscrivez-vous pour acheter des crédits — /login?next=/pricing");
+      return;
+    }
     try {
       localStorage.setItem("lastOfferId", offer_id);
       const { id } = await paypalCreate(offer_id);
@@ -228,6 +252,11 @@ export default function Pricing() {
   };
   const payCrypto = async (offer_id) => {
     setMsg("");
+    // v1.2 — Guard public : message + lien login
+    if (!localStorage.getItem("apiKey")) {
+      setMsg("Inscrivez-vous pour acheter des crédits — /login?next=/pricing");
+      return;
+    }
     try {
       localStorage.setItem("lastOfferId", offer_id);
       const { payment_url } = await cryptoOrder(offer_id);
@@ -282,9 +311,13 @@ export default function Pricing() {
 
       {msg && (
         <p className={`pr-msg ${msg.startsWith("✅") ? "ok" : msg.startsWith("🪙") ? "info" : "err"}`}>
-          {msg}
+          {msg.includes("/login?next=")
+            ? <>Inscrivez-vous pour acheter des crédits.{" "}
+                <a className="bt-link" href="/login?next=/pricing">Se connecter</a></>
+            : msg}
         </p>
       )}
+      
       {creditsAfter != null && (
         <p className="pr-msg ok">💳 Crédits actuels : <b>{creditsAfter}</b></p>
       )}

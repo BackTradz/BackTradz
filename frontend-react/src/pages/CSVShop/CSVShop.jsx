@@ -185,6 +185,22 @@ export default function CSVShop() {
     return `${url}${sep}token=${encodeURIComponent(t)}`;
   }
 
+  // v1.2 — visiteur vs connecté (simple, sans appel réseau)
+  const isLoggedIn = !!getApiTokenSafe();
+  const [publicNotice, setPublicNotice] = useState(""); // petit message au clic en public
+  // Intercepte les clics sur un bouton de download en mode public
+  const handlePublicClick = (e) => {
+    if (isLoggedIn) return;
+    const a = e.target.closest("a");
+    if (!a) return;
+    // si c'est le CTA de téléchargement (href = "#" côté public)
+    if (a.getAttribute("href") === "#") {
+      e.preventDefault();
+      e.stopPropagation();
+      setPublicNotice("Inscrivez-vous pour télécharger votre CSV — /login?next=/csv-shop");
+    }
+  };
+
 
   async function handleExtract(e) {
     e.preventDefault();
@@ -240,6 +256,12 @@ export default function CSVShop() {
           <b> backtests</b>, votre <b>trading algorithmique</b> et l’<b>vos modèles IA</b>.
         </p>
         <CSVInfoBanner />
+        {publicNotice && (
+          <div className="csvshop-notice" style={{ marginTop: 8 }}>
+            Inscrivez-vous pour télécharger votre CSV.{" "}
+            <a className="bt-link" href="/login?next=/csv-shop">Se connecter</a>
+          </div>
+        )}
 
         <CSVShopFilters
           q={q} setQ={setQ}
@@ -273,7 +295,7 @@ export default function CSVShop() {
               Aucun fichier trouvé.
             </div>
           ) : (
-            <div className="csvshop-grid" style={{ marginTop: "1.5rem" }}>
+              <div className="csvshop-grid" style={{ marginTop: "1.5rem" }} onClick={handlePublicClick}>
               {filtered
                 .slice()
                 .sort((a, b) => {
@@ -288,7 +310,13 @@ export default function CSVShop() {
                     symbol={it.pair}
                     timeframe={it.timeframe}
                     period={`${it.year}-${it.month}`}
-                    downloadUrl={ it.path ? withToken(downloadCsvByPathUrl(it.path)) : "" }
+                    // v1.2 — en public : on passe "#" pour que le bouton soit visible,
+                    // et on intercepte le clic plus haut pour afficher le message + lien.
+                    downloadUrl={
+                      !isLoggedIn
+                        ? "#"
+                        : (it.path ? withToken(downloadCsvByPathUrl(it.path)) : "")
+                    }
                     className="csvshop-card"
                     downloadLabel="Télécharger(–1 crédit)"   // ← piloté par la page
                     downloadTitle="Télécharger(–1 crédit))"

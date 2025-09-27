@@ -61,7 +61,6 @@ export default function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/csv-shop" element={<CSVShop />} />
         <Route path="/backtest" element={<Backtest />} />
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/a-savoir" element={<ASavoir />} />
         <Route path="/success" element={<Success />} />
       </Route>
@@ -83,6 +82,8 @@ export default function App() {
       {/* === PROTECTED === */}
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
+        {/* 🔐 Dashboard redevient protégé */}
+          <Route path="/dashboard" element={<Dashboard />} />
           {/* 🔐 Profil = nécessite auth */}
           <Route path="/profile" element={<Profile />} />
           {/* 🔐 Admin = nécessite auth + admin */}
