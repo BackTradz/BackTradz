@@ -6,6 +6,7 @@ import RegisterForm from "../../components/auth/RegisterForm";
 import CTAButton from "../../components/ui/button/CTAButton";
 import BacktradzLogo from "../../components/ui/BacktradzLogo/BacktradzLogo";
 import SignupSuccessOverlay from "../../components/auth/SignupSuccessOverlay"; 
+import PillTabs from "../../components/ui/switchonglet/PillTabs";        // ✅ NEW
 import "./auth.css";
 import { login } from "../../sdk/authApi";
 import { useAuth } from "../../auth/AuthContext"; 
@@ -232,8 +233,22 @@ export default function AuthPage() {
             )}
           </div>
 
+          {/* 🟦 Switch mobile (hors panel, au-dessus du form) */}
+          <div className="auth-mobile-switch">
+            <PillTabs
+              items={[
+                { id: "login",    label: "Connexion" },
+                { id: "register", label: "Inscription" },
+              ]}
+              value={isLoginActive ? "login" : "register"}
+              onChange={(id) => setIsLoginActive(id === "login")}
+              size="md"
+            />
+          </div>
+
           {/* 🔹 Panneau droit */}
           <div className="form-panel">
+
             {isLoginActive ? (
               <div className="auth-form login-form">
                 {oauthError && (

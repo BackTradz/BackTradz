@@ -863,25 +863,32 @@
 @media (max-width: 900px){
   .auth-box::after{ display:none; }
 
-  .info-panel{
-    position: relative;
+   /* v1.2 — Mobile : on retire complètement le panneau gauche */
+  .info-panel{ display: none !important; }
+ }
+ 
+
+ /* ===================== v1.2 — Switch mobile HORS panel ===================== */
+.auth-mobile-switch{ display: none; }
+@media (max-width: 900px){
+  .auth-mobile-switch{
+    /* centre le composant (pas full width) */
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 10px 16px 0;
+    box-sizing: border-box;
+    margin: 0 auto 8px;
   }
-  .info-panel::after{
-    content:"";
-    position:absolute;
-    left: 16px; right: 16px; bottom: -2px;
-    height: 1px;
-    background:
-      linear-gradient(
-        to right,
-        transparent 0%,
-        rgba(255,255,255,.06) 12%,
-        rgba(255,255,255,.10) 50%,
-        rgba(255,255,255,.06) 88%,
-        transparent 100%
-      );
-    pointer-events:none;
+  /* ⛳️ clé: ne PAS étirer le composant enfant */
+  .auth-mobile-switch > *{
+    width: auto !important;      /* <— plus de plein écran */
+    max-width: none !important;
+    margin: 0 auto;
+    align-self: center;
   }
+  /* le form-panel passe pleine largeur (déjà géré plus haut), on enlève l’espace haut */
+  .form-panel{ width:100% !important; padding-top: 0 !important; }
 }
 
 /* ================= Fix Inputs Register vs Login ================= */
