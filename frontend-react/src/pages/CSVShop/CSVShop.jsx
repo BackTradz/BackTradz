@@ -212,9 +212,13 @@ export default function CSVShop() {
       }
       const token = getApiTokenSafe();  // ✅ token robuste (apiKey/user.token)
       // v1.2 — Public: on ne bloque pas l’UI, on remplace juste l'erreur "token invalide"
-      if (!token) {
-        setExtractStatus('❌ Inscrivez-vous pour lancer une extraction. ' +
-          '<a class="bt-link" href="/login?next=/csv-shop">Se connecter</a>');
+     if (!token) {
+        setExtractStatus(
+          <>
+            ❌ Inscrivez-vous pour lancer une extraction.{" "}
+            <a className="bt-link" href="/login?next=/csv-shop">Se connecter</a>
+          </>
+        );
         return;
       }
       const res = await fetch(
@@ -226,8 +230,12 @@ export default function CSVShop() {
         // v1.2 — Si 401 / token invalide → message friendly + lien login
         const raw = (js?.detail || js?.error || "").toLowerCase();
         if (res.status === 401 || raw.includes("token")) {
-          setExtractStatus('❌ Inscrivez-vous pour lancer une extraction. ' +
-            '<a class="bt-link" href="/login?next=/csv-shop">Se connecter</a>');
+          setExtractStatus(
+            <>
+              ❌ Inscrivez-vous pour lancer une extraction.{" "}
+              <a className="bt-link" href="/login?next=/csv-shop">Se connecter</a>
+            </>
+          );
         } else {
           setExtractStatus(`❌ ${js?.detail || js?.error || "Erreur extraction"}`);
         }

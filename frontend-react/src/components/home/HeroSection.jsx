@@ -6,13 +6,11 @@ import { useNavigate } from "react-router-dom";
 export default function HeroSection() {
   const navigate = useNavigate();
 
+  // v1.2 — Toujours diriger vers /backtest (même en public).
+  // La page Backtest gère désormais elle-même le message "inscrivez-vous…"
+  // et/ou les gardes d'actions si non connecté.
   const goAnalyze = () => {
-    const token = localStorage.getItem("apiKey");
-    if (token) {
-      navigate("/backtest");         // connectés → page backtest
-    } else {
-      navigate("/login?trial=2");    // non connectés → page inscription avec 2 crédits offerts
-    }
+    navigate("/backtest");
   };
 
   return (
