@@ -2,6 +2,8 @@
 // RequireAuth.jsx
 // ------------------------------------------------------------
 // RÔLE : protéger les pages privées (toute route nécessitant un token).
+// v1.2 : n'est plus utilisé pour bloquer les pages de lecture (pricing, csv-shop, backtest…).
+// - Il ne reste appliqué que pour /profile et /admin (via <RequireAdmin/>).
 // - Si AuthContext.loading === true -> affiche un loader pendant la vérif initiale.
 // - Si pas de token en localStorage -> redirige vers /login.
 // - Sinon -> autorise l'accès aux routes enfants (<Outlet />).

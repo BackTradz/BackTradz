@@ -75,10 +75,20 @@ export async function api(path, { method = 'GET', headers = {}, body, auth = tru
   try { data = text ? JSON.parse(text) : {}; }
   catch { data = { raw: text }; }
 
-  // ❌ Erreurs HTTP → throw
   if (!res.ok) {
+    // v1.2 — Si l'appel exige l'auth et que le serveur répond 401/403,
+    // on redirige automatiquement vers la page de login avec "next" = URL courante.
+    if (auth && (res.status === 401 || res.status === 403)) {
+      try {
+        const here = window.location.pathname + window.location.search + window.location.hash;
+        const target = `/login?next=${encodeURIComponent(here)}`;
+        // Évite boucle si déjà sur /login
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.assign(target);
+        }
+      } catch {}
+    }
     throw new Error(data?.message || data?.error || `HTTP ${res.status}`);
   }
-
   return data;
 }

@@ -50,46 +50,50 @@ export default function App() {
   }, [loc.pathname]);
 
   return (
-      <Routes>
-      {/* === PUBLIC === */}
+    <Routes>
+      {/* === PUBLIC (lecture) === */}
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Home />} />   {/* Home publique AVEC Navbar/Footer */}
-        {/* ✅ Alias explicite : /home pointe vers la même Home (utile car tu y vas manuellement) */}
+        {/* Accueil */}
+        <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
-      </Route>
-      <Route path="/login" element={<AuthPage />} />
 
-      {/* ✅ Nouvelles routes canoniques (match les liens des emails) */}
+        {/* Pages marketing / lecture ouvertes */}
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/csv-shop" element={<CSVShop />} />
+        <Route path="/backtest" element={<Backtest />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/a-savoir" element={<ASavoir />} />
+        <Route path="/success" element={<Success />} />
+      </Route>
+
+      {/* Auth / reset (public) */}
+      <Route path="/login" element={<AuthPage />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
-
-      {/* ♻️ Alias legacy pour ne rien casser si d'anciens liens existent */}
+      {/* Aliases legacy */}
       <Route path="/resetpassword/forgot-password" element={<ForgotPassword />} />
       <Route path="/resetpassword/reset-password/:token" element={<ResetPassword />} />
 
+      {/* Mentions / CGU / Privacy / Support (public) */}
       <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
       <Route path="/legal/cgu" element={<ConditionsGenerales />} />
       <Route path="/legal/politique-confidentialite" element={<PolitiqueConfidentialite />} />
       <Route path="/support/support" element={<SupportPage />} />
-      {/* === PROTECTED (layout + auth) === */}
+
+      {/* === PROTECTED === */}
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/backtest" element={<Backtest />} />
-          <Route path="/csv-shop" element={<CSVShop />} />
-          <Route path="/pricing" element={<Pricing />} />
+          {/* 🔐 Profil = nécessite auth */}
           <Route path="/profile" element={<Profile />} />
-          <Route path="/a-savoir" element={<ASavoir />} />
-          <Route path="/success" element={<Success />} />
-
+          {/* 🔐 Admin = nécessite auth + admin */}
           <Route element={<RequireAdmin />}>
             <Route path="/admin" element={<AdminDashboard />} />
           </Route>
-          {/* 🧯 Fallback global SPA : si une route n’existe pas, renvoie vers /home (évite le NotFound) */}
-          <Route path="*" element={<Navigate to="/home" replace />} />
         </Route>
       </Route>
-    </Routes>
 
+      {/* Fallback → Home */}
+      <Route path="*" element={<Navigate to="/home" replace />} />
+    </Routes>
   );
 }
