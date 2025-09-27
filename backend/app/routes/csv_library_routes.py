@@ -279,21 +279,26 @@ def list_csv_files():
         "files_by_pair": files_by_pair
     }
 
-@router.get("/download_csv/{filename}")
-def download_csv(filename: str):
+# ⚠️ v1.2 – LEGACY (route publique) DÉPLACÉE HORS PRODUCTION
+# Raison :
+#   - Cette fonction exposait un téléchargement public en doublon avec
+#     la route protégée ci-dessous (même path /download_csv/{filename}).
+#   - Pour éviter toute régression de code (imports, références),
+#     on la conserve mais sur un chemin interne caché, non documenté.
+#   - NE PAS utiliser en prod. L’unique route de téléchargement reste
+#     la version PROTÉGÉE plus bas (consommation de crédits).
+@router.get("/__legacy_download_csv/{filename}", include_in_schema=False)
+def download_csv__legacy_hidden(filename: str):
     """
-    Téléchargement d’un CSV officiel (backend/data/official).
-
-    Args:
-        filename (str): nom du fichier.
-
-    Returns:
-        FileResponse ou {error:"Fichier introuvable"}
+    [LEGACY – MASQUÉ] Ancienne variante non protégée.
+    Gardée pour compat technique, **à ne pas exposer**.
     """
-    file_path = OUTPUT_DIR/ filename
+    file_path = OUTPUT_DIR / filename
     if file_path.exists():
-        return FileResponse(path=file_path, filename=filename, media_type='text/csv')
-    return {"error": "Fichier introuvable"}
+        # Réponse neutre : on force une erreur claire pour éviter tout usage involontaire.
+        # Comportement choisi : 401 explicite (auth requise) plutôt que de servir le fichier.
+        raise HTTPException(status_code=401, detail="Authentification requise (utiliser l’endpoint protégé).")
+    raise HTTPException(status_code=404, detail="Fichier introuvable")
 
 @router.get("/list_output_backtest_files")
 def list_backtest_csv_from_output():
