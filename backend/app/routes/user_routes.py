@@ -14,9 +14,6 @@ Notes:
   - Les logs '🔄 UPDATE REQ' sont gardés pour debug.
 """
 from app.core.paths import USERS_JSON as USERS_FILE, DB_DIR, DATA_ROOT
-
-
-from app.utils.json_db import read_json, write_json_atomic, file_lock
 from fastapi import APIRouter, Depends, Request
 from app.auth import get_current_user
 from app.models.users import User
@@ -40,9 +37,12 @@ from passlib.exc import UnknownHashError
 # backend/routes/user_routes.py
 
 from pathlib import Path
-from passlib.context import CryptContext
 import uuid
 import json
+from app.services.user_service import (
+    hash_password, _abs_backend_url, _atomic_write_json,
+    load_users, save_users, _audit_append, _load_json_safe
+)
 
 router = APIRouter()
 
@@ -63,36 +63,11 @@ def _load_json_safe(path: Path) -> dict:
 AUDIT_FILE = (DATA_ROOT / "audit" / "ledger.jsonl")
 AUDIT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-def _audit_append(evt: dict) -> None:
-    # écriture append-only dans backend/data/audit/ledger.jsonl
-    from datetime import datetime as _dt
-    from pathlib import Path
-    import json, os
-
-    path = AUDIT_FILE
-    path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        data = dict(evt)
-        data.setdefault("ts", _dt.utcnow().isoformat() + "Z")
-        with open(path, "a", encoding="utf-8") as f:
-            f.write(json.dumps(data, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
+## Audit append-only: déplacé dans le service (même comportement)
 
 
-
-# 🛡️ Configuration du hash (bcrypt)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def hash_password(password: str):
-    """
-    Hash un mot de passe en utilisant bcrypt.
-    """
-    return pwd_context.hash(password)
-
-def _abs_backend_url(request, path: str) -> str:
-    base = str(request.base_url).rstrip("/")  # ex: http://127.0.0.1:8000
-    return f"{base}{path}"
+## Hash + helpers déplacés dans services/user_service.py (aucune logique modifiée)
+## URL absolue: importée du service
 
 @router.get("/me")
 async def get_me(user: User = Depends(get_current_user)):
@@ -278,36 +253,9 @@ async def set_password(payload: SetPasswordPayload, user: User = Depends(get_cur
 
     return {"status": "success"}
 
-
-# --- HELPERS SÛRS -----------------------------------------------------------
-def _atomic_write_json(path: Path, data: dict) -> None:
-    """
-    Écrit le JSON de façon atomique pour éviter la corruption fichier :
-    on écrit dans un tmp, puis on remplace le fichier final.
-    """
-    tmp_fd, tmp_path = tempfile.mkstemp(dir=str(path.parent), prefix=".tmp_", text=True)
-    try:
-        with os.fdopen(tmp_fd, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        os.replace(tmp_path, path)  # atomic si même FS
-    finally:
-        if os.path.exists(tmp_path):
-            try:
-                os.remove(tmp_path)
-            except Exception:
-                pass
-
-def load_users() -> dict:
-    return read_json(USERS_FILE, {})
-
-
-# après def load_users(): ...
-_load_users = load_users  # alias compat
-
-def save_users(users: dict) -> None:
-    lock = DB_DIR / "users.json.lock"
-    with file_lock(lock):
-        write_json_atomic(USERS_FILE, users)
+## Écriture atomique: déplacée dans le service
+## load/save users via service (mêmes signatures)
+_load_users = load_users  # alias compat inchangé
 
 # --- SCHÉMA D’ENTRÉE / VALIDATION ------------------------------------------
 class RegisterPayload(BaseModel):
