@@ -233,6 +233,17 @@ export default function AuthPage() {
             )}
           </div>
 
+         {/* ✅ v1.2 — Header mobile : logo au-dessus des pilltabs (uniquement ≤900px) */}
+          <div className="auth-mobile-header" aria-hidden="true">
+            {/* Re-use du même composant logo (aucune nouvelle dépendance) */}
+            <BacktradzLogo
+              size="sm"  
+              to="/"
+              className="select-none"
+            />
+          </div>
+
+
           {/* 🟦 Switch mobile (hors panel, au-dessus du form) */}
           <div className="auth-mobile-switch">
             <PillTabs
