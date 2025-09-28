@@ -14,7 +14,7 @@ Security: Page publique; le prix final (remise -10%) est affiché côté vue mai
 
 from fastapi import Request, APIRouter
 from app.utils.templates import templates
-from app.models.offers import OFFERS
+from app.services.pricing_service import build_pricing_plans
 from app.auth import get_current_user_optional  # doit être async
 
 router = APIRouter()
@@ -38,19 +38,10 @@ async def pricing_page(request: Request):
     user = await get_current_user_optional(request)
     #print("🔥 user =", user)
 
-    plans = []
-    for offer in OFFERS.values():
-        plans.append({
-            "name": offer["label"],
-            "price": offer["price_eur"],
-            "credits": offer.get("credits", offer.get("credits_monthly", "∞")),
-            "type": offer["type"],
-            "offer_id": offer["id"]
-        })
-
+    plans = build_pricing_plans()
     return templates.TemplateResponse("pricing.html", {
         "request": request,
         "plans": plans,
         "has_discount": user.has_discount if user else False,
-        "user": user  # facultatif si tu veux afficher d'autres infos
+        "user": user
     })
