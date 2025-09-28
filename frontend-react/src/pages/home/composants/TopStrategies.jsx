@@ -8,13 +8,13 @@
 
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { formatStrategy } from "../../lib/labels";
-import { API_BASE } from "../../sdk/apiClient"; // garde ton chemin actuel
+import { formatStrategy } from "../../../lib/labels";
+import { API_BASE } from "../../../sdk/apiClient"; // garde ton chemin actuel
 
-import SectionTitle from "../ui/SectionTitle";
-import "../../pages/home/Home.css";
-import PublicInsightsOverlay from "../overlay/PublicInsightsOverlay";
-import DetailButton from "../ui/button/DetailButton";
+import SectionTitle from "../../../components/ui/SectionTitle";
+import "../../../pages/home/Home.css";
+import PublicInsightsOverlay from "../../../components/overlay/PublicInsightsOverlay";
+import DetailButton from "../../../components/ui/button/DetailButton";
 // Animations légères
 const container = {
   hidden: { opacity: 0, y: 20 },

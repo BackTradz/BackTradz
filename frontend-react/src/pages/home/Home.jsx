@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import TopStrategies from "../../components/home/TopStrategies";
-import HeroSection from "../../components/home/HeroSection";
-import HeroMessage from "../../components/home/HeroMessage";
+import TopStrategies from "./composants/TopStrategies";
+import HeroSection from "./composants/HeroSection";
+import HeroMessage from "./composants/HeroMessage";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
 
 import "./Home.css"; // <-- ajoute ce fichier

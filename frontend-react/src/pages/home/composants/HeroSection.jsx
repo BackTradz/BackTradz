@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import CTAButton from "../ui/button/CTAButton";
+import CTAButton from "../../../components/ui/button/CTAButton";
 import AnimatedEMABG from "./AnimatedEMABG";
 import { useNavigate } from "react-router-dom";
 
