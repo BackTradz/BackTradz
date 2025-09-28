@@ -4,10 +4,10 @@ import "./dashboard.css";
 import { useAuth } from "../../auth/AuthContext";
 import { me } from "../../sdk/authApi";
 
-import BacktestList from "../../components/dashboard/BacktestList";
-import CsvList from "../../components/dashboard/CsvList";
+import BacktestList from "./composants/BacktestList";
+import CsvList from "./composants/CsvList";
 import PillTabs from "../../components/ui/switchonglet/PillTabs";
-import PinnedInsightsWall from "../../components/dashboard/PinnedInsightsWall";
+import PinnedInsightsWall from "./composants/PinnedInsightsWall";
 
 export default function Dashboard() {
   const { user, setUser } = useAuth();
