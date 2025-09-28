@@ -18,10 +18,7 @@ from app.auth import get_current_user
 from app.models.users import decrement_credits, User
 from pathlib import Path
 import os
-# BTZ-PATCH v1.1: centraliser via paths.py
-from app.core.paths import DATA_ROOT
-
-OFFICIAL_DIR = DATA_ROOT / "official"
+from app.services.official_data_service import OFFICIAL_DIR, list_official_csv_files
 
 router = APIRouter()
 
@@ -33,20 +30,7 @@ def list_official_csvs():
     Retour:
         { "files": [ { filename, size_kb, path }, ... ] }
     """
-    csv_files = []
-    if not OFFICIAL_DIR.exists():
-        return {"files": []}
-
-    for filename in os.listdir(OFFICIAL_DIR):
-        if filename.endswith(".csv"):
-            filepath = OFFICIAL_DIR / filename
-            size_kb = round(filepath.stat().st_size / 1024, 2)
-            csv_files.append({
-                "filename": filename,
-                "size_kb": size_kb,
-                "path": str(filepath)
-            })
-    return {"files": csv_files}
+    return {"files": list_official_csv_files()}
 
 @router.get("/download/{filename}")
 async def download_file(filename: str, user: User = Depends(get_current_user)):
