@@ -20,9 +20,9 @@ Security: Public (selon ton choix d’expo). Ne change pas la logique.
 """
 
 from fastapi import APIRouter
-import inspect
-import importlib
-import os
+from app.services.strategy_params_service import (
+    get_strategy_params_info, list_strategies_names
+)
 
 router = APIRouter()
 
@@ -54,42 +54,9 @@ def get_strategy_params(strategy_name: str):
           → Évite que "kwargs" apparaisse en champ à l'écran.
     """
     try:
-        module_path = f"app.strategies.{strategy_name}"
-        strategy_module = importlib.import_module(module_path)
-
-        func_name = f"detect_{strategy_name}"
-        func = getattr(strategy_module, func_name)
-
-        sig = inspect.signature(func)
-
-        params_info = []
-        for name, p in sig.parameters.items():
-            # 1) Masquer les paramètres variadiques (*args / **kwargs)
-            if p.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD):
-                continue
-
-            # 2) Masquer les paramètres internes du runner (non exposés au front)
-            if name in ("df", "data", "dataframe"):
-                continue
-
-            # 3) Préparer la sortie "propre" pour le front
-            default = None if p.default is inspect._empty else p.default
-            required = p.default is inspect._empty
-            annotation = None if p.annotation is inspect._empty else str(p.annotation)
-
-            params_info.append({
-                "name": name,
-                "default": default,
-                "required": required,
-                "annotation": annotation,
-            })
-
-        return {"strategy": strategy_name, "params": params_info}
-
+        return get_strategy_params_info(strategy_name)
     except Exception as e:
-        # On remonte l’erreur sous forme texte pour debug front, sans crash API
         return {"error": f"{type(e).__name__}: {e}"}
-
 
 @router.get("/list_strategies")
 def list_strategies():
@@ -102,9 +69,4 @@ def list_strategies():
     Notes:
         - Ignore __init__.py et fichiers non .py.
     """
-    folder = "app/strategies"
-    strats = []
-    for file in os.listdir(folder):
-        if file.endswith(".py") and not file.startswith("__"):
-            strats.append(file[:-3])  # remove ".py"
-    return {"strategies": sorted(strats)}
+    return {"strategies": list_strategies_names()}
