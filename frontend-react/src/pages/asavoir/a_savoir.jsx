@@ -4,14 +4,14 @@ import "./a_savoir.css";
 import { Link, useLocation } from "react-router-dom";
 
 
-import { TOC } from "../../components/a_savoir/TOC";
-import { Section } from "../../components/a_savoir/Section";
+import { TOC } from "./composants/TOC";
+import { Section } from "./composants/Section";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
-import StrategyExplorer from "../../components/a_savoir/StrategyExplorer";
+import StrategyExplorer from "./composants/StrategyExplorer";
 import STRATEGIES_MAP from "../../config/labels/strategies.map";
 import PARAMS_MAP from "../../config/labels/params.map";
 import STRATEGY_DOCS from "../../config/docs/strategies.docs";
-import PairExplorer from "../../components/a_savoir/PairExplorer";
+import PairExplorer from "./composants/PairExplorer";
 
 export default function ASavoirPage() {
   // ⚙️ Placeholder data – à compléter plus tard
