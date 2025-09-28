@@ -1,8 +1,8 @@
 // components/backtest/BacktestCard.jsx
-import { downloadXlsxUrl } from "../../sdk/userApi";
-import Card from "../ui/Card";
-import Button from "../ui/Button";
-import usePip from "../../hooks/usePip";
+import { downloadXlsxUrl } from "../../../sdk/userApi";
+import Card from "../../../components/ui/Card";
+import Button from "../../../components/ui/Button";
+import usePip from "../../../hooks/usePip";
 
 /**
  * 📦 Composant BacktestCard

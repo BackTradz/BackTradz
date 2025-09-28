@@ -23,12 +23,12 @@ import TopProgress from "../../components/ui/progressbar/TopProgress";
 import "./Backtest.css"; // Styles non intrusifs
 import { downloadXlsxUrl } from "../../sdk/userApi";
 // Composants existants 
-import TFSegment from "../../components/backtest/TFSegment";
-import DatePresets from "../../components/backtest/DatePresets";
-import ParamInput from "../../components/backtest/ParamInput";
+import TFSegment from "./composants/TFSegment";
+import DatePresets from "./composants/DatePresets";
+import ParamInput from "./composants/ParamInput";
 // import BacktestCard from "../../components/backtest/BacktestCard"; // optionnel
-import TopProgressBar from "../../components/backtest/TopProgressBar";
-import InlineProgress from "../../components/backtest/InlineProgress";
+import TopProgressBar from "./composants/TopProgressBar";
+import InlineProgress from "./composants/InlineProgress";
 
 // ✅ Switch réutilisable
 import PillTabs from "../../components/ui/switchonglet/PillTabs";
