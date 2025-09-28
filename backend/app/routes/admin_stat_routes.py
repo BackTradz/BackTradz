@@ -16,6 +16,7 @@
 # =============================================================================
 
 from fastapi import APIRouter, Request, HTTPException
+from datetime import timedelta
 import builtins
 from app.core.admin import require_admin as _admin_guard
 from app.services.admin_stat_service import (
@@ -25,7 +26,6 @@ from app.services.admin_stat_service import (
     _infer_subscription_price, _is_failed_payment_tx, _is_subscription_tx,
     _price_eur, _is_backtest,
 )
-
 
 
 # ⚠️ IMPORTANT: créer le router AVANT tout décorateur @stats_router.get(...)
