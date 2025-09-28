@@ -6,10 +6,10 @@
 // - Bouton "Détails" (overlay à brancher plus tard)
 // ------------------------------------------------------------
 import { useEffect, useMemo, useState } from "react";
-import SectionTitle from "../ui/SectionTitle";
-import CTAButton from "../ui/button/CTAButton";
+import SectionTitle from "../../../components/ui/SectionTitle";
+import CTAButton from "../../../components/ui/button/CTAButton";
 import AdminInsightsOverlay from "./AdminInsightsOverlay";
-import { downloadXlsxUrl } from "../../sdk/userApi";
+import { downloadXlsxUrl } from "../../../sdk/userApi";
 
 // Helpers affichage
 function pct(v) {
