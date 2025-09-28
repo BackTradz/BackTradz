@@ -31,78 +31,14 @@ import json
 import os
 from datetime import datetime
 import math
-from app.core.paths import ANALYSIS_DIR  # ✅ ajoute ceci
+from app.services.backtest_xlsx_service import (
+    _is_admin, _analysis_base, _folder_path, _assert_owns_folder,
+    _guess_xlsx_path, _safe_str, _to_dt, _session_for_hour
+)
 from app.core.admin import is_admin_user  # ✅ source of truth admin
 
 
 router = APIRouter()
-
-# -------- Helpers: résolution du dossier/xlsx + contrôle d'accès --------
-def _is_admin(user) -> bool:
-    """
-    Délègue à backend.core.admin.is_admin_user pour rester cohérent
-    (email list, role, flag is_admin, etc.).
-    """
-    try:
-        return is_admin_user(user)
-    except Exception:
-        return False
-
-
-def _analysis_base() -> Path:
-    # Utilise le disque Render (/var/data/backtradz/analysis) comme partout ailleurs
-    # Cf. backend/core/paths.py → ANALYSIS_DIR
-    return ANALYSIS_DIR
-
-def _folder_path(folder: str) -> Path:
-    return _analysis_base() / folder
-
-def _assert_owns_folder(folder: str, user) -> Path:
-    """
-    Vérifie que le dossier existe. Si l'utilisateur est admin, on autorise.
-    Sinon on contrôle l'appartenance via <folder>/*.json (meta.user_id).
-    """
-    p = _folder_path(folder)
-    if not p.exists() or not p.is_dir():
-        raise HTTPException(404, "Dossier introuvable")
-
-    # ✅ Admin = accès libre (overlay admin)
-    if _is_admin(user):
-        return p
-
-    json_files = list(p.glob("*.json"))
-    if not json_files:
-        raise HTTPException(400, "Métadonnées JSON absentes dans le dossier")
-    try:
-        with open(json_files[0], "r", encoding="utf-8") as f:
-            meta = json.load(f)
-    except Exception as e:
-        raise HTTPException(500, f"Erreur lecture JSON: {e}")
-
-    # tolérant: support attr ou dict
-    user_id = getattr(user, "id", None)
-    if user_id is None and isinstance(user, dict):
-        user_id = user.get("id")
-
-    if meta.get("user_id") != user_id:
-        raise HTTPException(403, "Accès refusé à ce backtest")
-    return p
-
-
-def _guess_xlsx_path(folder_dir: Path) -> Optional[Path]:
-    """
-    Essaie de retrouver le .xlsx principal dans le dossier (plusieurs variantes possibles).
-    On cherche 'analyse_*_resultats.xlsx' en priorité.
-    """
-    cands = list(folder_dir.glob("analyse_*_resultats.xlsx"))
-    if cands:
-        return cands[0]
-    # fallback: n'importe quel .xlsx
-    any_xlsx = list(folder_dir.glob("*.xlsx"))
-    return any_xlsx[0] if any_xlsx else None
-
-def _safe_str(v) -> str:
-    return "" if v is None else str(v)
 
 # -------- Routes ----------------------------------------------------------
 
