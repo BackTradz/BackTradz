@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./support.css";
-import { Section } from "../../components/a_savoir/Section";
+import { Section } from "../asavoir/composants/Section";
 import { api } from "../../sdk/apiClient";
 // ⚠️ ajuste le chemin si besoin suivant ton projet
 import PillTabs from "../../components/ui/switchonglet/PillTabs";
