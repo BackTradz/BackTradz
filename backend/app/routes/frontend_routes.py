@@ -10,15 +10,10 @@ Security: Pages publiques, certaines supposent un user connecté côté front.
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from pathlib import Path
-from app.utils.templates import templates
+from app.services.frontend_service import templates
+
 
 router = APIRouter()
-
-# Référence vers le dossier frontend/templates
-BASE_DIR = Path(__file__).resolve().parents[1]
-templates = Jinja2Templates(directory=str(BASE_DIR.parent / "frontend" / "templates"))
 
 @router.get("/", response_class=HTMLResponse)
 async def show_home(request: Request):
