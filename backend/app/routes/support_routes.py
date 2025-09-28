@@ -11,69 +11,23 @@ Support / Feedback endpoint
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr, Field
 from typing import Literal, Optional, Dict
-import os
-import re
-import unicodedata
 from app.utils.email_sender import send_email_html
-from app.utils.email_templates import BRAND_NAME  # pour le sujet
+from app.services.support_service import (
+    SUPPORT_INBOX,
+    _label_and_emoji, _build_subject, _slugify_tag, _build_text_body, SupportPayload
+)
 
-SUPPORT_INBOX = os.getenv("SUPPORT_INBOX")  # ex: support@backtradz.com
 router = APIRouter(prefix="/support", tags=["support"])
 
 # ========= Payload =========
-class SupportPayload(BaseModel):
-  type: Literal["contact", "feedback"]
+class SupportPayload(SupportPayload):  # conserve mêmes contraintes via Pydantic du service
   firstName: str = Field(..., min_length=1, max_length=120)
   lastName:  str = Field(..., min_length=1, max_length=120)
   email:     EmailStr
   message:   str = Field(..., min_length=6, max_length=10_000)
-  meta: Optional[Dict] = None  # e.g. {"path": "...", "ts": 1712345678, "userId": "...", "plan": "pro"}
+  meta: Optional[Dict] = None
 
-
-# ========= Helpers =========
-def _label_and_emoji(kind: Literal["contact", "feedback"]) -> tuple[str, str]:
-  """ Libellé lisible + emoji selon l’onglet UI. """
-  return ("Assistance", "💬") if kind == "contact" else ("Améliorations/Bug", "🛠️")
-
-def _build_subject(p: SupportPayload) -> str:
-  """ Sujet explicite pour tri en inbox. """
-  label, emoji = _label_and_emoji(p.type)
-  first = (p.firstName or "").strip()
-  last  = (p.lastName  or "").strip()
-  return f"{emoji} [{BRAND_NAME} • {label}] {last} {first}".strip()
-
-_slug_re = re.compile(r"[^a-z0-9_-]+")
-def _slugify_tag(value: str) -> str:
-  """
-  Convertit un texte en tag Resend valide:
-  - ASCII only, minuscules
-  - remplace tout caractère non [a-z0-9_-] par '-'
-  - compacte les '-'
-  """
-  if not value:
-    return "na"
-  # translit accents → ascii
-  val = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
-  val = val.lower()
-  val = _slug_re.sub("-", val).strip("-")
-  return val or "na"
-
-def _build_text_body(p: SupportPayload) -> str:
-  """ Corps en texte brut (compat universelle). """
-  label, _ = _label_and_emoji(p.type)
-  meta_str = p.meta or {}
-  return f"""Formulaire : {label}
-Type : {p.type}
-Nom : {p.lastName}
-Prénom : {p.firstName}
-Email : {p.email}
-
-Message :
-{p.message}
-
-Meta : {meta_str}
-""".strip()
-
+## Helpers déplacés dans app/services/support_service.py
 
 # ========= Endpoint support  =========
 @router.post("", summary="Envoi d’un message de support/feedback", response_model=dict)
