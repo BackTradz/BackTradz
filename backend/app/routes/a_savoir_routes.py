@@ -1,14 +1,18 @@
+#backend/app/routes/a_savoir_routes.py
 """
-File: backend/routes/a_savoir_routes.py
-Role: Sert la page informative "À savoir" côté frontend.
+File: backend/app/routes/a_savoir_routes.py
+Role: Sert la page informative "À savoir".
 Depends:
-  - backend.utils.templates.templates : moteur de templates (Jinja2/FastAPI)
-Side-effects: Aucun (rendu template seulement)
+  - app.utils.templates.templates : moteur de templates (Jinja2/FastAPI) si utilisé
+  - app.services.a_savoir_service.get_a_savoir_context : préparation du contexte
+Side-effects: Aucun
 Security: Page publique (pas d'auth).
 """
+ 
 
 from fastapi import APIRouter, Request
 from app.utils.templates import templates
+from app.services.a_savoir_service import get_a_savoir_context
 
 router = APIRouter()
 
@@ -24,8 +28,10 @@ def a_savoir_page(request: Request):
         TemplateResponse: rendu du template 'a_savoir.html' avec le contexte minimal.
 
     Notes:
-        - Le template doit exister dans ton dossier templates (ex: templates/a_savoir.html).
-        - Ajoute ici d’autres variables de contexte si tu veux afficher des infos dynamiques.
+        - Si tu n'utilises plus de templates, on pourra facilement basculer en JSON
+          en remplaçant le TemplateResponse par un JSONResponse (sans casser l'API).
+        - Le contexte est désormais construit dans le service (pas besoin de toucher la route).
     """
-    # On passe toujours {"request": request} pour Jinja2 via FastAPI
-    return templates.TemplateResponse("a_savoir.html", {"request": request})
+    # Contexte délégué au service (extensible sans impacter la route)
+    context = get_a_savoir_context(request)
+    return templates.TemplateResponse("a_savoir.html", context)

@@ -160,7 +160,7 @@ const csvExample = "2025-05-01 03:15:00+00:00,1809.45,1812.07,1808.98,1812.07,65
         <div className="container-std">
           <h1 className="title"> À savoir</h1>
           <p className="subtitle">
-            Référence Stratify : stratégies, CSV, chandeliers, crédits, sécurité, FAQ.
+            Référence BackTradz : stratégies, CSV, chandeliers, crédits, sécurité, FAQ.
           </p>
         </div>
       </section>
