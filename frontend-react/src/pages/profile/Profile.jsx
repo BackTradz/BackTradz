@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import "./Profil.css";
-import ProfileHeader from "../../components/profil/ProfileHeader";
-import AccountSettings from "../../components/profil/AccountSettings";
-import DangerZone from "../../components/profil/DangerZone";
-import PurchaseHistory from "../../components/profil/PurchaseHistory";
+import ProfileHeader from "./composants/ProfileHeader";
+import AccountSettings from "./composants/AccountSettings";
+import DangerZone from "./composants/DangerZone";
+import PurchaseHistory from "./composants/PurchaseHistory";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
 import { me } from "../../sdk/authApi";
 import { updateProfile, unsubscribe, deleteAccount } from "../../sdk/userApi";
-import SupportCard from "../../components/profil/SupportCard"
+import SupportCard from "./composants/SupportCard"
 import PaymentGraceOverlay from "../../components/overlay/PaymentGraceOverlay";
 
 export default function ProfilPage() {

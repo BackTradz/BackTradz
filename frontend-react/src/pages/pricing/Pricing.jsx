@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import "./pricing.css";
 import posthog from '../../analytics/posthog';
 
-import OfferCard from "../../components/pricing/OfferCard";
-import SuccessOverlay from "../../components/pricing/SuccessOverlay";
+import OfferCard from "./composants/OfferCard";
+import SuccessOverlay from "./composants/SuccessOverlay";
 
 import { stripeSession, paypalCreate, cryptoOrder, paypalCapture } from "../../sdk/paymentApi";
 import { me } from "../../sdk/authApi";
@@ -317,7 +317,7 @@ export default function Pricing() {
             : msg}
         </p>
       )}
-      
+
       {creditsAfter != null && (
         <p className="pr-msg ok">💳 Crédits actuels : <b>{creditsAfter}</b></p>
       )}
