@@ -77,6 +77,8 @@ export default function App() {
       <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
       <Route path="/legal/cgu" element={<ConditionsGenerales />} />
       <Route path="/legal/politique-confidentialite" element={<PolitiqueConfidentialite />} />
+      {/* Alias pour le lien /support */}
+      <Route path="/support" element={<SupportPage />} />
       <Route path="/support/support" element={<SupportPage />} />
 
       {/* === PROTECTED === */}
