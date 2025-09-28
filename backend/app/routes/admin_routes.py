@@ -16,90 +16,35 @@ Notes:
 """
 
 
-# en haut de fichier (si pas déjà importé)
 from fastapi import Body
-from app.core.paths import DB_DIR
-from app.core.paths import OUTPUT_DIR, ANALYSIS_DIR, USERS_JSON, INVOICES_DIR
-from app.core.paths import DATA_ROOT
+from app.core.paths import ANALYSIS_DIR  # utilisé dans stats & download_xlsx
 from fastapi import APIRouter
 from fastapi import Request, HTTPException
-from app.models.users import USERS_FILE
-from fastapi import Request, HTTPException
 from pydantic import BaseModel
-from app.models.users import get_user_by_token, USERS_FILE
 from app.core.admin import require_admin, require_admin_from_request_or_query
-from app.models.offers import OFFERS
-import os
-import pandas as pd
-import json
-from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
-from pathlib import Path
-import openpyxl
-import shutil
-from fastapi.responses import FileResponse
 from typing import Optional
-from fastapi import Body
+import os, json, pandas as pd, openpyxl, shutil
+from pathlib import Path
+from datetime import datetime, timezone
+from fastapi.responses import FileResponse
 
-PARIS_TZ = ZoneInfo("Europe/Paris")
+# ✅ Helpers/constantes désormais importés depuis le service (aucune logique modifiée)
+from app.services.admin_service import (
+    PARIS_TZ,
+    FACTURES_DIR,
+    safe_under_data_root as _safe_under_data_root,
+    factures_stats as _factures_stats,
+    audit_append as _audit_append,
+    infer_subscription_price_from_user as _infer_subscription_price_from_user,
+    _parse_iso,
+    _is_failed_payment_tx_local,
+    _is_subscription_tx_local,
+    USERS_FILE,
+    load_users,
+    save_users,
+)
 
-# === AUDIT LEDGER (append-only) ===
-AUDIT_DIR = (DATA_ROOT / "audit").resolve()
-AUDIT_DIR.mkdir(parents=True, exist_ok=True)
-AUDIT_FILE = (AUDIT_DIR / "ledger.jsonl").resolve()
-
-# 📂 Dossier des factures (même que l’émetteur d’invoices)
-#  → cf. backend/utils/invoice_generator.py qui écrit dans INVOICES_DIR
-FACTURES_DIR = INVOICES_DIR.resolve()
-FACTURES_DIR.mkdir(parents=True, exist_ok=True)
-
-def _safe_under_data_root(p: Path) -> bool:
-    try:
-        return str(p.resolve()).startswith(str(DATA_ROOT.resolve()))
-    except Exception:        
-        return False
-
-def _factures_stats():
-    count = 0
-    size  = 0
-    for root, _, files in os.walk(FACTURES_DIR):
-        for fn in files:
-            count += 1
-            try:
-                size += (Path(root) / fn).stat().st_size
-            except Exception:
-                pass
-    return {"count": count, "bytes": int(size)}
-
-
-def _infer_subscription_price_from_user(u: dict, tx: dict):
-    label  = (tx.get("label") or "").lower()
-    method = (tx.get("method") or "").lower()
-    reason = (tx.get("billing_reason") or "").lower()
-    looks_like_sub = (method in {"renewal", "stripe"} or "subscription" in reason or "abonnement" in label)
-    if not looks_like_sub:
-        return None
-    plan = (u.get("subscription") or {}).get("type") or u.get("plan")
-    if not plan:
-        return None
-    offer = OFFERS.get(plan)
-    if not offer or offer.get("type") != "subscription":
-        return None
-    return float(offer.get("price_eur") or 0)
-
-
-def _audit_append(obj: dict):
-    """N'échoue jamais: on ne bloque pas la requête admin si disque KO."""
-    try:
-        import json as _json
-        from datetime import datetime as _dt, timezone as _tz
-        with open(AUDIT_FILE, "a", encoding="utf-8") as f:
-            obj = {**obj, "ts": _dt.now(_tz.utc).isoformat().replace("+00:00", "Z")}
-            f.write(_json.dumps(obj, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
-
-
+# (helpers déplacés dans admin_service)
 
 router = APIRouter()
 
@@ -648,32 +593,6 @@ def backtest_summary():
 
 from datetime import datetime, timezone
 
-def _parse_iso(dt):
-    try:
-        return datetime.fromisoformat(dt.replace("Z", "+00:00"))
-    except Exception:
-        return None
-
-def _is_failed_payment_tx_local(tx: dict) -> bool:
-    lbl = str(tx.get("label") or "").lower()
-    status = str(tx.get("status") or "").lower()
-    reason = str(tx.get("billing_reason") or "").lower()
-    fcode = str(tx.get("failure_code") or "").lower()
-    return ("échou" in lbl or "echou" in lbl or "failed" in lbl
-            or status in {"failed","payment_failed","failed_payment"}
-            or "payment_failed" in reason or bool(fcode))
-
-def _is_subscription_tx_local(u: dict | None, tx: dict) -> bool:
-    lbl = str(tx.get("label") or "").lower()
-    method = str(tx.get("method") or "").lower()
-    reason = str(tx.get("billing_reason") or "").lower()
-    if "abonnement" in lbl or "subscription" in reason or method == "renewal":
-        return True
-    if u:
-        plan = (u.get("subscription") or {}).get("type") or u.get("plan") or ""
-        return str(plan).upper().startswith("SUB")
-    return False
-
 @router.get("/admin/get_users")
 def get_all_users(request: Request):
     require_admin(request)
@@ -730,17 +649,8 @@ class UserAction(BaseModel):
     """
     user_id: str
     amount: int = 1  # par défaut pour les crédits
-
-def load_users():
-    """Lecture JSON brute de USERS_FILE."""
-    with open(USERS_FILE, "r") as f:
-        return json.load(f)
-
-def save_users(data):
-    """Écriture JSON formatée (indent=2) vers USERS_FILE."""
-    with open(USERS_FILE, "w") as f:
-        json.dump(data, f, indent=2)
-
+    
+# (load_users/save_users déplacés dans admin_service)
 # Remplace l’ancienne implémentation par un simple proxy vers la nouvelle
 def admin_required(request: Request):
     return require_admin(request)
