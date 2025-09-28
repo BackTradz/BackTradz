@@ -28,21 +28,14 @@ from app.utils.logger import logger
 from app.utils.payment_utils import update_user_after_payment
 import requests
 import os
-import hmac
-import hashlib
+from app.services.crypto_service import (
+    NOWPAYMENTS_API_BASE,
+    verify_nowpayments_signature,
+)
 
 router = APIRouter()
-NOWPAYMENTS_API_BASE = "https://api.nowpayments.io/v1"
 
-
-
-
-def verify_nowpayments_signature(raw_body: bytes, signature: str, ipn_secret: str) -> bool:
-    """Vérifie la signature HMAC (NOWPayments IPN) avec le **IPN_SECRET** (pas la clé API)."""
-    if not ipn_secret:
-        return False
-    computed_sig = hmac.new(ipn_secret.encode(), raw_body, hashlib.sha512).hexdigest()
-    return hmac.compare_digest(computed_sig, signature)
+# (helper déplacé dans services.crypto_service — aucune logique modifiée)
 
 @router.post("/payment/crypto/create-order")
 async def create_crypto_order(request: Request):
