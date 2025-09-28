@@ -8,10 +8,10 @@ import { listCsvLibrary, downloadCsvByPathUrl } from "../../sdk/catalogApi";
 import { API_BASE } from "../../sdk/apiClient";
 import "./CSVShop.css";
 import CsvCard from "../../components/ui/CSVcard/CSVCard";
-import CSVShopFilters from "../../components/CSVshop/CSVShopFilters";
-import ExtractorInline from "../../components/CSVshop/ExtractorInline";
-import PrivateExtraction from "../../components/CSVshop/PrivateExtraction";
-import CSVInfoBanner from "../../components/CSVshop/CSVInfoBanner";
+import CSVShopFilters from "./composants/CSVShopFilters";
+import ExtractorInline from "./composants/ExtractorInline";
+import PrivateExtraction from "./composants/PrivateExtraction";
+import CSVInfoBanner from "./composants/CSVInfoBanner";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
 
 // TF à masquer côté front

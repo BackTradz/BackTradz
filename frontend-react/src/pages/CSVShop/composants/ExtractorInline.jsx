@@ -1,5 +1,5 @@
 import React from "react";
-import CTAButton from "../../components/ui/button/CTAButton";
+import CTAButton from "../../../components/ui/button/CTAButton";
 
 /**
  * ⛏ Extracteur inline

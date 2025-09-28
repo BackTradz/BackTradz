@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import DetailButton from "../ui/button/DetailButton";
+import DetailButton from "../../../components/ui/button/DetailButton";
 
 /**
  * ℹ️ Bandeau d’information sur le contenu des fichiers CSV vendus

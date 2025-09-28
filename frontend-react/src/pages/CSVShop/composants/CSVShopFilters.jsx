@@ -1,6 +1,6 @@
 import React from "react";
-import CTAButton from "../../components/ui/button/CTAButton";
-import Select from "../../components/ui/select/Select";
+import CTAButton from "../../../components/ui/button/CTAButton";
+import Select from "../../../components/ui/select/Select";
 
 /**
  * 🎛️ Filtres de la boutique CSV
