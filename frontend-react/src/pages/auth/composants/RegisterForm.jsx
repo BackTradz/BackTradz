@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import GoogleLoginButton from "../ui/GoogleLoginButton";
-import CTAButton from "../../components/ui/button/CTAButton";
+import GoogleLoginButton from "../../../components/ui/GoogleLoginButton";
+import CTAButton from "../../../components/ui/button/CTAButton";
 
 // ✅ Formulaire d'inscription utilisateur
 // - Demande prénom, nom, pseudo, e-mail, mot de passe

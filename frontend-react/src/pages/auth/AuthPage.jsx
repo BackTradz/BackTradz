@@ -1,11 +1,11 @@
 // src/pages/auth/AuthPage.jsx
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom"; // ✅ gère la redirection next
-import LoginForm from "../../components/auth/LoginForm";
-import RegisterForm from "../../components/auth/RegisterForm";
+import LoginForm from "./composants/LoginForm";
+import RegisterForm from "./composants/RegisterForm";
 import CTAButton from "../../components/ui/button/CTAButton";
 import BacktradzLogo from "../../components/ui/BacktradzLogo/BacktradzLogo";
-import SignupSuccessOverlay from "../../components/auth/SignupSuccessOverlay"; 
+import SignupSuccessOverlay from "./composants/SignupSuccessOverlay"; 
 import PillTabs from "../../components/ui/switchonglet/PillTabs";        // ✅ NEW
 import "./auth.css";
 import { login } from "../../sdk/authApi";

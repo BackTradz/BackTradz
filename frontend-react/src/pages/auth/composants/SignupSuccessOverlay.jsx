@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import CTAButton from "../ui/button/CTAButton";
-import BacktradzLogo from "../ui/BacktradzLogo/BacktradzLogo";
+import CTAButton from "../../../components/ui/button/CTAButton";
+import BacktradzLogo from "../../../components/ui/BacktradzLogo/BacktradzLogo";
 
 /**
  * ✅ Overlay affiché après une inscription réussie
