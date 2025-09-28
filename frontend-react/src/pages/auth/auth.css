@@ -209,6 +209,23 @@
   .info-panel, .form-panel { width: 100%; padding: 2rem; }
   .auth-form { position: relative; inset: auto; transform: none !important; opacity: 1 !important; display: flex !important; }
   .auth-legal { margin-top: 12px; flex-wrap: wrap; row-gap: .6rem; }
+  /* v1.2 — Footer mobile : plus compact et bien centré */
+  .auth-legal{
+    width: 100%;
+    max-width: 100%;
+    margin: 12px auto 0;          /* légerement plus proche de la box */
+    justify-content: center !important;
+    text-align: center !important;
+    flex-wrap: wrap;
+    gap: .8rem !important;         /* ↓ espace horizontal entre liens */
+    row-gap: .4rem !important;     /* ↓ espace vertical si wrap */
+    font-size: .85rem !important;  /* ↓ taille légère */
+    line-height: 1.25 !important;  /* rythme un peu plus serré */
+    padding-bottom: 6px;           /* petit amorti bas */
+  }
+  .auth-legal a{
+    text-underline-offset: 2px;    /* cohérent en petite taille */
+  }
 }
 
 /* Décalage vertical du footer SANS impacter la box */
