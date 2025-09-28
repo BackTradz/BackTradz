@@ -28,6 +28,8 @@ from app.services.admin_stat_service import (
 
 
 
+# ⚠️ IMPORTANT: créer le router AVANT tout décorateur @stats_router.get(...)
+stats_router = APIRouter()
 ## Helpers/constantes déplacés dans services/admin_stat_service.py (aucune logique modifiée)
 
 # --- ROUTES KPIs -------------------------------------------------------------

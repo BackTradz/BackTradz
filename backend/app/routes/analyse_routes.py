@@ -10,10 +10,10 @@ Security:
 """
 
 
-from app.core.paths import ANALYSIS_DIR
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 from pathlib import Path
+from app.services.analyse_service import find_analysis_file, top_strategies_file
 
 
 router = APIRouter()
@@ -33,37 +33,10 @@ def download_xlsx(
     - Si `?folder=` est fourni, on privilégie ce sous-dossier.
     """
 
-    # BTZ-PATCH v1.1: unifie → ANALYSIS_DIR gère déjà local/prod (via paths/dev)
-    roots = [ANALYSIS_DIR.resolve()]
-
-    candidates: list[Path] = []
-
-    # a) si folder fourni → on teste directement {root}/{folder}/{filename}
-    if folder:
-        for r in roots:
-            p = (r / folder / filename).resolve()
-            if p.exists() and p.is_file():
-                candidates.append(p)
-
-    # b) sinon / en complément → rglob(filename) (premier match suffisant)
-    if not candidates:
-        for r in roots:
-            # on limite la profondeur à 3 niveaux pour rester perfs/secure
-            for p in r.rglob(filename):
-                try:
-                    # petit garde-fou : s'assurer que p est bien sous r
-                    if r in p.resolve().parents:
-                        candidates.append(p)
-                        break
-                except Exception:
-                    continue
-            if candidates:
-                break
-
-    if not candidates:
+    path = find_analysis_file(filename, folder)
+    if not path:
         raise HTTPException(status_code=404, detail="❌ Fichier non trouvé")
 
-    path = candidates[0]
     return FileResponse(
         path=path,
         filename=filename,
@@ -82,7 +55,7 @@ def get_top_strategies():
     Returns:
         FileResponse avec media_type="application/json"
     """
-    json_path = Path("backend/data/public/top_strategies.json")
+    json_path = top_strategies_file()
     if not json_path.exists():
         raise HTTPException(status_code=404, detail="Top strategies non trouvé")
     return FileResponse(json_path, media_type="application/json")
