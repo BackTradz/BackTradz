@@ -22,33 +22,13 @@ from app.models.users import get_user_by_token
 from app.utils.payment_utils import update_user_after_payment
 from fastapi.responses import JSONResponse
 from app.core.config import FRONTEND_URL
+from app.services.paypal_service import PAYPAL_API_BASE, get_paypal_access_token
 
 import json
-import os
 
 router = APIRouter()
 
 
-
-PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
-PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET")
-
-PAYPAL_API_BASE = "https://api-m.sandbox.paypal.com"
-
-def get_paypal_access_token():
-    """
-    Récupère un access_token OAuth PayPal via client_id + secret.
-    """
-    print("CLIENT_ID:", PAYPAL_CLIENT_ID)
-    print("CLIENT_SECRET:", PAYPAL_CLIENT_SECRET)
-    response = requests.post(
-        f"{PAYPAL_API_BASE}/v1/oauth2/token",
-        auth=(PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET),
-        headers={"Accept": "application/json"},
-        data={"grant_type": "client_credentials"}
-    )
-    response.raise_for_status()
-    return response.json()["access_token"]
 
 @router.post("/payment/paypal/create-order")
 async def create_order(request: Request):
