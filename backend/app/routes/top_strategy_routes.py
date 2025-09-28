@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 import pandas as pd
 from app.core.paths import ANALYSIS_DIR
+from app.services.top_strategy_service import BASE_ANALYSIS, _find_xlsx_in_folder
 
 router = APIRouter()
 
@@ -67,18 +68,7 @@ def get_top_strategies():
 
     return top_3
 
-
-
-BASE_ANALYSIS = ANALYSIS_DIR
-
-def _find_xlsx_in_folder(folder: str) -> Path:
-    base = BASE_ANALYSIS / folder
-    if not base.exists() or not base.is_dir():
-        raise HTTPException(status_code=404, detail="Folder not found")
-    files = list(base.glob("*.xlsx"))
-    if not files:
-        raise HTTPException(status_code=404, detail="No xlsx in folder")
-    return files[0]  # on prend le premier
+## Helpers déplacés dans services/top_strategy_service.py (même logique)
 
 @router.get("/public/xlsx/meta")
 def public_xlsx_meta(folder: str = Query(..., min_length=1)):
