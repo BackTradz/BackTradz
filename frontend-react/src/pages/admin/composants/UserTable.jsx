@@ -3,8 +3,8 @@
 // 👥 Admin > Utilisateurs (style only, routes inchangées)
 // ------------------------------------------------------------
 import { useEffect, useState } from "react";
-import SectionTitle from "../ui/SectionTitle";
-import { API_BASE } from "../../sdk/apiClient";
+import SectionTitle from "../../../components/ui/SectionTitle"
+import { API_BASE } from "../../../sdk/apiClient";
 
 export default function UserTable() {
   const [users, setUsers] = useState([]);

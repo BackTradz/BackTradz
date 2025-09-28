@@ -5,8 +5,8 @@
 // - Ajout : limiter à 5 entrées par défaut + bouton "Tout afficher"
 // ------------------------------------------------------------
 import { useEffect, useState, useMemo } from "react";
-import SectionTitle from "../ui/SectionTitle";
-import { API_BASE } from "../../sdk/apiClient";
+import SectionTitle from "../../../components/ui/SectionTitle";
+import { API_BASE } from "../../../sdk/apiClient";
 
 export default function GlobalHistory() {
   const [history, setHistory] = useState([]); // liste d’achats (déjà triée desc côté back)

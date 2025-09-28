@@ -1,6 +1,6 @@
 // AdminMaintenance.jsx
 import { useEffect, useState } from "react";
-import { api } from "../../sdk/apiClient";
+import { api } from "../../../sdk/apiClient";
 
 export default function AdminMaintenance() {
   const [loading, setLoading] = useState(false);

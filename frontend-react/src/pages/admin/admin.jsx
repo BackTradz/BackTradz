@@ -7,13 +7,13 @@
 
 import { useState } from "react";
 import "./admin.css"; // ✅ CSS dédié admin
-import AdminMaintenance from "../../components/admin/AdminMaintenance"; // 👈 AJOUT
+import AdminMaintenance from "./composants/AdminMaintenance"; // 👈 AJOUT
 
-import AdminSidebar from "../../components/admin/AdminSidebar";
-import UserTable from "../../components/admin/UserTable";
-import GlobalHistory from "../../components/admin/GlobalHistory";
-import Stats from "../../components/admin/Stats";
-import BacktestSummary from "../../components/admin/BacktestSummary";
+import AdminSidebar from "./composants/admin/AdminSidebar";
+import UserTable from "./composants/admin/UserTable";
+import GlobalHistory from "./composants/admin/GlobalHistory";
+import Stats from "./composants/admin/Stats";
+import BacktestSummary from "./composants/admin/BacktestSummary";
 
 export default function AdminDashboard() {
   // ✅ pas d'URL change → pas de risque de 404 côté router

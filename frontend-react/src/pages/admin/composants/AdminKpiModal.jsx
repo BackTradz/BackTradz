@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { API_BASE } from "../../sdk/apiClient";
+import { API_BASE } from "../../../sdk/apiClient";
 
 /**
  * AdminKpiModal

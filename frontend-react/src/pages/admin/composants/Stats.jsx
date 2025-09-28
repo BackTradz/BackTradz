@@ -7,11 +7,11 @@
 // - "Analyses" -> AdminBreakdownModal & AdminAnalyticsModal.
 // ------------------------------------------------------------
 import { useEffect, useState } from "react";
-import SectionTitle from "../ui/SectionTitle";
+import SectionTitle from "../../../components/ui/SectionTitle";
 import AdminKpiModal from "./AdminKpiModal";
 import AdminBreakdownModal from "./AdminBreakdownModal";
 import AdminAnalyticsModal from "./AdminAnalyticsModal";
-import { API_BASE } from "../../sdk/apiClient";
+import { API_BASE } from "../../../sdk/apiClient";
 // Formatters FR
 const nfInt  = new Intl.NumberFormat("fr-FR");
 const nfEuro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });

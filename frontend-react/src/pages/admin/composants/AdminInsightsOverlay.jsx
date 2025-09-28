@@ -1,6 +1,6 @@
 // components/admin/AdminInsightsOverlay.jsx
 import React from "react";
-import BacktestInsightsOverlay from "../overlay/BacktestInsightsOverlay";
+import BacktestInsightsOverlay from "../../../components/overlay/BacktestInsightsOverlay";
 
 /**
  * AdminInsightsOverlay
