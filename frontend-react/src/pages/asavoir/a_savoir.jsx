@@ -588,7 +588,7 @@ const csvExample = "2025-05-01 03:15:00+00:00,1809.45,1812.07,1808.98,1812.07,65
             <p className="muted">
                 💡 Nous sommes également ouverts à vos retours : 
                 n’hésitez pas à partager vos <b>idées d’amélioration</b> ou à signaler un bug 
-                directement depuis la page <Link to="/support" className="link">Support</Link>.
+                directement depuis la page <Link to="/support/support" className="link">Support</Link>.
               </p>
           </Section>
 
