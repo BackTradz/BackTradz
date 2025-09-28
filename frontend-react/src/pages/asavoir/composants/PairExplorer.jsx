@@ -23,9 +23,9 @@
 // - Si le nom de la query string change, MAJ "pair" dans le code (deep-link).
 // ============================================================
 import React from "react";
-import Select from "../ui/select/Select";
-import PAIRS_MAP, { getPip } from "../../config/labels/pairs.map"; // ✅ un seul import
-import PAIR_DOCS from "../../config/docs/Pairs.docs";              // fiches explicatives
+import Select from "../../../components/ui/select/Select";
+import PAIRS_MAP, { getPip } from "../../../config/labels/pairs.map"; // ✅ un seul import
+import PAIR_DOCS from "../../../config/docs/Pairs.docs";              // fiches explicatives
 
 /**
  * PairExplorer

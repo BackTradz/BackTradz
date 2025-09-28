@@ -25,7 +25,7 @@
 // ============================================================
 import React from "react";
 import { useState, useEffect, useMemo, useRef } from "react";
-import Select from "../ui/select/Select";
+import Select from "../../../components/ui/select/Select";
 
 export default function StrategyExplorer({ strategies = [] }) {
   // [BTZ] Clé de la stratégie active
