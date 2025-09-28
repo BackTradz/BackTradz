@@ -45,44 +45,13 @@ from app.utils.email_templates import (
     subscription_failed_text,
 )
 from app.models.users import USERS_FILE as USERS_JSON_PATH
+from app.services.stripe_service import resolve_price_for_offer
 
 load_dotenv()
 
 router = APIRouter()
 
 
-# === 🔐 API Key Stripe (mode test) ===
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-
-# --- Resolver de Price Stripe (ENV -> lookup_key -> fallback offers)
-def resolve_price_for_offer(offer_id: str) -> str:
-    from app.models.offers import get_offer_by_id  # local import pour éviter cycles
-    offer = get_offer_by_id(offer_id) or {}
-    # 1) ENV direct par convention STRIPE_PRICE_<OFFER_ID>
-    env_direct = os.getenv(f"STRIPE_PRICE_{offer_id}")
-    if env_direct and env_direct.startswith("price_"):
-        return env_direct
-
-    # 2) ENV via clé déclarée dans l’offre ("stripe_env_key")
-    env_key = offer.get("stripe_env_key")
-    if env_key:
-        val = os.getenv(env_key)
-        if val and val.startswith("price_"):
-            return val
-
-    # 3) ENV via lookup_key (optionnel) : STRIPE_LOOKUP_<OFFER_ID>
-    lookup = os.getenv(f"STRIPE_LOOKUP_{offer_id}")
-    if lookup:
-        res = stripe.Price.list(active=True, lookup_keys=[lookup], limit=1)
-        if res.data:
-            return res.data[0].id
-
-    # 4) Fallback (legacy): champ 'stripe_price_id' dans l’offre
-    legacy = offer.get("stripe_price_id")
-    if legacy and legacy.startswith("price_"):
-        return legacy
-
-    raise HTTPException(status_code=500, detail=f"Stripe price introuvable pour {offer_id}")
 
 # === ✅ Route pour créer une session de paiement ===
 
