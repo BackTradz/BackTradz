@@ -2,60 +2,23 @@
 from fastapi import APIRouter, Request, HTTPException
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
-from passlib.context import CryptContext
 import uuid, json, os, tempfile
 from app.utils.email_sender import send_email_html
 from app.utils.email_templates import (
     reset_subject, reset_html, reset_text
 )
 from app.core.config import FRONTEND_URL
-from app.core.paths import USERS_JSON as USERS_FILE, DB_DIR
-
+from app.core.paths import USERS_JSON as USERS_FILE
+from app.services.auth_reset_service import (
+    RESET_FILE,
+    _load_json,
+    _atomic_write_json,
+    _purge_expired,
+    _hash_password,
+)
 router = APIRouter()
-# ✅ Disque/chemins cohérents avec toute l’app (Render /var/...)
 
-RESET_FILE = DB_DIR / "reset_tokens.json"
-RESET_FILE.parent.mkdir(parents=True, exist_ok=True)
-
-# ✅ Hash bcrypt (cohérent avec le reste)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# -- utils JSON (écriture atomique pour éviter toute corruption) -------------
-def _load_json(path: Path) -> dict:
-    if not path.exists(): return {}
-    try:
-        raw = path.read_text(encoding="utf-8")
-        return json.loads(raw) if raw.strip() else {}
-    except Exception:
-        return {}
-
-def _atomic_write_json(path: Path, data: dict) -> None:
-    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=".tmp_", text=True)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        os.replace(tmp, path)
-    finally:
-        if os.path.exists(tmp):
-            try: os.remove(tmp)
-            except: pass
-
-def _purge_expired(tokens: dict) -> int:
-    now = datetime.now(timezone.utc)
-    to_del = []
-    for k, v in tokens.items():
-        try:
-            exp = v.get("exp")
-            if exp and now > datetime.fromisoformat(exp):
-                to_del.append(k)
-        except Exception:
-            to_del.append(k)
-    for k in to_del:
-        tokens.pop(k, None)
-    return len(to_del)
-
-def _hash_password(pw: str) -> str:
-    return pwd_context.hash(pw)
+# ✅ utils/constantes importés depuis services.auth_reset_service
 
 @router.post("/generate-reset-token")
 async def generate_reset_token(request: Request):
@@ -92,8 +55,6 @@ async def generate_reset_token(request: Request):
 
         # lien FRONT
         reset_url = f"{FRONTEND_URL}/reset-password/{reset_token}"
-        # email simple (dark) — tu peux le styler plus tard
-
         subject = reset_subject()
         html    = reset_html(reset_url)
         text    = reset_text(reset_url)
