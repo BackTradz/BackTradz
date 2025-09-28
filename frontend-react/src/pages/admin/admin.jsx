@@ -9,11 +9,11 @@ import { useState } from "react";
 import "./admin.css"; // ✅ CSS dédié admin
 import AdminMaintenance from "./composants/AdminMaintenance"; // 👈 AJOUT
 
-import AdminSidebar from "./composants/admin/AdminSidebar";
-import UserTable from "./composants/admin/UserTable";
-import GlobalHistory from "./composants/admin/GlobalHistory";
-import Stats from "./composants/admin/Stats";
-import BacktestSummary from "./composants/admin/BacktestSummary";
+import AdminSidebar from "./composants/AdminSidebar";
+import UserTable from "./composants/UserTable";
+import GlobalHistory from "./composants/GlobalHistory";
+import Stats from "./composants/Stats";
+import BacktestSummary from "./composants/BacktestSummary";
 
 export default function AdminDashboard() {
   // ✅ pas d'URL change → pas de risque de 404 côté router
