@@ -53,6 +53,9 @@ from app.routes.user_routes import router as user_router
 from app.routes.run_backtest_route import router as run_backtest_router
 from app.routes.strategy_params_route import router as strategy_params_router
 from fastapi.middleware.cors import CORSMiddleware
+from app.middlewares.robots_noindex import RobotsNoIndexMiddleware
+from app.middlewares.cache_favicon import FaviconCacheMiddleware
+
 from app.routes.analyse_routes import router as download_xlsx
 from app.routes.csv_library_routes import router as csv_library_router
 #from fastapi.staticfiles import StaticFiles
@@ -154,6 +157,8 @@ app.include_router(paypal_router, prefix="/api")
 app.include_router(crypto_router, prefix="/api")
 app.include_router(meta_router, prefix="/api")
 
+app.add_middleware(RobotsNoIndexMiddleware)
+app.add_middleware(FaviconCacheMiddleware)
 
 app.include_router(auth_reset_routes.router, prefix="/api/auth")
 app.include_router(auth.router, prefix="/api")
