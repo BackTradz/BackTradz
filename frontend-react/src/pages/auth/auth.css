@@ -30,6 +30,10 @@
   --sdx-shadow: 0 10px 40px rgba(0,0,0,.35);
   --sdx-border: 1px solid rgba(255,255,255,.05);
 
+  --sdx-bg-band: rgba(255,255,255,.06);
+  --sdx-grid-a: rgba(255,255,255,.025); /* lignes horizontales */
+  --sdx-grid-b: rgba(255,255,255,.02);  /* lignes verticales   */
+
   /* Layout */
   --sdx-maxw: 1100px;
   --sdx-pad:  2rem;
@@ -55,11 +59,38 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background:
-    radial-gradient(1100px 520px at 50% 12%, var(--sdx-bg-halo), transparent 62%),
+    background:
+    /* grille subtile (24px) */
+    repeating-linear-gradient(0deg,   var(--sdx-grid-a) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(90deg,  var(--sdx-grid-b) 0 1px, transparent 1px 24px),
+    /* glow haut */
+    radial-gradient(900px 420px at 50% 10%, rgba(59,130,246,.16), transparent 62%),
+    /* bande de séparation bas */
+    linear-gradient(to bottom,
+      transparent 0 72%,
+      var(--sdx-bg-band) 86%,
+      rgba(255,255,255,.02) 94%,
+      transparent 100%
+    ),
+    /* base */
     linear-gradient(135deg, var(--sdx-bg-start) 0%, var(--sdx-bg-end) 100%);
 }
 
+@media (max-width: 900px){
+  .auth-bg{
+    background:
+      repeating-linear-gradient(0deg,   var(--sdx-grid-a) 0 1px, transparent 1px 22px),
+      repeating-linear-gradient(90deg,  var(--sdx-grid-b) 0 1px, transparent 1px 22px),
+      radial-gradient(760px 360px at 50% 8%, rgba(59,130,246,.20), transparent 60%),
+      linear-gradient(to bottom,
+        transparent 0 64%,
+        rgba(255,255,255,.10) 83%,
+        rgba(255,255,255,.03) 92%,
+        transparent 100%
+      ),
+      linear-gradient(135deg, var(--sdx-bg-start) 0%, var(--sdx-bg-end) 100%);
+  }
+}
 /* === 🔲 BOX PRINCIPALE ===================================== */
 .auth-box {
   position: relative;
