@@ -1181,3 +1181,29 @@
     margin-top: 12px !important; /* ajuste 8–12px si tu veux */
   }
 }
+
+/* ================= v1.2 — Mobile: fin de page propre ================= */
+@media (max-width: 900px){
+  /* 🔹 REGISTER — on serre le bas sans empêcher le scroll global */
+  body.auth-page .auth-box.register-active .form-panel{
+    padding-bottom: 8px !important;               /* était 16px */
+  }
+  /* on neutralise toute marge résiduelle du dernier bloc du form register */
+  body.auth-page .auth-box.register-active .register-form .auth-form-inner > *:last-child{
+    margin-bottom: 0 !important;
+  }
+  /* le bouton Google ne crée pas d'espace additionnel en bas */
+  body.auth-page .auth-box.register-active .register-form .google-button-wrapper{
+    margin-bottom: 0 !important;
+  }
+
+  /* 🔹 LOGIN — pas de min-height ni d'overflow qui provoque un micro-scroll */
+  body.auth-page .auth-box.login-active{
+    min-height: unset !important;                 /* déjà posé plus haut, on confirme */
+    overflow-y: visible !important;               /* évite une barre de scroll fantôme */
+    }
+  body.auth-page .auth-box.login-active .form-panel{
+    padding-bottom: 8px !important;               /* léger amorti, pas de “coussin” */
+    overflow: visible !important;                 /* pas de scroll interne inutile */
+  }
+}
