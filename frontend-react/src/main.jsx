@@ -4,8 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './auth/AuthContext';
 import "./index.css";
-import './analytics/posthog';
-import { startReplayIfAllowed } from './analytics/posthog';
+import { initPostHog, startReplayIfAllowed } from './lib/posthog.js'
 
 // 🔗 Route tous les appels '/api/*' vers l'API (sans jamais doubler /api)
 (function patchFetchBaseURL() {

@@ -18,7 +18,6 @@ import RequireAdmin from "./auth/RequireAdmin";
 import AppLayout from "./layouts/AppLayout";
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import posthog from './analytics/posthog';
 import posthog, { startReplayIfAllowed } from './analytics/posthog';
 
 // Pages publiques
@@ -86,7 +85,7 @@ export default function App() {
       {/* === PROTECTED === */}
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
-        {/* 🔐 Dashboard redevient protégé */}
+          {/* 🔐 Dashboard redevient protégé */}
           <Route path="/dashboard" element={<Dashboard />} />
           {/* 🔐 Profil = nécessite auth */}
           <Route path="/profile" element={<Profile />} />
