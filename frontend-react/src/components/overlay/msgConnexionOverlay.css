@@ -1,0 +1,98 @@
+/* Backdrop fullscreen (classes uniques pour éviter tout conflit) */
+.bt-conn-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.70);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Panel central */
+.bt-conn-panel {
+  width: 100%;
+  max-width: 520px;
+  background: #0B1220;            /* proche de ton thème */
+  color: #E8EEF9;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 24px;
+}
+
+/* Header (logo centré) */
+.bt-conn-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+/* Titres */
+.bt-conn-title {
+  text-align: center;
+  margin: 0 0 8px 0;
+}
+
+.bt-conn-title-line {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.2px;
+}
+
+.bt-conn-title-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4C77FF; /* touche brand */
+}
+
+/* Texte / Liste */
+.bt-conn-body {
+  margin-top: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #C9D3EA;
+}
+
+.bt-conn-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bt-conn-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.bt-conn-dot {
+  color: #4C77FF;
+  margin-right: 2px;
+}
+
+/* Actions */
+.bt-conn-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Petites tailles */
+@media (max-width: 420px) {
+  .bt-conn-panel {
+    padding: 20px;
+    border-radius: 14px;
+  }
+  .bt-conn-title-line {
+    font-size: 20px;
+  }
+}

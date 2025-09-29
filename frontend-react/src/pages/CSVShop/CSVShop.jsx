@@ -13,6 +13,7 @@ import ExtractorInline from "./composants/ExtractorInline";
 import PrivateExtraction from "./composants/PrivateExtraction";
 import CSVInfoBanner from "./composants/CSVInfoBanner";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
+import MsgConnexionOverlay from "../../components/overlay/MsgConnexionOverlay";
 
 // TF à masquer côté front
 const EXCLUDED_TF = new Set(["M1", "D", "D1"]);
@@ -188,6 +189,8 @@ export default function CSVShop() {
   // v1.2 — visiteur vs connecté (simple, sans appel réseau)
   const isLoggedIn = !!getApiTokenSafe();
   const [publicNotice, setPublicNotice] = useState(""); // petit message au clic en public
+  const [showLoginOverlay, setShowLoginOverlay] = useState(false); // v1.2 — overlay connexion
+
   // Intercepte les clics sur un bouton de download en mode public
   const handlePublicClick = (e) => {
     if (isLoggedIn) return;
@@ -197,6 +200,8 @@ export default function CSVShop() {
     if (a.getAttribute("href") === "#") {
       e.preventDefault();
       e.stopPropagation();
+      // v1.2 — on ouvre l'overlay de connexion (on garde le message en backup, sans suppression)
+      setShowLoginOverlay(true);
       setPublicNotice("Inscrivez-vous pour télécharger votre CSV — /login?next=/csv-shop");
     }
   };
@@ -212,13 +217,12 @@ export default function CSVShop() {
       }
       const token = getApiTokenSafe();  // ✅ token robuste (apiKey/user.token)
       // v1.2 — Public: on ne bloque pas l’UI, on remplace juste l'erreur "token invalide"
-     if (!token) {
-        setExtractStatus(
-          <>
-            ❌ Inscrivez-vous pour lancer une extraction.{" "}
-            <a className="bt-link" href="/login?next=/csv-shop">Se connecter</a>
-          </>
-        );
+      if (!token) {
+        // 👉 Ouvre l'overlay de connexion au lieu du petit message HTML
+        setShowLoginOverlay(true);
+        // (On garde un fallback minimal si jamais l’overlay ne se monte pas)
+        setExtractStatus("");
+        setPublicNotice("Inscrivez-vous pour lancer une extraction — /login?next=/csv-shop");
         return;
       }
       const res = await fetch(
@@ -277,12 +281,6 @@ export default function CSVShop() {
           <b> backtests</b>, votre <b>trading algorithmique</b> et l’<b>vos modèles IA</b>.
         </p>
         <CSVInfoBanner />
-        {publicNotice && (
-          <div className="csvshop-notice" style={{ marginTop: 8 }}>
-            Inscrivez-vous pour télécharger votre CSV.{" "}
-            <a className="bt-link" href="/login?next=/csv-shop">Se connecter</a>
-          </div>
-        )}
 
         <CSVShopFilters
           q={q} setQ={setQ}
@@ -349,6 +347,14 @@ export default function CSVShop() {
           )
         )}
       </div>
+
+      {/* v1.2 — Overlay de connexion (affiché quand visiteur clique Download/Extract) */}
+      {showLoginOverlay && (
+        <MsgConnexionOverlay
+          open
+          onClose={() => setShowLoginOverlay(false)}
+        />
+      )}
     </>
   );
 }

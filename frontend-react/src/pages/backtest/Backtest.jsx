@@ -40,7 +40,7 @@ import usePip from "../../hooks/usePip"; // ✅ nouveau hook
 import { getUiParamsSpec } from "../../config/labels/params.map"; // 🔥 on utilise la spec UI
 import DetailButton from "../../components/ui/button/DetailButton";
 import ResultInsightsOverlay from "../../components/overlay/ResultInsightsOverlay";
-
+import MsgConnexionOverlay from "../../components/overlay/MsgConnexionOverlay";
 
 export default function Backtest() {
   // ───────────────────────── Onglet actif ─────────────────────────
@@ -86,6 +86,8 @@ export default function Backtest() {
   const [showOverlay, setShowOverlay] = useState(false);   // (tu l’as déjà)
   const [overlayFolder, setOverlayFolder] = useState("");  // 👈 nouveau
   const [overlayPeriod, setOverlayPeriod] = useState("");  // 👈 nouveau
+  const [showLoginOverlay, setShowLoginOverlay] = useState(false); // v1.2 — overlay connexion
+
 
 
   // ===== Dates helpers (FR + ISO) =====
@@ -256,10 +258,10 @@ export default function Backtest() {
   // ───────────────────────────── Run OFFICIEL ─────────────────────────────
   const onRunOfficial = async (e) => {
     e.preventDefault();
-    // v1.2 — Guard public : pas d'appel API, juste un message + lien login
+    // v1.2 — Guard public : on ouvre l’overlay (pas de message)
     const token = localStorage.getItem("apiKey") || localStorage.getItem("token") || "";
     if (!token) {
-      setError("Inscrivez-vous pour lancer votre premier backtest gratuit — /login?next=/backtest");
+      setShowLoginOverlay(true);
       return;
     }
     setError(""); setResult(null); setLoading(true);
@@ -291,10 +293,10 @@ export default function Backtest() {
   // ───────────────────────────── Run CUSTOM ─────────────────────────────
   const onRunCustom = async (e) => {
     e.preventDefault();
-    // v1.2 — Guard public : pas d'appel API, juste un message + lien login
+    // v1.2 — Guard public : on ouvre l’overlay (pas de message)
     const token = localStorage.getItem("apiKey") || localStorage.getItem("token") || "";
     if (!token) {
-      setError("Inscrivez-vous pour lancer votre premier backtest gratuit — /login?next=/backtest");
+      setShowLoginOverlay(true);
       return;
     }
     setError(""); setResult(null);
@@ -784,12 +786,7 @@ export default function Backtest() {
               <section className="bt-card">
                 <h3 className="bt-section-title">❌ Erreur</h3>
                 <div className="bt-error">
-                  {error.includes("/login?next=") ? (
-                    <>
-                      Inscrivez-vous pour lancer votre premier backtest gratuit.{" "}
-                      <a className="bt-link" href="/login?next=/backtest">Se connecter</a>
-                    </>
-                  ) : error}
+                   {error}
                 </div>
 
               </section>
@@ -819,6 +816,13 @@ export default function Backtest() {
            </aside>
         </div>
       </div>
+      {/* v1.2 — Overlay de connexion (public → register/login) */}
+      {showLoginOverlay && (
+        <MsgConnexionOverlay
+          open
+          onClose={() => setShowLoginOverlay(false)}
+        />
+      )}
     </main>
   );
 }

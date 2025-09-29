@@ -60,6 +60,16 @@ export default function AuthPage() {
       return raw.startsWith('/') ? raw : '/home';
     } catch { return '/home'; }
   }, [location.search]);
+  // v1.2 — ouvre l'onglet demandé via ?tab=register|login (depuis l’overlay)
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const tab = (params.get('tab') || '').toLowerCase();
+      if (tab === 'register') setIsLoginActive(false);
+      else if (tab === 'login') setIsLoginActive(true);
+    } catch {/* no-op */}
+  }, [location.search]);
+
   
   // ✅ Gère le retour OAuth Google + affichage overlay succès
   useEffect(() => {
