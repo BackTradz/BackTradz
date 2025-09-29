@@ -5,6 +5,7 @@ import App from './App';
 import { AuthProvider } from './auth/AuthContext';
 import "./index.css";
 import './analytics/posthog';
+import { startReplayIfAllowed } from './analytics/posthog';
 
 // 🔗 Route tous les appels '/api/*' vers l'API (sans jamais doubler /api)
 (function patchFetchBaseURL() {
@@ -59,3 +60,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+// 🔁 (re)lance/stop le replay sur navigation
+window.addEventListener('load', () => startReplayIfAllowed(location.pathname));
+window.addEventListener('popstate', () => startReplayIfAllowed(location.pathname));
+(() => {
+  const _pushState = history.pushState;
+  history.pushState = function () {
+    _pushState.apply(this, arguments);
+    startReplayIfAllowed(location.pathname);
+  };
+})();

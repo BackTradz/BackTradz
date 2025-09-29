@@ -20,10 +20,17 @@ if (!KEY || !HOST) {
 } else {
   posthog.init(KEY, {
     api_host: HOST,
-    // ✅ On laisse PostHog CAPTER PAR DÉFAUT pour tous les users normaux
-    //    (on ne coupera que pour tes emails internes au moment de l'identify)
     capture_pageview: true,
-    disable_session_recording: true,  // safe par défaut
+    // ✅ Active le Session Replay avec masquage
+    session_recording: {
+      maskAllInputs: true,
+      recordCanvas: true,
+    },
+    // rétro-compat éventuelle selon version
+    sessionRecording: {
+      maskAllInputs: true,
+      recordCanvas: true,
+    },
   });
   // expose pour test console
   // eslint-disable-next-line no-undef
@@ -52,7 +59,13 @@ export function posthogIdentify(user) {
 
     // user normal → on autorise et on identifie
     posthog.opt_in_capturing();
-    posthog.identify(id, { email, username: user.username, role: user.role || 'user' });
+    posthog.identify(id, {
+      email,
+      username: user.username,
+      role: user.role || 'user',
+      plan: user.plan || 'free',
+      credits: user.credits ?? null,
+    });
   } catch {}
 }
 
@@ -60,6 +73,20 @@ export function posthogIdentify(user) {
 export function posthogReset() {
   try {
     posthog.reset();
+  } catch {}
+}
+
+// 🎥 Démarrer/stopper le Replay selon la route (et emails internes)
+const BLOCKED_PATHS = ['/login','/register','/profile','/admin'];
+export function startReplayIfAllowed(pathname = window.location.pathname) {
+  try {
+    const blocked = BLOCKED_PATHS.some(p => pathname.startsWith(p));
+    const fnStart = posthog.startSessionRecording || posthog.sessionRecording?.startRecording;
+    const fnStop  = posthog.stopSessionRecording  || posthog.sessionRecording?.stopRecording;
+    if (blocked) { fnStop && fnStop(); return; }
+    // ne démarre pas si opt-out (emails internes)
+    if (posthog.has_opted_out_capturing && posthog.has_opted_out_capturing()) return;
+    fnStart && fnStart();
   } catch {}
 }
 

@@ -19,6 +19,7 @@ import AppLayout from "./layouts/AppLayout";
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import posthog from './analytics/posthog';
+import posthog, { startReplayIfAllowed } from './analytics/posthog';
 
 // Pages publiques
 import Home from "./pages/home/Home";
@@ -47,6 +48,7 @@ export default function App() {
 
   useEffect(() => {
     posthog?.capture?.('$pageview');
+    startReplayIfAllowed(loc.pathname);
   }, [loc.pathname]);
 
   return (
