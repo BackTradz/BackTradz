@@ -224,7 +224,7 @@ export default function Pricing() {
     setMsg("");
     // v1.2 — Guard public : message + lien login
     if (!localStorage.getItem("apiKey")) {
-      setMsg("Inscrivez-vous pour acheter des crédits — /login?next=/pricing");
+      setMsg("Inscrivez-vous pour acheter des crédits — /login?tab=register&next=/pricing");
       return;
     }
     try {
@@ -238,7 +238,7 @@ export default function Pricing() {
     setMsg("");
     // v1.2 — Guard public : message + lien login
     if (!localStorage.getItem("apiKey")) {
-      setMsg("Inscrivez-vous pour acheter des crédits — /login?next=/pricing");
+            setMsg("Inscrivez-vous pour acheter des crédits — /login?tab=register&next=/pricing");
       return;
     }
     try {
@@ -254,7 +254,7 @@ export default function Pricing() {
     setMsg("");
     // v1.2 — Guard public : message + lien login
     if (!localStorage.getItem("apiKey")) {
-      setMsg("Inscrivez-vous pour acheter des crédits — /login?next=/pricing");
+       setMsg("Inscrivez-vous pour acheter des crédits — /login?tab=register&next=/pricing");
       return;
     }
     try {
@@ -279,6 +279,30 @@ export default function Pricing() {
         <div className="pr-muted">
           Accède à des données de trading fiables et à des backtests détaillés. Choisis entre crédits à l’unité ou abonnements mensuels, selon ton usage.
         </div>
+        {/* v1.2 — Message d’erreur déplacé ici (header), style léger + redirection vers Inscription */}
+        {msg && msg.includes("/login?tab=register&next=") && (
+          <div
+            className="pr-header-alert"
+            style={{
+              marginTop: 12,
+              padding: "10px 14px",
+              background: "rgba(76,119,255,0.10)",
+              border: "1px solid rgba(76,119,255,0.25)",
+              borderRadius: 12,
+              color: "#E8EEF9",
+              /* v1.2 — pas full width : on contraint et on centre */
+              maxWidth: "760px",
+              width: "100%",
+              marginLeft: "auto",
+              marginRight: "auto"
+            }}
+          >
+            Crée un compte pour acheter des crédits.{" "}
+            <a className="bt-link" href="/login?tab=register&next=/pricing">
+              S’inscrire
+            </a>
+          </div>
+        )}
       </header>
 
       {/* Grille unique : 6 cartes */}
@@ -309,13 +333,9 @@ export default function Pricing() {
 
       </section>
 
-      {msg && (
-        <p className={`pr-msg ${msg.startsWith("✅") ? "ok" : msg.startsWith("🪙") ? "info" : "err"}`}>
-          {msg.includes("/login?next=")
-            ? <>Inscrivez-vous pour acheter des crédits.{" "}
-                <a className="bt-link" href="/login?next=/pricing">Se connecter</a></>
-            : msg}
-        </p>
+      {/* le message d’erreur “inscription” est désormais géré dans le header */}
+      {msg && !msg.includes("/login?tab=register&next=") && (
+        <p className={`pr-msg ${msg.startsWith("✅") ? "ok" : msg.startsWith("🪙") ? "info" : "err"}`}>{msg}</p>
       )}
 
       {creditsAfter != null && (
