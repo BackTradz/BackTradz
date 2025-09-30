@@ -89,7 +89,7 @@ export default function App() {
           {/* 🔐 Dashboard redevient protégé */}
           <Route path="/dashboard" element={<Dashboard />} />
           {/* 🔐 Comparateur (protégé) */}
-          <Route path="/comparateur" element={<ComparateurPage />} />
+         {/* <Route path="/comparateur" element={<ComparateurPage />} />*/}
           {/* 🔐 Profil = nécessite auth */}
           <Route path="/profile" element={<Profile />} />
           {/* 🔐 Admin = nécessite auth + admin */}
