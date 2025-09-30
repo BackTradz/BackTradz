@@ -29,15 +29,24 @@ from app.schemas.communs import DEFAULT_SESSIONS, DEFAULT_DAYS, DEFAULT_HOURS
 def _find_runs(root: Path) -> List[Path]:
     """
     Retourne les dossiers d’analyse (runs) sous ANALYSIS_DIR.
-    🔁 Aligné avec le dashboard: on détecte via 'params.json' (pas CSV).
+    Tolérant: détecte via plusieurs artefacts possibles (prod/dev),
+    pour coller au dashboard.
     """
-    runs: List[Path] = []
     if not root.exists():
-        return runs
-    for p in root.rglob("params.json"):
-        runs.append(p.parent)
-    runs = sorted(set(runs), key=lambda d: d.stat().st_mtime, reverse=True)
+        return []
+    candidates: List[Path] = []
+    # params (nom exact ou variantes)
+    for pat in ("params.json", "params*.json"):
+        candidates += [p.parent for p in root.rglob(pat)]
+    # xlsx résultats (si pas de params)
+    for pat in ("*resultats.xlsx", "analyse_*_resultats.xlsx"):
+        candidates += [p.parent for p in root.rglob(pat)]
+    # csv globaux (fallback ultime)
+    for pat in ("*_global.csv", "global.csv", "Global.csv"):
+        candidates += [p.parent for p in root.rglob(pat)]
+    runs = sorted(set(candidates), key=lambda d: d.stat().st_mtime, reverse=True)
     return runs
+
 
 def _load_params(run_dir: Path) -> dict:
     """Lit le params*.json le plus récent s’il existe (meta du run)."""
