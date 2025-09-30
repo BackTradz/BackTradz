@@ -3,6 +3,22 @@
 
 import os
 from pathlib import Path
+try:
+    from dotenv import load_dotenv  # pour lire .env en local
+except Exception:
+    load_dotenv = None
+
+# -- Localiser la racine du repo pour .env
+_BACKEND_DIR = Path(__file__).resolve().parents[2]     # .../backend
+_REPO_ROOT   = _BACKEND_DIR.parent                     # repo root (où tu as .env)
+if load_dotenv:
+    # On charge .env.local puis .env (sans override) si présents
+    for _f in (_BACKEND_DIR / ".env.local",
+               _BACKEND_DIR / ".env",
+               _REPO_ROOT   / ".env.local",
+               _REPO_ROOT   / ".env"):
+        if _f.exists():
+            load_dotenv(_f, override=False)
 
 # ---- Mode d'exécution
 ENV = os.getenv("ENV", "").strip().lower()            # "local" | "render" | "prod"

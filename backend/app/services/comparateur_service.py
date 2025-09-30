@@ -82,6 +82,7 @@ def _own_by_user(params: dict, current_user_id: str) -> bool:
     try:
         raw = (
             (params.get("run_user") or {}).get("id")
+            or (params.get("user") or {}).get("id")   # ✅ couvre 'user': {id: ...}
             or params.get("user_id")
             or ""
         )
@@ -136,7 +137,10 @@ def _extract_global_metrics(df_global: pd.DataFrame) -> Tuple[Optional[int], Opt
 
 def list_user_compare_options(current_user_id: str) -> CompareOptionsResponse:
     items: List[CompareOptionsItem] = []
-    for run_dir in _find_runs(ANALYSIS_DIR):
+    print(f"🔎 [compare] ANALYSIS_DIR = {ANALYSIS_DIR}")  # debug non bloquant (même style que dashboard)
+    runs = _find_runs(ANALYSIS_DIR)
+    print(f"📦 [compare] dossiers détectés = {len(runs)}")
+    for run_dir in runs:
         params = _load_params(run_dir)
         if not _own_by_user(params, current_user_id):
             continue
