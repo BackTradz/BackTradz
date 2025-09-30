@@ -4,11 +4,11 @@ import { api } from "./apiClient";
 
 export async function fetchCompareOptions() {
   const res = await api("api/compare/options");
-  return res.data; // { items: [...] }
+  return res;      // ✅ le JSON complet (ex: { items: [...] })
 }
 
 export async function fetchCompareData(payload) {
   // payload: { analysis_ids: [...], metric: "session" | ... , normalize: false }
   const res = await api("api/compare/data", { method: "POST", body: payload });
-  return res.data; // { metric, value_type, precision, buckets, series }
+  return res;      // ✅ le JSON complet (ex: { metric, buckets, series, ... })
 }

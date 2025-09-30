@@ -94,7 +94,7 @@ def _own_by_user(params: dict, current_user_id: str) -> bool:
 
 def _compose_label(params: dict, fallback_dir: Path) -> Tuple[str, str]:
     """Construit (label, period) lisibles pour l’UI."""
-    pair = str(params.get("pair") or "").strip() or "?"
+    pair = str(params.get("pair") or params.get("symbol") or "")
     period = str(params.get("period") or "").strip() or ""
     tf = str(params.get("timeframe") or "").strip()
     strategy = str(params.get("strategy") or "").strip()
@@ -137,14 +137,27 @@ def _extract_global_metrics(df_global: pd.DataFrame) -> Tuple[Optional[int], Opt
 
 def list_user_compare_options(current_user_id: str) -> CompareOptionsResponse:
     items: List[CompareOptionsItem] = []
-    print(f"🔎 [compare] ANALYSIS_DIR = {ANALYSIS_DIR}")  # debug non bloquant (même style que dashboard)
+    #print(f"🔎 [compare] ANALYSIS_DIR = {ANALYSIS_DIR}")  # debug non bloquant (même style que dashboard)
     runs = _find_runs(ANALYSIS_DIR)
-    print(f"📦 [compare] dossiers détectés = {len(runs)}")
+    #print(f"📦 [compare] dossiers détectés = {len(runs)}")
     for run_dir in runs:
         params = _load_params(run_dir)
+        # pair/symbol synchronisés comme le dashboard
+        pair = (params.get("pair") or params.get("symbol") or "").strip()
+        symbol = (params.get("symbol") or params.get("pair") or "").strip()
+        if not pair or not symbol:
+            # Dernier fallback: déduire depuis *_global.csv / *_sessions.csv
+            files = _find_csv_files(run_dir)
+            cand = files.get("global") or files.get("sessions")
+            if cand:
+                code = cand.name.split("_")[0].strip()
+                if code and not pair:   pair = code
+                if code and not symbol: symbol = code
+
+         # ownership identique dashboard
         if not _own_by_user(params, current_user_id):
             continue
-
+        
         files = _detect_files(run_dir)
         trades_count, wr1, wr2 = (None, None, None)
         # 1) CSV global si présent
@@ -191,12 +204,18 @@ def list_user_compare_options(current_user_id: str) -> CompareOptionsResponse:
                     wb.close()
             except Exception:
                 pass
-        label, period = _compose_label(params, run_dir)
+        # label construit avec le pair/symbol corrigé
+        params_for_label = dict(params)
+        if pair and not params_for_label.get("pair"): params_for_label["pair"] = pair
+        if symbol and not params_for_label.get("symbol"): params_for_label["symbol"] = symbol
+        label, period = _compose_label(params_for_label, run_dir)
+
 
         item = CompareOptionsItem(
             id=run_dir.name,  # id simple = nom du dossier
             label=label,
-            pair=str(params.get("pair") or ""),
+            pair=pair,
+            symbol=symbol,
             period=period,
             created_at=None,  # si dispo plus tard: run_at/created_at
             trades_count=trades_count,

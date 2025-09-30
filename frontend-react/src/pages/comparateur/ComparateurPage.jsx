@@ -4,6 +4,7 @@ import { fetchCompareOptions, fetchCompareData } from "../../sdk/compareApi";
 import "./comparateur.css";
 import { useLocation } from "react-router-dom";
 import CompareChart from "./composants/CompareChart";
+import ListeAnalyses from "./composants/ListeAnalyses";
 
 const METRICS = [
   { value: "session", label: "Sessions (Asia/London/NY)" },
@@ -121,63 +122,15 @@ export default function ComparateurPage() {
       <div className="cmp-content">
         {/* Colonne gauche : sélecteur */}
         <section className="cmp-left">
-          <div className="cmp-box">
-            <div className="cmp-left-header">
-              <input
-                className="cmp-search"
-                placeholder="🔎 paire, stratégie, TF..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              <div className="cmp-pill">Mes analyses</div>
-            </div>
-
-            {loading ? (
-              <div className="cmp-empty">Chargement…</div>
-            ) : filtered.length === 0 ? (
-              <div className="cmp-empty">Aucune analyse trouvée.</div>
-            ) : (
-              <ul className="cmp-list">
-                {filtered.map((o) => {
-                  const checked = selected.includes(o.id);
-                  const disabled = !checked && !canSelectMore;
-                  return (
-                    <li key={o.id} className={`cmp-item ${checked ? "is-checked" : ""} ${disabled ? "is-disabled" : ""}`}>
-                      <label className="cmp-item-row">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={disabled}
-                          onChange={() => toggle(o.id)}
-                        />
-                        <div className="cmp-item-main">
-                          <div className="cmp-item-top">
-                            <span className="cmp-item-title">{o.label}</span>
-                            {o.trades_count != null && (
-                              <span className="cmp-badge">{o.trades_count} trades</span>
-                            )}
-                          </div>
-                          <div className="cmp-item-sub">
-                            <span className="cmp-mono">{o.pair}</span>
-                            {o.period && <span className="cmp-dot">•</span>}
-                            {o.period && <span className="cmp-mono">{o.period}</span>}
-                            {o.winrate_tp1 != null && (
-                              <>
-                                <span className="cmp-dot">•</span>
-                                <span className="cmp-good">
-                                  TP1 {Math.round(o.winrate_tp1 * 100)}%
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </label>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
+          <ListeAnalyses
+            loading={loading}
+            options={filtered}
+            selected={selected}
+            canSelectMore={canSelectMore}
+            query={query}
+            setQuery={setQuery}
+            onToggle={toggle}
+          />
         </section>
 
         {/* Colonne droite : contrôles + graphe */}

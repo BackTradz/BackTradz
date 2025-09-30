@@ -7,6 +7,7 @@ class CompareOptionsItem(BacktradzModel):
     id: str
     label: str
     pair: str
+    symbol: Optional[str] = None
     period: str
     created_at: Optional[str] = None  # ISO si dispo
     trades_count: Optional[int] = None
