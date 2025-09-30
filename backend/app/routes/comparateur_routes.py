@@ -24,7 +24,13 @@ def _current_user_id_from_header(authorization: Optional[str]) -> str:
     user = get_user_by_token(token)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token")
-    uid = str(getattr(user, "id", "") or "").strip()
+    # ✨ tolérant: objet pydantic OU dict imbriqué
+    uid = (
+        getattr(user, "id", None)
+        or (user.get("id") if isinstance(user, dict) else None)
+        or (user.get("user", {}).get("id") if isinstance(user, dict) else None)
+    )
+    uid = str(uid or "").strip()
     if not uid:
         raise HTTPException(status_code=403, detail="User not found")
     return uid

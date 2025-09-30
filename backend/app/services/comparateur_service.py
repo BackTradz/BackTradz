@@ -74,12 +74,20 @@ def _detect_files(run_dir: Path) -> Dict[str, Optional[Path]]:
 
 def _own_by_user(params: dict, current_user_id: str) -> bool:
     """
-    Si params contient un 'user_id' (ou run_user.id), on le respecte.
-    Sinon on accepte (legacy, pas de régression).
+    Aligné dashboard : si user_id présent, on compare de façon permissive.
+    - accepte run_user.id ou user_id
+    - cast en str, trim, insensible casse
+    - si pas d'info user -> on accepte (legacy)
     """
     try:
-        uid = str((params.get("run_user") or {}).get("id") or params.get("user_id") or "").strip()
-        return (not uid) or (uid == str(current_user_id))
+        raw = (
+            (params.get("run_user") or {}).get("id")
+            or params.get("user_id")
+            or ""
+        )
+        uid = str(raw).strip().lower()
+        cur = str(current_user_id).strip().lower()
+        return (uid == "") or (uid == cur)
     except Exception:
         return True
 
