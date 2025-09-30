@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import json
 import pandas as pd
+import openpyxl  # fallback XLSX comme le dashboard
 
 from app.core.paths import ANALYSIS_DIR
 from app.schemas.comparateur import (
@@ -28,12 +29,12 @@ from app.schemas.communs import DEFAULT_SESSIONS, DEFAULT_DAYS, DEFAULT_HOURS
 def _find_runs(root: Path) -> List[Path]:
     """
     Retourne les dossiers d’analyse (runs) sous ANALYSIS_DIR.
-    Un 'run' contient au moins un *_global.csv.
+    🔁 Aligné avec le dashboard: on détecte via 'params.json' (pas CSV).
     """
     runs: List[Path] = []
     if not root.exists():
         return runs
-    for p in root.rglob("*_global.csv"):
+    for p in root.rglob("params.json"):
         runs.append(p.parent)
     runs = sorted(set(runs), key=lambda d: d.stat().st_mtime, reverse=True)
     return runs
@@ -124,14 +125,51 @@ def list_user_compare_options(current_user_id: str) -> CompareOptionsResponse:
             continue
 
         files = _detect_files(run_dir)
-        if not files["global"]:
-            continue
-
-        df_global = _safe_read_csv(files["global"])
         trades_count, wr1, wr2 = (None, None, None)
-        if df_global is not None:
-            trades_count, wr1, wr2 = _extract_global_metrics(df_global)
-
+        # 1) CSV global si présent
+        if files["global"]:
+            df_global = _safe_read_csv(files["global"])
+            if df_global is not None:
+                trades_count, wr1, wr2 = _extract_global_metrics(df_global)
+        # 2) Fallback XLSX (onglet "Global") si pas de CSV
+        if trades_count is None and wr1 is None and wr2 is None:
+            try:
+                # tentative: 1er fichier 'analyse_*_resultats.xlsx' dans le dossier
+                candidates = list(run_dir.glob("analyse_*_resultats.xlsx"))
+                if candidates:
+                    wb = openpyxl.load_workbook(candidates[0], data_only=True)
+                    if "Global" in wb.sheetnames:
+                        ws = wb["Global"]
+                        metrics = {}
+                        for row in ws.iter_rows(min_row=1, max_row=ws.max_row):
+                            k = (str(row[0].value) if row[0].value is not None else "").strip()
+                            v = row[1].value if len(row) > 1 else None
+                            if k:
+                                metrics[k] = v
+                        def _get(*keys):
+                            low = {kk.lower().replace(" ", ""): kk for kk in metrics}
+                            for k in keys:
+                                if k in metrics and metrics[k] is not None:
+                                    return metrics[k]
+                                t = k.lower().replace(" ", "")
+                                if t in low and metrics.get(low[t]) is not None:
+                                    return metrics[low[t]]
+                            return None
+                        def _as_float(x):
+                            if x is None: return None
+                            s = str(x).strip().replace(",", ".").replace("%", "")
+                            try: return float(s)
+                            except: return None
+                        # Total trades (entier), winrate global (0..1), TP2 si dispo
+                        tr = _as_float(_get("Total Trades","Total Trad"))
+                        wrg = _as_float(_get("Winrate Global","Winrate Gl","WinrateGL","WinrateGlobal","Winrate TP1"))
+                        wr2 = _as_float(_get("TP2 Winrate","Winrate TP2"))
+                        trades_count = int(tr) if tr is not None else None
+                        wr1 = (wrg/100.0) if wrg is not None else None
+                        wr2 = (wr2/100.0) if wr2 is not None else None
+                    wb.close()
+            except Exception:
+                pass
         label, period = _compose_label(params, run_dir)
 
         item = CompareOptionsItem(
@@ -206,33 +244,81 @@ def build_compare_series(current_user_id: str, req: CompareDataRequest) -> Compa
                 wr_map = {f"{int(r['hour']):02d}": float(r["winrate"])/100.0 for _, r in df.iterrows()}
                 values = [wr_map.get(b, None) for b in buckets]
 
-        elif metric in {"winrate_tp1", "winrate_tp2", "sl_rate", "trades_count"} and files["global"]:
-            df = _safe_read_csv(files["global"])
-            if df is not None and {"Metric", "Value"}.issubset(df.columns):
-                def get_val(name: str) -> Optional[float]:
-                    row = df.loc[df["Metric"] == name, "Value"]
-                    if row.empty:
-                        return None
-                    try:
-                        return float(str(row.iloc[0]).replace("%", "").strip())
-                    except Exception:
-                        return None
-
-                if metric == "trades_count":
-                    total_trades = get_val("Total Trades")
-                    values = [float(total_trades) if total_trades is not None else None]
-                elif metric == "winrate_tp1":
-                    wr = get_val("Winrate Global")
-                    values = [wr/100.0 if wr is not None else None]
-                elif metric == "winrate_tp2":
-                    wr = get_val("TP2 Winrate")
-                    values = [wr/100.0 if wr is not None else None]
-                elif metric == "sl_rate":
-                    tp1 = get_val("TP1") or 0.0
-                    sl = get_val("SL") or 0.0
-                    total = tp1 + sl
-                    rate = (sl/total) if total > 0 else None
-                    values = [rate]
+        elif metric in {"winrate_tp1", "winrate_tp2", "sl_rate", "trades_count"}:
+            got = False
+            # 1) CSV global si présent
+            if files["global"]:
+                df = _safe_read_csv(files["global"])
+                if df is not None and {"Metric", "Value"}.issubset(df.columns):
+                    def get_val(name: str) -> Optional[float]:
+                        row = df.loc[df["Metric"] == name, "Value"]
+                        if row.empty:
+                            return None
+                        try:
+                            return float(str(row.iloc[0]).replace("%", "").strip())
+                        except Exception:
+                            return None
+                    if metric == "trades_count":
+                        total_trades = get_val("Total Trades")
+                        values = [float(total_trades) if total_trades is not None else None]; got = True
+                    elif metric == "winrate_tp1":
+                        wr = get_val("Winrate Global")
+                        values = [wr/100.0 if wr is not None else None]; got = True
+                    elif metric == "winrate_tp2":
+                        wr = get_val("TP2 Winrate")
+                        values = [wr/100.0 if wr is not None else None]; got = True
+                    elif metric == "sl_rate":
+                        tp1 = (get_val("TP1") or 0.0)
+                        sl  = (get_val("SL")  or 0.0)
+                        total = tp1 + sl
+                        rate = (sl/total) if total > 0 else None
+                        values = [rate]; got = True
+            # 2) Fallback XLSX (onglet "Global") si pas de CSV ou valeurs manquantes
+            if not got:
+                try:
+                    candidates = list(run_dir.glob("analyse_*_resultats.xlsx"))
+                    if candidates:
+                        wb = openpyxl.load_workbook(candidates[0], data_only=True)
+                        if "Global" in wb.sheetnames:
+                            ws = wb["Global"]
+                            metrics = {}
+                            for row in ws.iter_rows(min_row=1, max_row=ws.max_row):
+                                k = (str(row[0].value) if row[0].value is not None else "").strip()
+                                v = row[1].value if len(row) > 1 else None
+                                if k:
+                                    metrics[k] = v
+                            def _get(*keys):
+                                low = {kk.lower().replace(" ", ""): kk for kk in metrics}
+                                for k in keys:
+                                    if k in metrics and metrics[k] is not None:
+                                        return metrics[k]
+                                    t = k.lower().replace(" ", "")
+                                    if t in low and metrics.get(low[t]) is not None:
+                                        return metrics[low[t]]
+                                return None
+                            def _f(x):
+                                if x is None: return None
+                                s = str(x).strip().replace(",", ".").replace("%", "")
+                                try: return float(s)
+                                except: return None
+                            if metric == "trades_count":
+                                tr = _f(_get("Total Trades","Total Trad"))
+                                values = [float(tr) if tr is not None else None]
+                            elif metric == "winrate_tp1":
+                                wr = _f(_get("Winrate Global","Winrate Gl","WinrateGL","WinrateGlobal","Winrate TP1"))
+                                values = [wr/100.0 if wr is not None else None]
+                            elif metric == "winrate_tp2":
+                                wr = _f(_get("TP2 Winrate","Winrate TP2"))
+                                values = [wr/100.0 if wr is not None else None]
+                            elif metric == "sl_rate":
+                                tp1 = _f(_get("TP1")) or 0.0
+                                sl  = _f(_get("SL")) or 0.0
+                                total = tp1 + sl
+                                rate = (sl/total) if total > 0 else None
+                                values = [rate]
+                        wb.close()
+                except Exception:
+                    pass
 
         series.append(SeriesItem(analysis_id=analysis_id, label=label, values=values))
 
