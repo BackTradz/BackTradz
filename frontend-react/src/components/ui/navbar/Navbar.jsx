@@ -81,6 +81,7 @@ export default function Navbar() {
   const baseLinks = [
     { label: "Accueil", path: "/" },
     { label: "Dashboard", path: "/dashboard" },
+    { label: "Comparateur", path: "/comparateur" },
     { label: "Backtest", path: "/backtest" },
     { label: "CSV Shop", path: "/csv-shop" },
     { label: "Tarifs", path: "/pricing" },

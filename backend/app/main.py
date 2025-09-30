@@ -79,7 +79,7 @@ from app.routes import auth_reset_routes
 from app.routes import support_routes
 from app.routes import backtest_xlsx_routes  # ⬅️ import
 from app.routes.admin_stat_routes import stats_router  # ⬅️ nouveau
-
+from app.routes.comparateur_routes import router as comparateur_router
 from app.routes.meta_routes import router as meta_router
 # Proxy headers (Starlette récent) ou fallback Uvicorn si non dispo
 try:
@@ -163,6 +163,7 @@ app.add_middleware(FaviconCacheMiddleware)
 app.include_router(auth_reset_routes.router, prefix="/api/auth")
 app.include_router(auth.router, prefix="/api")
 app.include_router(support_routes.router, prefix="/api")
+app.include_router(comparateur_router, prefix="/api")
 app.include_router(user_dashboard_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
 app.include_router(stats_router, prefix="/api")

@@ -13,7 +13,9 @@ try:
     # Compatibilité avec les anciens noms utilisés ailleurs
     OUTPUT_DIR      = DATA_ROOT / "output"
     OUTPUT_LIVE_DIR = DATA_ROOT / "output_live"
-    ANALYSIS_DIR    = DATA_ROOT / "analysis"
+    # ✅ Permettre un override ciblé pour l’analyse en DEV (ou partout) via env ANALYSIS_DIR
+    _ANALYSIS_DIR_ENV = os.getenv("ANALYSIS_DIR", "").strip()
+    ANALYSIS_DIR    = Path(_ANALYSIS_DIR_ENV) if _ANALYSIS_DIR_ENV else (DATA_ROOT / "analysis")
     DB_DIR          = DB_ROOT
     USERS_JSON      = DB_DIR / "users.json"
     PRIVATE_DIR     = DATA_ROOT / "private"
@@ -24,7 +26,8 @@ except Exception:
     DATA_ROOT       = Path(os.getenv("DATA_ROOT", "/var/data/backtradz")).resolve()
     OUTPUT_DIR      = DATA_ROOT / "output"
     OUTPUT_LIVE_DIR = DATA_ROOT / "output_live"
-    ANALYSIS_DIR    = DATA_ROOT / "analysis"
+    _ANALYSIS_DIR_ENV = os.getenv("ANALYSIS_DIR", "").strip()
+    ANALYSIS_DIR    = Path(_ANALYSIS_DIR_ENV) if _ANALYSIS_DIR_ENV else (DATA_ROOT / "analysis")
     DB_DIR          = DATA_ROOT / "db"
     USERS_JSON      = DB_DIR / "users.json"
     PRIVATE_DIR     = DATA_ROOT / "private"

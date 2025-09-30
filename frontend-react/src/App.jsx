@@ -41,6 +41,7 @@ import Dashboard from "./pages/dashboard/dashboard.jsx";
 import AdminDashboard from "./pages/admin/admin";
 import ASavoir from "./pages/asavoir/a_savoir";
 import Success from "./pages/Success";
+import ComparateurPage from "./pages/comparateur/ComparateurPage";
 
 export default function App() {
   const loc = useLocation();
@@ -87,6 +88,8 @@ export default function App() {
         <Route element={<AppLayout />}>
           {/* 🔐 Dashboard redevient protégé */}
           <Route path="/dashboard" element={<Dashboard />} />
+          {/* 🔐 Comparateur (protégé) */}
+          <Route path="/comparateur" element={<ComparateurPage />} />
           {/* 🔐 Profil = nécessite auth */}
           <Route path="/profile" element={<Profile />} />
           {/* 🔐 Admin = nécessite auth + admin */}
