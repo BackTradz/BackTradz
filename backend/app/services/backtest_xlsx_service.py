@@ -13,6 +13,7 @@ import json
 from datetime import datetime
 from app.core.paths import ANALYSIS_DIR
 from app.core.admin import is_admin_user
+import time, zipfile
 
 # -------- Helpers: résolution du dossier/xlsx + contrôle d'accès --------
 def _is_admin(user) -> bool:
@@ -81,5 +82,24 @@ def _session_for_hour(h: int) -> str:
 
 __all__ = [
     "_is_admin","_analysis_base","_folder_path","_assert_owns_folder",
-    "_guess_xlsx_path","_safe_str","_to_dt","_session_for_hour"
+    "_guess_xlsx_path","_safe_str","_to_dt","_session_for_hour",
+    "_ensure_xlsx_ready"
 ]
+
+def _ensure_xlsx_ready(xlsx_path: Path, max_wait_s: float = 2.0) -> None:
+    """
+    DEV-tolerant: attend brièvement qu'un .xlsx soit bien écrit (ZIP valide, taille > 0).
+    En prod c'est quasi instant, on garde ça léger (max_wait_s par défaut = 2s).
+    """
+    deadline = time.time() + max_wait_s
+    while time.time() < deadline:
+        try:
+            if xlsx_path.exists():
+                st = xlsx_path.stat()
+                if st.st_size > 0 and zipfile.is_zipfile(xlsx_path):
+                    return
+        except Exception:
+            pass
+        time.sleep(0.1)
+    # On laisse l'appelant lever une erreur si besoin.
+    return

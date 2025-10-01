@@ -26,13 +26,18 @@ import json
 import importlib
 import pandas as pd
 from pathlib import Path
+import os  # <-- nécessaire pour fsync/replace dans le bloc DEV-only
+
 from app.models.users import get_user_by_token, decrement_credits
 from app.models.users import charge_2_credits_for_backtest
 from fastapi import Header
 from fastapi import UploadFile, File, Form
 from app.core.admin import is_admin_user
 # --- ADD: mirroring vers ANALYSIS_DIR (disque Render) ---
+
 from app.core.paths import ANALYSIS_DIR
+from app.core.dev import IS_DEV  # ← on limite le correctif au local
+import tempfile
 import shutil
 import time
 import re
@@ -186,23 +191,25 @@ def launch_backtest(req: BacktestRequest, authorization: str = Header(None, alia
         print("✅ Analyse terminée :", analysis_xlsx_path)
         elapsed_ms = int((time.perf_counter() - t0) * 1000)
 
-        src_dir = Path(analysis_xlsx_path).parent  # ex: backend/data/analysis/....../
+        src_dir = Path(analysis_xlsx_path).parent  # ex: backend/data/analysis/.../
         try:
             # On ne copie que si la source est sous 'backend/data/analysis'
             if "backend/data/analysis" in str(src_dir).replace("\\", "/"):
                 dest_dir = ANALYSIS_DIR / src_dir.name
-                dest_dir.parent.mkdir(parents=True, exist_ok=True)
-
-                # copie tolérante (dirs_exist_ok dispo en Py3.8+)
-                shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
-
-                # on repointe le chemin XLSX vers le miroir sur disque Render
-                analysis_xlsx_path = str(dest_dir / Path(analysis_xlsx_path).name)
-                print(f"🔁 Miroir ANALYSIS_DIR: {dest_dir}")
+                # ⚠️ DEV: si src == dest, on ne fait rien (évite copy sur soi-même)
+                try:
+                    if src_dir.resolve() != dest_dir.resolve():
+                        dest_dir.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
+                        analysis_xlsx_path = str(dest_dir / Path(analysis_xlsx_path).name)
+                        print(f"🔁 Miroir ANALYSIS_DIR: {dest_dir}")
+                except Exception as _sub_e:
+                    print("⚠️ Mirror vers ANALYSIS_DIR ignoré:", _sub_e)
         except Exception as _e:
             print("⚠️ Mirror vers ANALYSIS_DIR échoué:", _e)
 
-        # ✅ Crédit décrémenté uniquement si succès
+
+       # ✅ Crédit décrémenté uniquement si succès
         try:
             # Métadonnées pour historiser proprement dans admin/user
             folder = Path(analysis_xlsx_path).parent.name if analysis_xlsx_path else None

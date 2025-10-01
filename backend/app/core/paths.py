@@ -19,6 +19,21 @@ try:
     # ✅ Permettre un override ciblé pour l’analyse en DEV (ou partout) via env ANALYSIS_DIR
     _ANALYSIS_DIR_ENV = os.getenv("ANALYSIS_DIR", "").strip().strip('"').strip("'")
     ANALYSIS_DIR    = Path(_ANALYSIS_DIR_ENV) if _ANALYSIS_DIR_ENV else (DATA_ROOT / "analysis")
+
+    # 🔁 Fallback DEV (lecture overlay) :
+    # si ANALYSIS_DIR n'existe pas OU est vide, on force backend/data/analysis
+    if 'IS_DEV' in locals() and IS_DEV:
+        try:
+            _need_fallback = (not ANALYSIS_DIR.exists()) or (not any(ANALYSIS_DIR.iterdir()))
+        except Exception:
+            _need_fallback = True
+        if _need_fallback:
+            _BACKEND_DIR = Path(__file__).resolve().parents[2]  # .../backend
+            _LOCAL_ANALYSIS = _BACKEND_DIR / "data" / "analysis"
+            if _LOCAL_ANALYSIS.exists():
+                ANALYSIS_DIR = _LOCAL_ANALYSIS
+                print(f"🔧 [DEV] ANALYSIS_DIR redirigé vers {_LOCAL_ANALYSIS}")
+
    # --- DB_DIR (ENV prioritaire), sinon DB_ROOT
     _DB_DIR_ENV     = os.getenv("DB_DIR", "").strip().strip('"').strip("'")
     DB_DIR          = Path(_DB_DIR_ENV) if _DB_DIR_ENV else DB_ROOT

@@ -33,7 +33,7 @@ from datetime import datetime
 import math
 from app.services.backtest_xlsx_service import (
     _is_admin, _analysis_base, _folder_path, _assert_owns_folder,
-    _guess_xlsx_path, _safe_str, _to_dt, _session_for_hour
+    _guess_xlsx_path, _safe_str, _to_dt, _session_for_hour, _ensure_xlsx_ready
 )
 from app.core.admin import is_admin_user  # ✅ source of truth admin
 
@@ -60,6 +60,7 @@ def xlsx_meta(
         raise HTTPException(404, "Fichier .xlsx introuvable")
 
     try:
+        _ensure_xlsx_ready(xlsx_path)  # ⬅️ DEV-safe: attend que le .xlsx soit OK
         wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
         sheets = []
         for name in wb.sheetnames:
@@ -83,7 +84,12 @@ def xlsx_meta(
             "sheets": sheets,
         }
     except Exception as e:
-        raise HTTPException(500, f"Erreur ouverture .xlsx: {e}")
+        # diag utile en local
+        try:
+            sz = xlsx_path.stat().st_size
+        except Exception:
+            sz = -1
+        raise HTTPException(500, f"Erreur ouverture .xlsx: {e} | path={xlsx_path} | size={sz} bytes")
 
 @router.get("/user/backtests/xlsx/sheet")
 def xlsx_sheet(
@@ -105,6 +111,7 @@ def xlsx_sheet(
         raise HTTPException(404, "Fichier .xlsx introuvable")
 
     try:
+        _ensure_xlsx_ready(xlsx_path)  # ⬅️ DEV-safe
         wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
         if sheet not in wb.sheetnames:
             wb.close()
@@ -154,7 +161,11 @@ def xlsx_sheet(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(500, f"Erreur lecture feuille: {e}")
+        try:
+            sz = xlsx_path.stat().st_size
+        except Exception:
+            sz = -1
+        raise HTTPException(500, f"Erreur lecture feuille: {e} | path={xlsx_path} | size={sz} bytes")
 
 # ---- Agrégats (overall, par heure, par session, par jour) ---------------
 
@@ -200,6 +211,7 @@ def xlsx_aggregates(
         raise HTTPException(404, "Fichier .xlsx introuvable")
 
     try:
+        _ensure_xlsx_ready(xlsx_path)  # ⬅️ DEV-safe
         wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
         if sheet not in wb.sheetnames:
             wb.close()
@@ -325,4 +337,8 @@ def xlsx_aggregates(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(500, f"Erreur calcul agrégats: {e}")
+        try:
+            sz = xlsx_path.stat().st_size
+        except Exception:
+            sz = -1
+        raise HTTPException(500, f"Erreur calcul agrégats: {e} | path={xlsx_path} | size={sz} bytes")
