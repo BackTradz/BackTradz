@@ -28,7 +28,11 @@
 }
 
 .cmp-page {
-  padding: 32px 20px 60px;
+  /* ↓ on réduit le padding bas pour rapprocher du footer */
+  padding: 32px 20px 24px; /* (avant 60px) */
+  min-height: 100vh;             /* ✅ la page occupe toute la hauteur */
+  display: flex;
+  flex-direction: column;
 }
 
 .cmp-title {
@@ -63,6 +67,8 @@
   display: grid;
   grid-template-columns: 380px 1fr;
   gap: 22px;
+  flex: 1;                        /* ✅ le contenu remplit l'espace sous le header */
+  align-items: start;
 }
 
 .cmp-box {
@@ -72,6 +78,8 @@
   border-radius: 16px;
   padding: 16px;
   box-shadow: var(--cmp-shadow);
+  /* ↓ évite une marge basse implicite si un style global cible .card */
+  margin-bottom: 0;
 }
 
 .cmp-left-header {
@@ -105,7 +113,8 @@
   list-style: none;           /* 🔥 enlève le point à gauche */
   margin: 0;
   padding: 0 6px 0 0;
-  max-height: 62vh;           /* mieux que fixe 520px, s’adapte à l’écran */
+  /* ✅ liste plus haute : quasi jusqu’au footer, tout en restant scrollable */
+  max-height: calc(100vh - 220px);
   overflow: auto;
 }
 .cmp-item {
@@ -245,18 +254,23 @@
 .cmp-bucket { font-weight: 700; opacity: 0.9; }
 
 .cmp-chart-canvas {
-  height: 360px;
+  /* ✅ on laisse le conteneur grandir ; on garde un plancher visuel propre */
+  min-height: 360px;
   border-top: 1px solid var(--cmp-stroke-1);
   /* fond plus sombre sous le canvas pour coller au reste */
   background: linear-gradient(180deg, rgba(8,16,32,0.72), rgba(8,16,32,0.68));
   /* 🔁 Permettre le scroll horizontal SI le canvas est plus large (mobile) */
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  /* ↓ enlève l’espace inutile sous le chart */
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .cmp-canvas {
   width: 100%;
-  height: 360px;
+  /* ✅ la height réelle vient du prop JS (chartHeight). Ici on garde juste un plancher. */
+  min-height: 360px;
   display: block;
 }
 
@@ -387,13 +401,24 @@
   outline-offset: 2px;
 }
 
+/* sous-entête : période */
+.cmp-table thead .cmp-subhead th {
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+  padding-top: 2px;
+  padding-bottom: 8px;
+}
+.cmp-table thead .cmp-period-label { text-align: left; }
+.cmp-table thead .cmp-period { white-space: nowrap; }
+
 
 /* Responsive */
 @media (max-width: 1080px) {
   .cmp-content {
     grid-template-columns: 1fr;
   }
-  .cmp-list { max-height: 50vh; } /* un peu moins haut sur petits écrans */
+  /* ✅ sur petits écrans, on laisse quand même plus de place à la liste */
+  .cmp-list { max-height: calc(100vh - 240px); }
   .cmp-item { padding: 9px; }
   .cmp-item-title { font-size: 14px; }
   .cmp-badge--trades { min-width: 50px; padding: 5px 8px; }

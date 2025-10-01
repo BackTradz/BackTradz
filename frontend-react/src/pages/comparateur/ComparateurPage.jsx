@@ -11,7 +11,7 @@ import { formatPair, formatStrategy } from "../../lib/labels";
 
 const METRICS = [
   { value: "session", label: "Sessions (Asia/London/NY)" },
-  { value: "day", label: "Jours (Mon..Sun)" },
+  { value: "day", label: "Jours (Lun..Dim)" },
   { value: "hour", label: "Heures (00..23)" },
   { value: "winrate_tp1", label: "Winrate TP1 (global)" },
   { value: "winrate_tp2", label: "Winrate TP2 (global)" },
@@ -36,6 +36,22 @@ export default function ComparateurPage() {
   const [error, setError] = useState("");
   const location = useLocation();
 
+  const [chartHeight, setChartHeight] = useState(360); // ✅ hauteur dynamique du graphe
+
+  // Recalcule une hauteur confortable pour le graphe en fonction de la fenêtre
+  useEffect(() => {
+    const compute = () => {
+      const vh = typeof window !== "undefined" ? window.innerHeight : 800;
+      // Offset ≈ header + sous-texte + contrôles + paddings
+      // ↓ On réduit l’offset pour que le chart descende + près du footer
+      const OFFSET = 280; // (avant 320)
+      setChartHeight(Math.max(360, vh - OFFSET));
+    };
+    compute();
+    window.addEventListener("resize", compute);
+    return () => window.removeEventListener("resize", compute);
+  }, []);
+ 
   // Charger les options (analyses de l'user)
   useEffect(() => {
     let mounted = true;
@@ -61,6 +77,13 @@ export default function ComparateurPage() {
     })();
     return () => (mounted = false);
   }, []);
+
+  // ---------- Mapping jours EN -> FR pour l'affichage ----------
+  const DAY_FR = useMemo(() => ({
+    Mon: "Lun", Tue: "Mar", Wed: "Mer", Thu: "Jeu", Fri: "Ven", Sat: "Sam", Sun: "Dim",
+  }), []);
+  const toFrenchDays = (arr=[]) => arr.map(x => DAY_FR[x] ?? x);
+
 
   // Filtre textuel simple (pair, label, période)
   const filtered = useMemo(() => {
@@ -185,6 +208,7 @@ export default function ComparateurPage() {
                 <div className={`cmp-table-wrap ${data.buckets.length > 8 ? "scrollable" : ""}`}>
                   <table className="cmp-table">
                     <thead>
+                      {/* Ligne 1 : libellés principaux */}
                       <tr>
                         {/* Entête de la colonne catégories = label du Select (pas de clé brute) */}
                         <th>{(METRICS.find(m => m.value === data.metric)?.label) || "Métrique"}</th>
@@ -200,11 +224,28 @@ export default function ComparateurPage() {
                           </th>
                         ))}
                       </tr>
+                      {/* Ligne 2 : période du backtest (si connue) */}
+                      <tr className="cmp-subhead">
+                        <th className="cmp-period-label">Période</th>
+                        {data.series.map((s) => {
+                          const opt = options.find(o => o.id === s.analysis_id);
+                          const period = opt?.period ? String(opt.period) : "—";
+                          return (
+                            <th key={s.analysis_id + "_period"} className="cmp-period">
+                              {period}
+                            </th>
+                          );
+                        })}
+                      </tr>
+
                     </thead>
                     <tbody>
                       {data.buckets.map((b, rowIdx) => (
                         <tr key={b}>
-                          <td className="cmp-bucket">{b}</td>
+                          {/* 🔁 Jour affiché en FR si metric = day (les index restent inchangés) */}
+                          <td className="cmp-bucket">
+                            {data.metric === "day" ? (DAY_FR[b] ?? b) : b}
+                          </td>
                           {data.series.map((s) => {
                             const v = s.values[rowIdx];
                             return (
@@ -226,7 +267,8 @@ export default function ComparateurPage() {
                 <div className="cmp-chart-canvas">
                   <CompareChart
                     type={chartType}
-                    buckets={data.buckets}
+                    // 🔁 X-axis en FR si "day" sélectionné
+                    buckets={data.metric === "day" ? toFrenchDays(data.buckets) : data.buckets}
                     series={data.series.map((s) => {
                       const opt = options.find(o => o.id === s.analysis_id);
                       const niceLabel = opt
@@ -237,7 +279,7 @@ export default function ComparateurPage() {
                     })}
                     valueType={data.value_type}
                     precision={data.precision}
-                    height={360}
+                    height={chartHeight}   // ✅ hauteur dynamique (remplit l’écran jusqu’au footer)
                   />
                 </div>
               </>
