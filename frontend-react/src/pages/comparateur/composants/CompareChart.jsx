@@ -1,5 +1,5 @@
 // frontend-react/src/components/charts/CompareChart.jsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Props:
@@ -20,6 +20,8 @@ export default function CompareChart({
 }) {
   const canvasRef = useRef(null);
   const ratio = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+  // ✅ minWidth appliquée uniquement si nécessaire (évite le "zoom" desktop)
+  const [minWidthPx, setMinWidthPx] = useState(0);
 
   // Palette cohérente (6 teintes, réutilisées en boucle)
   const palette = [
@@ -268,7 +270,33 @@ export default function CompareChart({
     ctx.lineTo(padding.left, padding.top + plotH);
     ctx.lineTo(padding.left + plotW, padding.top + plotH);
     ctx.stroke();
-  }, [type, buckets, series, valueType, precision, height, ratio]);
 
-  return <canvas ref={canvasRef} className="cmp-canvas" role="img" aria-label="Comparateur chart" />;
+    // ---- Responsive min-width (scroll horizontal seulement sur écrans étroits) ----
+    const computeMinWidth = () => {
+      const bucketCount = buckets?.length || 0;
+      const seriesCount = series?.length || 0;
+      const parentW = parent.clientWidth;
+      // 💡 Desktop large → jamais de min-width (pas de scroll horizontal)
+      if (parentW >= 900) return 0;
+      // 📱 Écran étroit : largeur par catégorie plus compacte
+      const perBucket = Math.min(96, Math.max(44, 32 + seriesCount * 14));
+      const desiredMin = Math.max(520, bucketCount * perBucket + 80);
+      return desiredMin > parentW ? desiredMin : 0;
+    };
+    setMinWidthPx(computeMinWidth());
+
+    // Recalcule quand la taille du conteneur change (rotation, split view, etc.)
+    const ro = new ResizeObserver(() => setMinWidthPx(computeMinWidth()));
+    ro.observe(parent);
+    return () => ro.disconnect();
+  }, [type, buckets, series, valueType, precision, height, ratio]);
+  
+  return (
+    <canvas
+      ref={canvasRef}
+      className="cmp-canvas"
+      /* 🔁 min-width uniquement si nécessaire (mobile/écran étroit) */
+      style={minWidthPx ? { minWidth: `${minWidthPx}px` } : undefined}
+    />
+  );
 }

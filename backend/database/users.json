@@ -37,7 +37,7 @@
     "password": "$2b$12$KUUhRBl7TemGxps4c58lU.GfzrNC8PvNqy6kLZwzW0ASPXz89zPS.",
     "first_name": "admin",
     "last_name": "admin",
-    "credits": 641,
+    "credits": 637,
     "token": "169047fc-7a47-4650-9865-75c9678a4e9d",
     "plan": "free",
     "purchase_history": [
@@ -194,6 +194,34 @@
         "period": "2025-08-01 to 2025-08-31",
         "folder": "BTC-USD_M15_ob_pullback_pure_2025-08-01to2025-08-31_sl100__h4d8b959eb2",
         "duration_ms": 297
+      },
+      {
+        "date": "2025-10-01T19:44:03.554034+02:00",
+        "type": "backtest",
+        "method": "credits",
+        "price_paid": -2,
+        "credits_delta": -2,
+        "label": "Backtest AUDUSD M15 fvg_pullback_multi",
+        "symbol": "AUDUSD",
+        "timeframe": "M15",
+        "strategy": "fvg_pullback_multi",
+        "period": "2025-08-01 to 2025-08-31",
+        "folder": "AUDUSD_M15_fvg_pullback_multi_2025-08-01to2025-08-31_sl50__h0885fd6415",
+        "duration_ms": 29125
+      },
+      {
+        "date": "2025-10-01T19:59:24.366283+02:00",
+        "type": "backtest",
+        "method": "credits",
+        "price_paid": -2,
+        "credits_delta": -2,
+        "label": "Backtest BTC-USD M30 fvg_pullback_multi",
+        "symbol": "BTC-USD",
+        "timeframe": "M30",
+        "strategy": "fvg_pullback_multi",
+        "period": "2025-08-01 to 2025-08-31",
+        "folder": "BTC-USD_M30_fvg_pullback_multi_2025-08-01to2025-08-31_sl100__h5e081e2781",
+        "duration_ms": 313
       }
     ],
     "subscription": {

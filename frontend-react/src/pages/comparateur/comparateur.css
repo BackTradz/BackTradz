@@ -13,6 +13,12 @@
   --cmp-surface-1: rgba(8, 16, 32, 0.70);  /* champs/inputs/éléments internes */
   --cmp-surface-2: rgba(8, 16, 32, 0.60);  /* éléments secondaires (pills/badges) */
 
+   /* 🔧 Track de scrollbar sombre (manquait → restait blanc par défaut) */
+  --cmp-scroll-track: var(--cmp-surface-1);
+  /* 🔧 Thumb de scrollbar (clair sur fond sombre) */
+  --cmp-scroll-thumb: rgba(255,255,255,0.22);
+  --cmp-scroll-thumb-hover: rgba(255,255,255,0.35);
+
   /* Traits / séparateurs */
   --cmp-stroke-0: rgba(255,255,255,0.10);
   --cmp-stroke-1: rgba(255,255,255,0.08);
@@ -210,14 +216,22 @@
   border: 1px solid var(--cmp-stroke-1);
   background: var(--cmp-surface-2);
 }
-.cmp-legend-pill.c1 { background: rgba(0,140,255,0.16); }
-.cmp-legend-pill.c2 { background: rgba(120,0,255,0.16); }
-.cmp-legend-pill.c3 { background: rgba(0,200,140,0.16); }
-.cmp-legend-pill.c4 { background: rgba(255,160,0,0.16); }
-.cmp-legend-pill.c5 { background: rgba(255,0,130,0.16); }
-.cmp-legend-pill.c6 { background: rgba(80,80,255,0.16); }
+.cmp-legend-pill.c1 { background: #43A6FF; }
+.cmp-legend-pill.c2 { background: #9B59FF; }
+.cmp-legend-pill.c3 { background: #00D0A6; }
+.cmp-legend-pill.c4 { background: #FFA833; }
+.cmp-legend-pill.c5 { background: #FF2E8A; }
+.cmp-legend-pill.c6 { background: #6266FF; }
 
 .cmp-table-wrap { overflow-x: auto; padding: 12px 16px 16px; }
+.cmp-table-wrap.scrollable {
+  /* 🧭 Quand il y a beaucoup de lignes (ex: 24 heures), on borne la hauteur
+     et on active un scroll vertical pour ne plus tasser le graphe. */
+  max-height: 280px;       /* valeur douce : ~8–10 lignes visibles */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-bottom: 1px solid var(--cmp-stroke-1); /* séparation propre avec le canvas */
+}
 .cmp-table {
   width: 100%;
   border-collapse: collapse;
@@ -235,6 +249,9 @@
   border-top: 1px solid var(--cmp-stroke-1);
   /* fond plus sombre sous le canvas pour coller au reste */
   background: linear-gradient(180deg, rgba(8,16,32,0.72), rgba(8,16,32,0.68));
+  /* 🔁 Permettre le scroll horizontal SI le canvas est plus large (mobile) */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cmp-canvas {
@@ -242,6 +259,46 @@
   height: 360px;
   display: block;
 }
+
+/* Variante compacte quand scroll activé : un peu moins d'espace vertical par ligne */
+.cmp-table-wrap.scrollable .cmp-table th,
+.cmp-table-wrap.scrollable .cmp-table td {
+  padding: 8px 10px;
+}
+/* =========================
+   𝐒𝐂𝐑𝐎𝐋𝐋𝐁𝐀𝐑𝐒 𝐒𝐎𝐌𝐁𝐑𝐄𝐒 (comparateur seulement)
+   Appliqué à TOUT élément scrollable dans .cmp-page (table, listes, etc.)
+  ========================= */
+@supports (scrollbar-color: auto) {
+  .cmp-page * {
+    scrollbar-width: thin; /* Firefox */
+    /* thumb | track */
+    scrollbar-color: var(--cmp-scroll-thumb) var(--cmp-scroll-track);
+  }
+}
+/* WebKit (Chrome/Edge/Opera/Safari) */
+.cmp-page *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.cmp-page *::-webkit-scrollbar-track {
+  background: var(--cmp-scroll-track);
+  border-radius: 8px;
+}
+.cmp-page *::-webkit-scrollbar-thumb {
+  background: var(--cmp-scroll-thumb);
+  border-radius: 8px;
+  border: 2px solid var(--cmp-scroll-track); /* marge interne propre */
+}
+.cmp-page *::-webkit-scrollbar-thumb:hover {
+  background: var(--cmp-scroll-thumb-hover);
+}
+
+/* 🎯 Spécificité renforcée : table scrollable & liste de gauche */
+.cmp-table-wrap.scrollable::-webkit-scrollbar,
+.cmp-list::-webkit-scrollbar { width: 10px; }
+.cmp-table-wrap.scrollable::-webkit-scrollbar-thumb,
+.cmp-list::-webkit-scrollbar-thumb { border-radius: 10px; }
 
 /* états génériques */
 .cmp-empty, .cmp-error {
@@ -342,6 +399,18 @@
   .cmp-badge--trades { min-width: 50px; padding: 5px 8px; }
   .cmp-check { width: 20px; height: 20px; }
   .cmp-check-mark { width: 11px; height: 11px; }
+  /* 📱 Graphe : réduire les marges et autoriser la largeur mini + scroll si besoin */
+  .cmp-page { padding: 24px 12px 48px; }
+  .cmp-chart-head { padding: 12px 12px 0 12px; }
+  .cmp-table-wrap { padding: 10px 12px 12px; }
+}
+
+/* 📱 Extra-compact < 600px : textes un poil plus petits, pills sur 2 lignes si besoin */
+@media (max-width: 600px) {
+  .cmp-title { font-size: 24px; }
+  .cmp-chart-title { font-size: 16px; }
+  .cmp-legend { gap: 6px; }
+  .cmp-legend-pill { font-size: 11px; padding: 5px 8px; }
 }
 
 /* Accessibilité : focus discret sans accent persistant */

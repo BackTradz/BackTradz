@@ -180,7 +180,9 @@ export default function ComparateurPage() {
                   </div>
                 </div>
 
-                <div className="cmp-table-wrap">
+                {/* 🧭 Si la métrique produit plus de 8 lignes (ex: hour -> 24),
+                    on applique une classe scrollable pour éviter d'écraser le graphe. */}
+                <div className={`cmp-table-wrap ${data.buckets.length > 8 ? "scrollable" : ""}`}>
                   <table className="cmp-table">
                     <thead>
                       <tr>
