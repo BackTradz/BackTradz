@@ -3,32 +3,49 @@ paths.py
 --------------------------------
 Wrapper centralisé autour de dev.py
 → Permet de gérer Render + Local sans casser l’existant.
+→ PATCH: override par ENV + fallback DEV vers backend/app/output si besoin.
 """
+
 import os
 from pathlib import Path
 
 try:
     # ✅ Importer depuis dev.py si dispo
-    from app.core.dev import DATA_ROOT, DB_ROOT
-    # Compatibilité avec les anciens noms utilisés ailleurs
-    OUTPUT_DIR      = DATA_ROOT / "output"
+    from app.core.dev import DATA_ROOT, DB_ROOT, IS_DEV
+    # --- OUTPUT_DIR (ENV prioritaire), sinon DATA_ROOT/output
+    _OUTPUT_DIR_ENV = os.getenv("OUTPUT_DIR", "").strip().strip('"').strip("'")
+    OUTPUT_DIR      = Path(_OUTPUT_DIR_ENV) if _OUTPUT_DIR_ENV else (DATA_ROOT / "output")
     OUTPUT_LIVE_DIR = DATA_ROOT / "output_live"
     # ✅ Permettre un override ciblé pour l’analyse en DEV (ou partout) via env ANALYSIS_DIR
     _ANALYSIS_DIR_ENV = os.getenv("ANALYSIS_DIR", "").strip().strip('"').strip("'")
     ANALYSIS_DIR    = Path(_ANALYSIS_DIR_ENV) if _ANALYSIS_DIR_ENV else (DATA_ROOT / "analysis")
-    DB_DIR          = DB_ROOT
+   # --- DB_DIR (ENV prioritaire), sinon DB_ROOT
+    _DB_DIR_ENV     = os.getenv("DB_DIR", "").strip().strip('"').strip("'")
+    DB_DIR          = Path(_DB_DIR_ENV) if _DB_DIR_ENV else DB_ROOT
     USERS_JSON      = DB_DIR / "users.json"
     PRIVATE_DIR     = DATA_ROOT / "private"
     INVOICES_DIR    = PRIVATE_DIR / "invoices"
     STRATEGIES_DIR  = PRIVATE_DIR / "strategies"
+
+    # 🔁 Fallback DEV: si OUTPUT_DIR n’existe pas mais que backend/app/output existe, on bascule dessus.
+    if 'IS_DEV' in locals() and IS_DEV:
+        if not OUTPUT_DIR.exists():
+            _BACKEND_DIR = Path(__file__).resolve().parents[2]  # .../backend
+            _LEGACY = _BACKEND_DIR / "app" / "output"
+            if _LEGACY.exists():
+                OUTPUT_DIR = _LEGACY
+
+
 except Exception:
     # 🔒 Fallback → logique historique (Render only)
     DATA_ROOT       = Path(os.getenv("DATA_ROOT", "/var/data/backtradz")).resolve()
-    OUTPUT_DIR      = DATA_ROOT / "output"
+    _OUTPUT_DIR_ENV = os.getenv("OUTPUT_DIR", "").strip().strip('"').strip("'")
+    OUTPUT_DIR      = Path(_OUTPUT_DIR_ENV) if _OUTPUT_DIR_ENV else (DATA_ROOT / "output")
     OUTPUT_LIVE_DIR = DATA_ROOT / "output_live"
     _ANALYSIS_DIR_ENV = os.getenv("ANALYSIS_DIR", "").strip().strip('"').strip("'")
     ANALYSIS_DIR    = Path(_ANALYSIS_DIR_ENV) if _ANALYSIS_DIR_ENV else (DATA_ROOT / "analysis")
-    DB_DIR          = DATA_ROOT / "db"
+    _DB_DIR_ENV     = os.getenv("DB_DIR", "").strip().strip('"').strip("'")
+    DB_DIR          = Path(_DB_DIR_ENV) if _DB_DIR_ENV else (DATA_ROOT / "db")
     USERS_JSON      = DB_DIR / "users.json"
     PRIVATE_DIR     = DATA_ROOT / "private"
     INVOICES_DIR    = PRIVATE_DIR / "invoices"

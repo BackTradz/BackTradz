@@ -65,32 +65,32 @@ export default function ListeAnalyses({
                 className={`cmp-item ${checked ? "is-checked" : ""} ${disabled ? "is-disabled" : ""}`}
               >
                 <label className="cmp-item-row">
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    disabled={disabled}
-                    onChange={() => onToggle(o.id)}
-                  />
+                  {/* Checkbox custom — input natif accessible + marque visuelle séparée */}
+                  <span className={`cmp-check ${checked ? "on" : ""}`}>
+                    <input
+                      type="checkbox"
+                      aria-label="Sélectionner cette analyse"
+                      checked={checked}
+                      disabled={disabled}
+                      onChange={() => onToggle(o.id)}
+                    />
+                    <i className="cmp-check-mark" aria-hidden="true" />
+                  </span>
 
                   <div className="cmp-item-main">
                     <div className="cmp-item-top">
+                      {/* Affichage simplifié : paire · TF · stratégie uniquement */}
                       <span className="cmp-item-title">
                         {[pairLabel, periodUC, strategyLabel].filter(Boolean).join(" · ")}
                       </span>
-                      {trades != null && <span className="cmp-badge">{trades} trades</span>}
-                    </div>
-
-                    <div className="cmp-item-sub">
-                      <span className="cmp-mono">{pairLabel}</span>
-                      {periodUC && <span className="cmp-dot">•</span>}
-                      {periodUC && <span className="cmp-mono">{periodUC}</span>}
-                      {tp1 && (
-                        <>
-                          <span className="cmp-dot">•</span>
-                          <span>TP1 {tp1}</span>
-                        </>
+                      {trades != null && (
+                        <span className="cmp-badge cmp-badge--trades">
+                          <b>{trades}</b>
+                          <i>trades</i>
+                        </span>
                       )}
                     </div>
+                     {/* Sous-titre supprimé (évite la duplication, design plus clean) */}              
                   </div>
                 </label>
               </li>

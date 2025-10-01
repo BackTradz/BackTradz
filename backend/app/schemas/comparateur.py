@@ -8,11 +8,19 @@ class CompareOptionsItem(BacktradzModel):
     label: str
     pair: str
     symbol: Optional[str] = None
-    period: str
-    created_at: Optional[str] = None  # ISO si dispo
+    timeframe: Optional[str] = None
+    period: Optional[str] = None
+    strategy: Optional[str] = None
+    created_at: Optional[str] = None
     trades_count: Optional[int] = None
-    winrate_tp1: Optional[float] = None  # 0..1
-    winrate_tp2: Optional[float] = None  # 0..1
+    winrate_tp1: Optional[float] = None
+    winrate_tp2: Optional[float] = None
+    # Champs dashboard additionnels (permissifs)
+    winrate: Optional[str] = None
+    trades: Optional[int] = None
+    metrics: Optional[dict] = None
+    xlsx_filename: Optional[str] = None
+    folder: Optional[str] = None
 
 class CompareOptionsResponse(BacktradzModel):
     items: List[CompareOptionsItem]

@@ -91,6 +91,32 @@ def _own_by_user(params: dict, current_user_id: str) -> bool:
         return (uid == "") or (uid == cur)
     except Exception:
         return True
+    
+def _clean_symbol(x: str) -> str:
+    """Considère UNKNOWN/?/- comme vide pour pair/symbol (aligné dashboard)."""
+    x = (x or "").strip()
+    return "" if x.upper() in {"UNKNOWN", "?", "-"} else x
+
+def _normalize_pair_symbol(params: dict, run_dir: Path) -> Tuple[str, str]:
+    """
+    Normalise pair/symbol pour label UI et séries :
+    - nettoie UNKNOWN/?/-
+    - synchronise pair <-> symbol
+    - fallback sur le préfixe du nom de dossier (ex: GC=F_M15_...)
+    """
+    pair = _clean_symbol(params.get("pair"))
+    symbol = _clean_symbol(params.get("symbol"))
+    if not pair and symbol:
+        pair = symbol
+    if not symbol and pair:
+        symbol = pair
+    if not pair or not symbol:
+        folder_code = run_dir.name.split("_")[0].strip()
+        if folder_code:
+            if not pair:   pair = folder_code
+            if not symbol: symbol = folder_code
+    return pair, symbol
+
 
 def _compose_label(params: dict, fallback_dir: Path) -> Tuple[str, str]:
     """Construit (label, period) lisibles pour l’UI."""
@@ -142,18 +168,8 @@ def list_user_compare_options(current_user_id: str) -> CompareOptionsResponse:
     #print(f"📦 [compare] dossiers détectés = {len(runs)}")
     for run_dir in runs:
         params = _load_params(run_dir)
-        # pair/symbol synchronisés comme le dashboard
-        pair = (params.get("pair") or params.get("symbol") or "").strip()
-        symbol = (params.get("symbol") or params.get("pair") or "").strip()
-        if not pair or not symbol:
-            # Dernier fallback: déduire depuis *_global.csv / *_sessions.csv
-            files = _find_csv_files(run_dir)
-            cand = files.get("global") or files.get("sessions")
-            if cand:
-                code = cand.name.split("_")[0].strip()
-                if code and not pair:   pair = code
-                if code and not symbol: symbol = code
-
+        # pair/symbol normalisés (même logique partout)
+        pair, symbol = _normalize_pair_symbol(params, run_dir)
          # ownership identique dashboard
         if not _own_by_user(params, current_user_id):
             continue
@@ -212,15 +228,23 @@ def list_user_compare_options(current_user_id: str) -> CompareOptionsResponse:
 
 
         item = CompareOptionsItem(
-            id=run_dir.name,  # id simple = nom du dossier
+            id=run_dir.name,
             label=label,
             pair=pair,
             symbol=symbol,
-            period=period,
-            created_at=None,  # si dispo plus tard: run_at/created_at
+            timeframe=(params.get("timeframe") or "").upper(),
+            period=period or params.get("period") or "",
+            strategy=params.get("strategy") or "",
+            created_at=None,
             trades_count=trades_count,
             winrate_tp1=wr1,
             winrate_tp2=wr2,
+            # alignement dashboard
+            winrate=params.get("winrate"),
+            trades=params.get("trades"),
+            metrics=params.get("metrics"),
+            xlsx_filename=params.get("xlsx_filename"),
+            folder=run_dir.name,
         )
         items.append(item)
 
@@ -262,8 +286,13 @@ def build_compare_series(current_user_id: str, req: CompareDataRequest) -> Compa
             continue
 
         files = _detect_files(run_dir)
-        label, _period = _compose_label(params, run_dir)
-
+        # ✅ même label que la liste: normalise pair/symbol puis compose
+        pair, symbol = _normalize_pair_symbol(params, run_dir)
+        params_for_label = dict(params)
+        if pair and not params_for_label.get("pair"): params_for_label["pair"] = pair
+        if symbol and not params_for_label.get("symbol"): params_for_label["symbol"] = symbol
+        label, _period = _compose_label(params_for_label, run_dir)
+ 
         values: List[Optional[float]] = [None]*len(buckets)
 
         if metric == "session" and files["sessions"]:

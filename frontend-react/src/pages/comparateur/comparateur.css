@@ -1,6 +1,25 @@
-/* frontend-react/src/pages/comparateur/comparateur.css */
-/* Style aligné à ta DA (dark, cards arrondies, ombres douces, pills, etc.)
-   Scopé sous .cmp- pour éviter toute régression globale. */
+
+/* frontend-react/src/pages/comparateur/comparateur.css
+   ----------------------------------------------------
+   • Style aligné à La DA (dark)
+   • Scopé sous .cmp- pour éviter toute régression
+   • Tokens locaux au :root pour unifier les couleurs
+*/
+
+/* =============== ROOT TOKENS (spécifiques comparateur) =============== */
+:root {
+  /* Surfaces foncées (alignées visuellement à ta navbar) */
+  --cmp-surface-0: rgba(8, 16, 32, 0.80);  /* carte/section principale */
+  --cmp-surface-1: rgba(8, 16, 32, 0.70);  /* champs/inputs/éléments internes */
+  --cmp-surface-2: rgba(8, 16, 32, 0.60);  /* éléments secondaires (pills/badges) */
+
+  /* Traits / séparateurs */
+  --cmp-stroke-0: rgba(255,255,255,0.10);
+  --cmp-stroke-1: rgba(255,255,255,0.08);
+
+  /* Ombres cartes */
+  --cmp-shadow: 0 8px 28px rgba(0,0,0,0.35);
+}
 
 .cmp-page {
   padding: 32px 20px 60px;
@@ -41,11 +60,12 @@
 }
 
 .cmp-box {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+  /* ====== CARD / SECTION ====== */
+  background: var(--cmp-surface-0);
+  border: 1px solid var(--cmp-stroke-0);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  box-shadow: var(--cmp-shadow);
 }
 
 .cmp-left-header {
@@ -56,8 +76,8 @@
 }
 .cmp-search {
   flex: 1;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--cmp-surface-1);
+  border: 1px solid var(--cmp-stroke-1);
   border-radius: 12px;
   padding: 10px 12px;
   color: inherit;
@@ -67,33 +87,50 @@
   padding: 8px 12px;
   border-radius: 999px;
   font-weight: 700;
-  background: linear-gradient(90deg, rgba(50,120,255,0.4), rgba(75,0,255,0.35));
-  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(90deg, rgba(50,120,255,0.35), rgba(75,0,255,0.30));
+  border: 1px solid var(--cmp-stroke-1);
 }
 
 .cmp-list {
+  /* Liste propre, sans bullet, pens&eacute;e pour de TR&Egrave;S nombreuses analyses */
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 520px;
+  list-style: none;           /* 🔥 enlève le point à gauche */
+  margin: 0;
+  padding: 0 6px 0 0;
+  max-height: 62vh;           /* mieux que fixe 520px, s’adapte à l’écran */
   overflow: auto;
-  padding-right: 6px;
 }
 .cmp-item {
+  position: relative; /* nécessaire pour le pseudo-élément d’accent */
   border-radius: 12px;
   padding: 10px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--cmp-surface-1);
+  border: 1px solid var(--cmp-stroke-1);
   transition: transform .12s ease, background .12s ease, border-color .12s ease;
 }
 .cmp-item:hover {
   transform: translateY(-1px);
-  background: rgba(255,255,255,0.045);
-  border-color: rgba(255,255,255,0.1);
+  background: rgba(8,16,32,0.78);
+  border-color: var(--cmp-stroke-0);
 }
 .cmp-item.is-checked {
-  background: rgba(0,150,255,0.12);
-  border-color: rgba(0,150,255,0.35);
+  /* fond légèrement relevé au lieu d’un halo bleu */
+  background: linear-gradient(180deg, rgba(70,140,255,0.10), rgba(70,140,255,0.06)), var(--cmp-surface-1);
+  border-color: rgba(90,150,255,0.38);
+}
+/* Accent latéral à gauche quand sélectionné (propre, sans “glow”) */
+.cmp-item.is-checked::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 6px;
+  bottom: 6px;
+  width: 4px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #5AA0FF, #7C6BFF);
+  box-shadow: 0 0 0 1px rgba(90,150,255,0.35), 0 2px 8px rgba(90,150,255,0.25);
 }
 .cmp-item.is-disabled {
   opacity: 0.55;
@@ -101,7 +138,7 @@
 }
 .cmp-item-row {
   display: grid;
-  grid-template-columns: 22px 1fr;
+  grid-template-columns: 28px 1fr; /* un peu plus large pour la checkbox custom */
   gap: 10px;
   align-items: start;
 }
@@ -116,22 +153,41 @@
 .cmp-item-sub { opacity: 0.85; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .cmp-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 .cmp-dot { opacity: 0.6; }
+
+/* Badge générique conservé pour compat */
 .cmp-badge {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.06);
-  padding: 4px 8px;
-  border-radius: 999px;
+  background: var(--cmp-surface-2);
+  border: 1px solid var(--cmp-stroke-1);
+  padding: 4px 10px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 700;
 }
+/* Variante trades : 2 lignes, look plus premium */
+.cmp-badge--trades {
+  display: grid;
+  grid-auto-flow: row;
+  align-items: center;
+  justify-items: center;
+  min-width: 54px;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, rgba(70,140,255,0.16), rgba(70,140,255,0.10));
+  border: 1px solid rgba(90,150,255,0.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  border-radius: 12px;
+}
+.cmp-badge--trades b { font-size: 14px; line-height: 1; }
+.cmp-badge--trades i { font-style: normal; font-size: 10px; opacity: .85; line-height: 1; }
 
 .cmp-right { display: grid; gap: 16px; }
 .cmp-tools { display: grid; gap: 12px; }
 .cmp-selects { display: flex; gap: 12px; flex-wrap: wrap; }
 .cmp-select { display: grid; gap: 6px; min-width: 220px; }
+/* Select natif (fallback) — ton Select custom garde ses propres styles,
+   mais le conteneur .cmp-box déjà foncé harmonise le rendu global. */
 .cmp-select select {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--cmp-surface-1);
+  border: 1px solid var(--cmp-stroke-1);
   border-radius: 12px;
   padding: 10px 12px;
   color: inherit;
@@ -151,8 +207,8 @@
   padding: 6px 10px;
   font-size: 12px;
   font-weight: 700;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--cmp-stroke-1);
+  background: var(--cmp-surface-2);
 }
 .cmp-legend-pill.c1 { background: rgba(0,140,255,0.16); }
 .cmp-legend-pill.c2 { background: rgba(120,0,255,0.16); }
@@ -176,8 +232,9 @@
 
 .cmp-chart-canvas {
   height: 360px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  border-top: 1px solid var(--cmp-stroke-1);
+  /* fond plus sombre sous le canvas pour coller au reste */
+  background: linear-gradient(180deg, rgba(8,16,32,0.72), rgba(8,16,32,0.68));
 }
 
 .cmp-canvas {
@@ -195,9 +252,100 @@
   color: #ff7a7a;
 }
 
+/* ===== Checkbox custom ===== */
+/* — Conteneur & fond (toujours visible) */
+.cmp-check {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 6px;
+}
+.cmp-check::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: var(--cmp-surface-2);
+  border: 1px solid var(--cmp-stroke-0);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: background .12s ease, border-color .12s ease;
+}
+.cmp-check.on::before {
+  background: linear-gradient(180deg, rgba(70,140,255,0.18), rgba(70,140,255,0.12));
+  border-color: rgba(90,150,255,0.45);
+}
+
+/* — Input natif (accessibilité), invisible mais clique capte tout */
+.cmp-check input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* — Marque ✕ (2 traits) rendue dans un élément dédié pour éviter tout conflit */
+.cmp-check-mark {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity .12s ease, transform .12s ease;
+}
+.cmp-check-mark::before,
+.cmp-check-mark::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transform-origin: center;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.20);
+}
+.cmp-check-mark::before { transform: translate(-50%, -50%) rotate(45deg); }
+.cmp-check-mark::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+.cmp-check.on .cmp-check-mark {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* — Hover / focus subtils, pas d’effet qui reste après décochage */
+.cmp-check:hover::before { border-color: rgba(255,255,255,0.28); }
+.cmp-check:focus-within::before {
+  outline: 2px solid rgba(255,255,255,0.18);
+  outline-offset: 2px;
+}
+
+/* Hover/focus de l'aire cliquable */
+.cmp-check input:hover + .noop, .cmp-check:hover::before {
+  border-color: rgba(255,255,255,0.28);
+}
+.cmp-check input:focus-visible + .noop, .cmp-check:focus-within::before {
+  outline: 2px solid rgba(255,255,255,0.18);
+  outline-offset: 2px;
+}
+
+
 /* Responsive */
 @media (max-width: 1080px) {
   .cmp-content {
     grid-template-columns: 1fr;
   }
+  .cmp-list { max-height: 50vh; } /* un peu moins haut sur petits écrans */
+  .cmp-item { padding: 9px; }
+  .cmp-item-title { font-size: 14px; }
+  .cmp-badge--trades { min-width: 50px; padding: 5px 8px; }
+  .cmp-check { width: 20px; height: 20px; }
+  .cmp-check-mark { width: 11px; height: 11px; }
+}
+
+/* Accessibilité : focus discret sans accent persistant */
+.cmp-item:focus-within {
+  border-color: rgba(255,255,255,0.18);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
 }

@@ -4,7 +4,10 @@ import { fetchCompareOptions, fetchCompareData } from "../../sdk/compareApi";
 import "./comparateur.css";
 import { useLocation } from "react-router-dom";
 import CompareChart from "./composants/CompareChart";
+import ChartControls from "./composants/ChartControls";
 import ListeAnalyses from "./composants/ListeAnalyses";
+// ⬇️ mêmes helpers que la liste (pas de mapping en dur)
+import { formatPair, formatStrategy } from "../../lib/labels";
 
 const METRICS = [
   { value: "session", label: "Sessions (Asia/London/NY)" },
@@ -135,27 +138,14 @@ export default function ComparateurPage() {
 
         {/* Colonne droite : contrôles + graphe */}
         <section className="cmp-right">
-          <div className="cmp-box cmp-tools">
-            <div className="cmp-selects">
-              <div className="cmp-select">
-                <label>Type</label>
-                <select value={chartType} onChange={(e) => setChartType(e.target.value)}>
-                  {CHART_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="cmp-select">
-                <label>Métrique</label>
-                <select value={metric} onChange={(e) => setMetric(e.target.value)}>
-                  {METRICS.map((m) => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
+          <ChartControls
+            chartType={chartType}
+            setChartType={(v) => setChartType(v)}
+            metric={metric}
+            setMetric={(v) => setMetric(v)}
+            CHART_TYPES={CHART_TYPES}
+            METRICS={METRICS}
+          />
 
           <div className="cmp-box cmp-chart">
             {!data && !error && selected.length === 0 && (
@@ -174,11 +164,19 @@ export default function ComparateurPage() {
                     {["winrate_tp1","winrate_tp2","trades_count","sl_rate"].includes(data.metric) && "Comparaison globale"}
                   </div>
                   <div className="cmp-legend">
-                    {data.series.map((s, i) => (
-                      <span key={s.analysis_id} className={`cmp-legend-pill c${(i % 6) + 1}`}>
-                        {s.label}
-                      </span>
-                    ))}
+                    {data.series.map((s, i) => {
+                      // 🔁 Utilise le même mapping que la liste, à partir des options chargées
+                      const opt = options.find(o => o.id === s.analysis_id);
+                      const niceLabel = opt
+                        ? [formatPair(opt.symbol || opt.pair || ""), (opt.timeframe || opt.period || "").toUpperCase(), opt.strategy ? formatStrategy(opt.strategy) : null]
+                            .filter(Boolean).join(" · ")
+                        : s.label;
+                      return (
+                        <span key={s.analysis_id} className={`cmp-legend-pill c${(i % 6) + 1}`}>
+                          {niceLabel}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -186,9 +184,18 @@ export default function ComparateurPage() {
                   <table className="cmp-table">
                     <thead>
                       <tr>
-                        <th>{data.metric}</th>
+                        {/* Entête de la colonne catégories = label du Select (pas de clé brute) */}
+                        <th>{(METRICS.find(m => m.value === data.metric)?.label) || "Métrique"}</th>
                         {data.series.map((s) => (
-                          <th key={s.analysis_id}>{s.label}</th>
+                          <th key={s.analysis_id}>
+                            {(() => {
+                              const opt = options.find(o => o.id === s.analysis_id);
+                              return opt
+                                ? [formatPair(opt.symbol || opt.pair || ""), (opt.timeframe || opt.period || "").toUpperCase(), opt.strategy ? formatStrategy(opt.strategy) : null]
+                                    .filter(Boolean).join(" · ")
+                                : s.label;
+                            })()}
+                          </th>
                         ))}
                       </tr>
                     </thead>
@@ -218,10 +225,14 @@ export default function ComparateurPage() {
                   <CompareChart
                     type={chartType}
                     buckets={data.buckets}
-                    series={data.series.map((s) => ({
-                      label: s.label,
-                      values: s.values,
-                    }))}
+                    series={data.series.map((s) => {
+                      const opt = options.find(o => o.id === s.analysis_id);
+                      const niceLabel = opt
+                        ? [formatPair(opt.symbol || opt.pair || ""), (opt.timeframe || opt.period || "").toUpperCase(), opt.strategy ? formatStrategy(opt.strategy) : null]
+                            .filter(Boolean).join(" · ")
+                        : s.label;
+                      return { label: niceLabel, values: s.values };
+                    })}
                     valueType={data.value_type}
                     precision={data.precision}
                     height={360}
