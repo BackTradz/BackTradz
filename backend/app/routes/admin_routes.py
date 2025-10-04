@@ -16,7 +16,7 @@ Notes:
 """
 
 
-from fastapi import Body
+from fastapi import Body, UploadFile, File, Form
 from app.core.paths import ANALYSIS_DIR  # utilisé dans stats & download_xlsx
 from fastapi import APIRouter
 from fastapi import Request, HTTPException
@@ -27,6 +27,8 @@ import os, json, pandas as pd, openpyxl, shutil
 from pathlib import Path
 from datetime import datetime, timezone
 from fastapi.responses import FileResponse
+from datetime import datetime, timezone
+import tempfile, re, json, shutil
 
 # ✅ Helpers/constantes désormais importés depuis le service (aucune logique modifiée)
 from app.services.admin_service import (
@@ -42,6 +44,7 @@ from app.services.admin_service import (
     USERS_FILE,
     load_users,
     save_users,
+    import_output_month_from_zip,  # 👈 nouveau service v1.3
 )
 
 # (helpers déplacés dans admin_service)
@@ -1053,3 +1056,60 @@ def admin_reset_email_recreate(request: Request, payload: dict | None = Body(Non
     # reset total
     RECREATE_FILE.write_text("{}", encoding="utf-8")
     return {"ok": True, "cleared": "ALL"}
+
+@router.post("/admin/maintenance/import-output")
+def admin_import_output(
+    request: Request,
+    target_month: str = Form(..., description="YYYY-MM"),
+    mode: str = Form("skip"),
+    dry_run: bool = Form(False),
+    file: UploadFile = File(..., description="ZIP contenant output/<PAIR>/<YYYY-MM>/*.csv"),
+):
+    """
+    Maintenance: import mensuel des CSV 'output' (add-only).
+    - Filtre strict sur <PAIR>/<YYYY-MM>/*.csv
+    - mode=skip (défaut) n'écrase jamais
+    - dry_run pour simuler
+    - Archive + manifest par mois
+    """
+    # Auth admin standard (header X-API-Key ou ?apiKey si activé)
+    require_admin_from_request_or_query(request)
+
+    # Valider mois côté route (fail fast)
+    if not re.match(r"^\d{4}-\d{2}$", target_month or ""):
+        raise HTTPException(status_code=400, detail="target_month invalide (YYYY-MM)")
+    mode = (mode or "skip").strip().lower()
+    if mode not in {"skip", "overwrite"}:
+        raise HTTPException(status_code=400, detail="mode invalide (skip|overwrite)")
+
+    # Persist ZIP en temp (pour zipfile)
+    try:
+        tmp_dir = Path(tempfile.mkdtemp(prefix="btz_import_", dir=str(ANALYSIS_DIR.parent)))
+        tmp_zip = tmp_dir / f"import_output_{target_month}.zip"
+        with open(tmp_zip, "wb") as out:
+            while True:
+                chunk = file.file.read(1024 * 1024)
+                if not chunk:
+                    break
+                out.write(chunk)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Impossible d'écrire le ZIP temporaire.")
+
+    try:
+        report = import_output_month_from_zip(
+            zip_path=tmp_zip,
+            target_month=target_month,
+            mode=mode,
+            dry_run=bool(dry_run),
+        )
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Échec import: {e}")
+    finally:
+        try:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+        except Exception:
+            pass
+
+    return report

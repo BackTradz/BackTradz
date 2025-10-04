@@ -37,7 +37,7 @@
     "password": "$2b$12$KUUhRBl7TemGxps4c58lU.GfzrNC8PvNqy6kLZwzW0ASPXz89zPS.",
     "first_name": "admin",
     "last_name": "admin",
-    "credits": 633,
+    "credits": 632,
     "token": "169047fc-7a47-4650-9865-75c9678a4e9d",
     "plan": "free",
     "purchase_history": [
@@ -250,6 +250,17 @@
         "period": "2025-08-01 to 2025-08-31",
         "folder": "^IXIC_M15_ob_pullback_pure_2025-08-01to2025-08-31_sl50__h5210cd2a31",
         "duration_ms": 280
+      },
+      {
+        "label": "Téléchargement CSV",
+        "type": "Téléchargement",
+        "method": "credits",
+        "price_paid": -1,
+        "credits_delta": -1,
+        "filename": "BTC-USD_H4_2025-09.csv",
+        "date": "2025-10-04T13:52:29.287887+02:00",
+        "relative_path": "BTC-USD/2025-09/BTC-USD_H4_2025-09.csv",
+        "path": "backend/output/BTC-USD/2025-09/BTC-USD_H4_2025-09.csv"
       }
     ],
     "subscription": {

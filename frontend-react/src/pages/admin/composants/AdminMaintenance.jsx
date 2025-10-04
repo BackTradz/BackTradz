@@ -11,6 +11,15 @@ export default function AdminMaintenance() {
   const [factures, setFactures] = useState({ count: 0, bytes: 0 });
   const [invoiceFiles, setInvoiceFiles] = useState([]);
 
+  // === Import mensuel output ===
+  const [month, setMonth] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+  });
+  const [zipFile, setZipFile] = useState(null);
+  const [mode, setMode] = useState("skip");
+  const [dryRun, setDryRun] = useState(false);
+  const [report, setReport] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -123,6 +132,25 @@ export default function AdminMaintenance() {
     }
   };
 
+  // === Import mensuel output (add-only) ===
+  const runImport = async (simulate=false) => {
+    if (!zipFile) { setErr("Sélectionne un ZIP d'abord."); return; }
+    setErr(null); setMsg(null); setReport(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", zipFile);
+      fd.append("target_month", month);
+      fd.append("mode", mode);
+      fd.append("dry_run", String(!!simulate));
+      const res = await api("/api/admin/maintenance/import-output", { method: "POST", body: fd });
+      setReport(res || {});
+      setMsg(simulate ? "Simulation terminée." : "Import terminé.");
+    } catch (e) {
+      setErr(e?.message || "Échec de l'import.");
+    }
+  };
+
+
 
   return (
     <div className="p-6 maint">
@@ -157,6 +185,44 @@ export default function AdminMaintenance() {
         {msg && <div className="maint-msg">✔ {msg}</div>}
         {err && <div className="maint-err">✖ {err}</div>}
       </div>
+
+      {/* ===== Importer un mois d’output (add-only, skip par défaut) ===== */}
+      <div className="maint-card">
+        <h2 className="maint-title">Importer un mois d’output</h2>
+        <p className="maint-desc">
+          Charge un ZIP de <code>output/&lt;PAIR&gt;/{'{'}YYYY-MM{'}'}/...</code>. Seuls les fichiers du mois
+          <b> {month}</b> seront ajoutés. En mode <code>skip</code>, les fichiers existants sont ignorés.
+        </p>
+        <div className="maint-actions">
+          <input type="month" value={month} onChange={(e)=>setMonth(e.target.value)} className="maint-input" />
+          <input type="file" accept=".zip" onChange={(e)=>setZipFile(e.target.files?.[0] || null)} className="maint-input" />
+          <label className="flex items-center gap-2">
+            <span>Mode</span>
+            <select value={mode} onChange={(e)=>setMode(e.target.value)} className="maint-input">
+              <option value="skip">skip (ne pas écraser)</option>
+              <option value="overwrite">overwrite (autoriser l’écrasement)</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={dryRun} onChange={(e)=>setDryRun(e.target.checked)} />
+            <span>Dry-run (simulation)</span>
+          </label>
+          <div className="flex items-center gap-2">
+            <button onClick={()=>runImport(true)} className="btn">Simuler</button>
+            <button onClick={()=>runImport(false)} className="btn btn-primary">Exécuter</button>
+          </div>
+        </div>
+        {report && (
+          <div className="maint-msg" style={{marginTop:12}}>
+            <div><b>Mois:</b> {report.target_month} — <b>mode:</b> {report.mode} — <b>dry_run:</b> {String(report.dry_run)}</div>
+            <div><b>added:</b> {report.added} — <b>skipped:</b> {report.skipped} — <b>overwritten:</b> {report.overwritten}</div>
+            {Array.isArray(report.errors) && report.errors.length > 0 && (
+              <div className="maint-err" style={{marginTop:8}}>Erreurs: {report.errors.join(", ")}</div>
+            )}
+           </div>
+        )}
+      </div>
+
 
 
       <div className="maint-card">
