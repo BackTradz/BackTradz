@@ -20,6 +20,7 @@ export default function AdminMaintenance() {
   const [mode, setMode] = useState("skip");
   const [dryRun, setDryRun] = useState(false);
   const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(null); // "simulate" | "execute" | null
 
   const load = async () => {
     setLoading(true);
@@ -136,6 +137,7 @@ export default function AdminMaintenance() {
   const runImport = async (simulate=false) => {
     if (!zipFile && !zipUrl.trim()) { setErr("Fournis un ZIP (fichier) ou une URL."); return; }
     setErr(null); setMsg(null); setReport(null);
+    setLoading(simulate ? "simulate" : "execute");
     try {
       const fd = new FormData();
       if (zipFile) fd.append("file", zipFile);
@@ -148,6 +150,9 @@ export default function AdminMaintenance() {
       setMsg(simulate ? "Simulation terminée." : "Import terminé.");
     } catch (e) {
       setErr(e?.message || "Échec de l'import.");
+      } finally {
+      setLoading(null);
+
     }
   };
 
@@ -195,25 +200,76 @@ export default function AdminMaintenance() {
           <b> {month}</b> seront ajoutés. En mode <code>skip</code>, les fichiers existants sont ignorés.
         </p>
         <div className="maint-actions">
-          <input type="month" value={month} onChange={(e)=>setMonth(e.target.value)} className="maint-input" />
-          <input type="file" accept=".zip" onChange={(e)=>setZipFile(e.target.files?.[0] || null)} className="maint-input" />
-          <input type="url" placeholder="URL ZIP (optionnel)" value={zipUrl} onChange={(e)=>setZipUrl(e.target.value)} className="maint-input" />
+          <input
+            type="month"
+            value={month}
+            onChange={(e)=>setMonth(e.target.value)}
+            className="maint-input"
+            disabled={!!loading}
+          />
+          <input
+            type="file"
+            accept=".zip"
+            onChange={(e)=>setZipFile(e.target.files?.[0] || null)}
+            className="maint-input"
+            disabled={!!loading}
+          />
+          <input
+            type="url"
+            placeholder="URL ZIP (optionnel)"
+            value={zipUrl}
+            onChange={(e)=>setZipUrl(e.target.value)}
+            className="maint-input"
+            disabled={!!loading}
+          />
+
           <label className="flex items-center gap-2">
             <span>Mode</span>
-            <select value={mode} onChange={(e)=>setMode(e.target.value)} className="maint-input">
+            <select
+              value={mode}
+              onChange={(e)=>setMode(e.target.value)}
+              className="maint-input"
+              disabled={!!loading}
+            >
               <option value="skip">skip (ne pas écraser)</option>
               <option value="overwrite">overwrite (autoriser l’écrasement)</option>
             </select>
           </label>
+
           <label className="flex items-center gap-2">
-            <input type="checkbox" checked={dryRun} onChange={(e)=>setDryRun(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={dryRun}
+              onChange={(e)=>setDryRun(e.target.checked)}
+              disabled={!!loading}
+            />
             <span>Dry-run (simulation)</span>
           </label>
+
           <div className="flex items-center gap-2">
-            <button onClick={()=>runImport(true)} className="btn">Simuler</button>
-            <button onClick={()=>runImport(false)} className="btn btn-primary">Exécuter</button>
+            <button
+              onClick={()=>runImport(true)}
+              className="btn"
+              disabled={!!loading}
+            >
+              {loading === "simulate" ? "Simulation…" : "Simuler"}
+            </button>
+            <button
+              onClick={()=>runImport(false)}
+              className="btn btn-primary"
+              disabled={!!loading}
+            >
+              {loading === "execute" ? "Exécution…" : "Exécuter"}
+            </button>
           </div>
         </div>
+        {loading && (
+          <div className="maint-msg" style={{marginTop:12}}>
+            {loading === "simulate" ? "Simulation en cours…" : "Import en cours…"} Cela peut prendre un moment selon la taille du ZIP.
+            <br />
+            <small>Ne ferme pas la page.</small>
+          </div>
+        )}
         {report && (
           <div className="maint-msg" style={{marginTop:12}}>
             <div><b>Mois:</b> {report.target_month} — <b>mode:</b> {report.mode} — <b>dry_run:</b> {String(report.dry_run)}</div>
