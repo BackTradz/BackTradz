@@ -28,9 +28,8 @@ from pathlib import Path
 from datetime import datetime, timezone
 from fastapi.responses import FileResponse
 from datetime import datetime, timezone
-import tempfile, re, json, shutil
-
-import tempfile, shutil, re, traceback
+import json, shutil
+import tempfile, shutil, re, traceback, urllib.request
 
 # ✅ Helpers/constantes désormais importés depuis le service (aucune logique modifiée)
 from app.services.admin_service import (
@@ -1069,7 +1068,8 @@ def admin_import_output(
     target_month: str = Form(..., description="YYYY-MM"),
     mode: str = Form("skip"),
     dry_run: str = Form("false"),
-    file: UploadFile = File(..., description="ZIP contenant output/<PAIR>/<YYYY-MM>/*.csv"),
+    file: UploadFile = File(None, description="ZIP output/<PAIR>/<YYYY-MM>/*.csv"),
+    source_url: str = Form("", description="URL http(s) d’un ZIP alternatif (optionnel)"),
 ):
     """
     Maintenance: import mensuel des CSV 'output' (add-only).
@@ -1090,17 +1090,27 @@ def admin_import_output(
     # 🔐 Form → bool robuste (évite bool("false")==True)
     dry_run_flag = str(dry_run).strip().lower() in {"1","true","yes","on"}
 
-    # 📦 Temp système (writeable partout) + check zip non-vide
+    # 📦 Temp système (writeable partout)
     try:
         tmp_dir = Path(tempfile.mkdtemp(prefix="btz_import_"))
         tmp_zip = tmp_dir / f"import_output_{target_month}.zip"
-        with open(tmp_zip, "wb") as out:
-            while True:
-                chunk = file.file.read(1024 * 1024)
-                if not chunk:
-                    break
-                out.write(chunk)
-        if tmp_zip.stat().st_size <= 22:
+        if (source_url or "").strip():
+            # 🔗 Download côté serveur (bypass limite upload navigateur/proxy)
+            url = source_url.strip()
+            with urllib.request.urlopen(url) as resp, open(tmp_zip, "wb") as out:
+                shutil.copyfileobj(resp, out, length=1024 * 1024)
+        else:
+            # 📤 Upload navigateur (si présent)
+            if file is None:
+                raise ValueError("Aucun ZIP fourni (ni file, ni source_url)")
+            with open(tmp_zip, "wb") as out:
+                while True:
+                    chunk = file.file.read(1024 * 1024)
+                    if not chunk:
+                        break
+                    out.write(chunk)
+        # check zip non-vide
+        if not tmp_zip.exists() or tmp_zip.stat().st_size <= 22:
             raise ValueError("zip_vide_ou_invalide")
     except Exception as e:
         tb = traceback.format_exc(limit=2)

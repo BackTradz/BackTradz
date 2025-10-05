@@ -16,7 +16,7 @@ export default function AdminMaintenance() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
   });
-  const [zipFile, setZipFile] = useState(null);
+  const [zipUrl, setZipUrl] = useState("");
   const [mode, setMode] = useState("skip");
   const [dryRun, setDryRun] = useState(false);
   const [report, setReport] = useState(null);
@@ -134,11 +134,12 @@ export default function AdminMaintenance() {
 
   // === Import mensuel output (add-only) ===
   const runImport = async (simulate=false) => {
-    if (!zipFile) { setErr("Sélectionne un ZIP d'abord."); return; }
+    if (!zipFile && !zipUrl.trim()) { setErr("Fournis un ZIP (fichier) ou une URL."); return; }
     setErr(null); setMsg(null); setReport(null);
     try {
       const fd = new FormData();
-      fd.append("file", zipFile);
+      if (zipFile) fd.append("file", zipFile);
+      if (zipUrl.trim()) fd.append("source_url", zipUrl.trim());
       fd.append("target_month", month);
       fd.append("mode", mode);
       fd.append("dry_run", String(!!simulate));
@@ -196,6 +197,7 @@ export default function AdminMaintenance() {
         <div className="maint-actions">
           <input type="month" value={month} onChange={(e)=>setMonth(e.target.value)} className="maint-input" />
           <input type="file" accept=".zip" onChange={(e)=>setZipFile(e.target.files?.[0] || null)} className="maint-input" />
+          <input type="url" placeholder="URL ZIP (optionnel)" value={zipUrl} onChange={(e)=>setZipUrl(e.target.value)} className="maint-input" />
           <label className="flex items-center gap-2">
             <span>Mode</span>
             <select value={mode} onChange={(e)=>setMode(e.target.value)} className="maint-input">
