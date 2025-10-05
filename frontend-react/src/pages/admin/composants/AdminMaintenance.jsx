@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { api } from "../../../sdk/apiClient";
 
 export default function AdminMaintenance() {
-  const [loading, setLoading] = useState(false);
+  // Chargement des données de la page (listes, stats…)
+  const [pageLoading, setPageLoading] = useState(false);
   const [counts, setCounts] = useState({});
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState(null);
@@ -16,14 +17,16 @@ export default function AdminMaintenance() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
   });
+  const [zipFile, setZipFile] = useState(null);
   const [zipUrl, setZipUrl] = useState("");
   const [mode, setMode] = useState("skip");
   const [dryRun, setDryRun] = useState(false);
   const [report, setReport] = useState(null);
-  const [loading, setLoading] = useState(null); // "simulate" | "execute" | null
+  // Chargement d'une action (simulate/execute)
+  const [opLoading, setOpLoading] = useState(null); // "simulate" | "execute" | null
 
   const load = async () => {
-    setLoading(true);
+    setPageLoading(true);
     setErr(null);
     try {
       const data = await api("/api/admin/email-recreate");
@@ -35,7 +38,7 @@ export default function AdminMaintenance() {
     } catch (e) {
       setErr("Impossible de charger les données.");
     } finally {
-      setLoading(false);
+      setPageLoading(false);
     }
   };
 
@@ -137,7 +140,7 @@ export default function AdminMaintenance() {
   const runImport = async (simulate=false) => {
     if (!zipFile && !zipUrl.trim()) { setErr("Fournis un ZIP (fichier) ou une URL."); return; }
     setErr(null); setMsg(null); setReport(null);
-    setLoading(simulate ? "simulate" : "execute");
+    setOpLoading(simulate ? "simulate" : "execute");
     try {
       const fd = new FormData();
       if (zipFile) fd.append("file", zipFile);
@@ -151,8 +154,7 @@ export default function AdminMaintenance() {
     } catch (e) {
       setErr(e?.message || "Échec de l'import.");
       } finally {
-      setLoading(null);
-
+      setOpLoading(null);
     }
   };
 
@@ -205,14 +207,14 @@ export default function AdminMaintenance() {
             value={month}
             onChange={(e)=>setMonth(e.target.value)}
             className="maint-input"
-            disabled={!!loading}
+            disabled={!!opLoading}
           />
           <input
             type="file"
             accept=".zip"
             onChange={(e)=>setZipFile(e.target.files?.[0] || null)}
             className="maint-input"
-            disabled={!!loading}
+            disabled={!!opLoading}
           />
           <input
             type="url"
@@ -220,7 +222,7 @@ export default function AdminMaintenance() {
             value={zipUrl}
             onChange={(e)=>setZipUrl(e.target.value)}
             className="maint-input"
-            disabled={!!loading}
+            disabled={!!opLoading}
           />
 
           <label className="flex items-center gap-2">
@@ -229,7 +231,7 @@ export default function AdminMaintenance() {
               value={mode}
               onChange={(e)=>setMode(e.target.value)}
               className="maint-input"
-              disabled={!!loading}
+              disabled={!!opLoading}
             >
               <option value="skip">skip (ne pas écraser)</option>
               <option value="overwrite">overwrite (autoriser l’écrasement)</option>
@@ -241,7 +243,7 @@ export default function AdminMaintenance() {
               type="checkbox"
               checked={dryRun}
               onChange={(e)=>setDryRun(e.target.checked)}
-              disabled={!!loading}
+              disabled={!!opLoading}
             />
             <span>Dry-run (simulation)</span>
           </label>
@@ -250,22 +252,22 @@ export default function AdminMaintenance() {
             <button
               onClick={()=>runImport(true)}
               className="btn"
-              disabled={!!loading}
+              disabled={!!opLoading}
             >
-              {loading === "simulate" ? "Simulation…" : "Simuler"}
+              {opLoading === "simulate" ? "Simulation…" : "Simuler"}
             </button>
             <button
               onClick={()=>runImport(false)}
               className="btn btn-primary"
-              disabled={!!loading}
+              disabled={!!opLoading}
             >
-              {loading === "execute" ? "Exécution…" : "Exécuter"}
+              {opLoading === "execute" ? "Exécution…" : "Exécuter"}
             </button>
           </div>
         </div>
-        {loading && (
+        {opLoading && (
           <div className="maint-msg" style={{marginTop:12}}>
-            {loading === "simulate" ? "Simulation en cours…" : "Import en cours…"} Cela peut prendre un moment selon la taille du ZIP.
+            {opLoading === "simulate" ? "Simulation en cours…" : "Import en cours…"} Cela peut prendre un moment selon la taille du ZIP.
             <br />
             <small>Ne ferme pas la page.</small>
           </div>
@@ -285,7 +287,7 @@ export default function AdminMaintenance() {
 
       <div className="maint-card">
         <h3 className="text-lg font-semibold mb-3">Entrées actuelles</h3>
-        {loading ? (
+        {pageLoading ? (
           <div className="opacity-70">Chargement…</div>
         ) : Object.keys(counts).length === 0 ? (
           <div className="opacity-70">Aucune entrée.</div>
