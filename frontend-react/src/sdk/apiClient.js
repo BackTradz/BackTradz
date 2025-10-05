@@ -88,7 +88,9 @@ export async function api(path, { method = 'GET', headers = {}, body, auth = tru
         }
       } catch {}
     }
-    throw new Error(data?.message || data?.error || `HTTP ${res.status}`);
+    // 🔎 Afficher le 'detail' renvoyé par FastAPI si présent (debug clair)
+    const detail = (data && (data.detail || data.message || data.error)) ? ` — ${data.detail || data.message || data.error}` : "";
+    throw new Error(`HTTP ${res.status}${detail}`);
   }
   return data;
 }

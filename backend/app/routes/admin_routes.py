@@ -30,6 +30,8 @@ from fastapi.responses import FileResponse
 from datetime import datetime, timezone
 import tempfile, re, json, shutil
 
+import tempfile, shutil, re, traceback
+
 # ✅ Helpers/constantes désormais importés depuis le service (aucune logique modifiée)
 from app.services.admin_service import (
     PARIS_TZ,
@@ -45,7 +47,9 @@ from app.services.admin_service import (
     load_users,
     save_users,
     import_output_month_from_zip,  # 👈 nouveau service v1.3
+    DATA_ROOT,     
 )
+
 
 # (helpers déplacés dans admin_service)
 
@@ -1057,12 +1061,14 @@ def admin_reset_email_recreate(request: Request, payload: dict | None = Body(Non
     RECREATE_FILE.write_text("{}", encoding="utf-8")
     return {"ok": True, "cleared": "ALL"}
 
+##-----ADMIN OUPUT MENSUELLE----
+
 @router.post("/admin/maintenance/import-output")
 def admin_import_output(
     request: Request,
     target_month: str = Form(..., description="YYYY-MM"),
     mode: str = Form("skip"),
-    dry_run: bool = Form(False),
+    dry_run: str = Form("false"),
     file: UploadFile = File(..., description="ZIP contenant output/<PAIR>/<YYYY-MM>/*.csv"),
 ):
     """
@@ -1072,7 +1078,7 @@ def admin_import_output(
     - dry_run pour simuler
     - Archive + manifest par mois
     """
-    # Auth admin standard (header X-API-Key ou ?apiKey si activé)
+    # ⚠️ Utilise exactement le même helper d’auth que tes autres endpoints maintenance :
     require_admin_from_request_or_query(request)
 
     # Valider mois côté route (fail fast)
@@ -1081,10 +1087,12 @@ def admin_import_output(
     mode = (mode or "skip").strip().lower()
     if mode not in {"skip", "overwrite"}:
         raise HTTPException(status_code=400, detail="mode invalide (skip|overwrite)")
+    # 🔐 Form → bool robuste (évite bool("false")==True)
+    dry_run_flag = str(dry_run).strip().lower() in {"1","true","yes","on"}
 
-    # Persist ZIP en temp (pour zipfile)
+    # 📦 Temp système (writeable partout) + check zip non-vide
     try:
-        tmp_dir = Path(tempfile.mkdtemp(prefix="btz_import_", dir=str(ANALYSIS_DIR.parent)))
+        tmp_dir = Path(tempfile.mkdtemp(prefix="btz_import_"))
         tmp_zip = tmp_dir / f"import_output_{target_month}.zip"
         with open(tmp_zip, "wb") as out:
             while True:
@@ -1092,24 +1100,25 @@ def admin_import_output(
                 if not chunk:
                     break
                 out.write(chunk)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Impossible d'écrire le ZIP temporaire.")
+        if tmp_zip.stat().st_size <= 22:
+            raise ValueError("zip_vide_ou_invalide")
+    except Exception as e:
+        tb = traceback.format_exc(limit=2)
+        raise HTTPException(status_code=500, detail=f"TMP_WRITE {type(e).__name__}: {e} | {tb}")
 
     try:
         report = import_output_month_from_zip(
             zip_path=tmp_zip,
             target_month=target_month,
             mode=mode,
-            dry_run=bool(dry_run),
+            dry_run=dry_run_flag,
         )
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Échec import: {e}")
+        tb = traceback.format_exc(limit=3)
+        raise HTTPException(status_code=500, detail=f"IMPORT_FAIL {type(e).__name__}: {e} | {tb}")
     finally:
-        try:
-            shutil.rmtree(tmp_dir, ignore_errors=True)
-        except Exception:
-            pass
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
     return report

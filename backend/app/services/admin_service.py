@@ -168,11 +168,9 @@ def _is_valid_month(s: str) -> bool:
 
 
 def _safe_month_dir(pair: str, month: str) -> Path:
-    """OUTPUT_DIR/<PAIR>/<YYYY-MM> (sécurisé)"""
+    """OUTPUT_DIR/<PAIR>/<YYYY-MM> (sécurisé: must be under OUTPUT_DIR)"""
     p = (OUTPUT_DIR / pair / month).resolve()
-       # garde-fou: sous DATA_ROOT + sous OUTPUT_DIR
-    if not safe_under_data_root(p):
-        raise RuntimeError("month_dir_outside_DATA_ROOT")
+    # garde-fou: DOIT être sous OUTPUT_DIR (peut ou non être sous DATA_ROOT en local)
     if not str(p).startswith(str(OUTPUT_DIR.resolve())):
         raise RuntimeError("month_dir_outside_OUTPUT_DIR")
     return p
@@ -250,7 +248,8 @@ def import_output_month_from_zip(
 
                 month_dir = _safe_month_dir(pair, target_month)
                 dest = (month_dir / fname).resolve()
-                if not safe_under_data_root(dest) or not str(dest).startswith(str(OUTPUT_DIR.resolve())):
+                # sécurité: n'autoriser que des écritures sous OUTPUT_DIR
+                if not str(dest).startswith(str(OUTPUT_DIR.resolve())):
                     errors.append(f"unsafe_path:{pair}/{target_month}/{fname}")
                     continue
 
@@ -288,7 +287,7 @@ def import_output_month_from_zip(
                     except Exception:
                         errors.append(f"add_fail:{pair}/{target_month}/{fname}")
     except zipfile.BadZipFile:
-        raise ValueError("Fichier ZIP invalide")
+        raise ValueError("Fichier ZIP invalide (archive corrompue ou non-zip)")
     except Exception as e:
         # Erreur générique lecture ZIP
         raise RuntimeError(f"Échec lecture ZIP: {e}")
