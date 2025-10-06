@@ -1,6 +1,7 @@
 import React from "react";
 import CTAButton from "../../../components/ui/button/CTAButton";
 import Select from "../../../components/ui/select/Select";
+import { pairsToOptions } from "../../../lib/labels/";
 
 /**
  * 🎛️ Filtres de la boutique CSV
@@ -14,6 +15,10 @@ export default function CSVShopFilters({
   month, setMonth, months,
   showExtract, setShowExtract,
 }) {
+
+  // 🧭 Convertit les symboles bruts en options {value,label} avec mapping
+  const pairOptions = pairsToOptions(pairs);
+
   return (
     <div className="csvshop-filters">
       {/* 🔍 Recherche texte libre */}
@@ -28,7 +33,7 @@ export default function CSVShopFilters({
         id="pair"
         value={pair}
         onChange={setPair}
-        options={pairs}
+        options={pairOptions}
         label={null}
         placeholder="Choisir une paire"
         size="md"
