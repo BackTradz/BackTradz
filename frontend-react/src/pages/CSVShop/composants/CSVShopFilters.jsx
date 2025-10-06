@@ -1,32 +1,35 @@
 import React from "react";
 import CTAButton from "../../../components/ui/button/CTAButton";
 import Select from "../../../components/ui/select/Select";
-import { pairsToOptions } from "../../../lib/labels/";
+import { formatPair } from "../../../lib/labels";
 
 /**
  * 🎛️ Filtres de la boutique CSV
- * - Recherche textuelle
- * - Sélecteurs de paire et de mois
+ * - Sélecteurs de paire, timeframe et mois
  * - Toggle vers l’extracteur
  */
 export default function CSVShopFilters({
-  q, setQ,
+  q, setQ,                      // (la page conserve l’état mais on ne l’affiche plus)
   pair, setPair, pairs,
+  tf, setTf, tfs,
   month, setMonth, months,
   showExtract, setShowExtract,
 }) {
 
-  // 🧭 Convertit les symboles bruts en options {value,label} avec mapping
-  const pairOptions = pairsToOptions(pairs);
+  // 🧭 Paires → options {value,label} (sans "Toutes")
+  const pairOptions = Array.from(new Set(pairs || []))
+    .filter(Boolean)
+    .map((p) => ({ value: p, label: formatPair(p) }))
+    .sort((a, b) => a.label.localeCompare(b.label, "fr"));
+
+  // ⏱️ Timeframes dispo pour la paire sélectionnée
+  const tfOptions = Array.from(new Set(tfs || []))
+    .filter(Boolean)
+    .map((t) => ({ value: t, label: t }))
+    .sort((a, b) => a.label.localeCompare(b.label, "fr"));
 
   return (
     <div className="csvshop-filters">
-      {/* 🔍 Recherche texte libre */}
-      <input
-        placeholder="Rechercher (tf, fichier)…"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-      />
 
       {/* 📈 Sélecteur de paire */}
       <Select
@@ -40,6 +43,20 @@ export default function CSVShopFilters({
         variant="solid"
         className="min-w-[160px]"
       />
+      
+      {/* ⏱️ Sélecteur de timeframe */}
+      <Select
+        id="timeframe"
+        value={tf}
+        onChange={setTf}
+        options={tfOptions}
+        label={null}
+        placeholder="Tous les TF"
+        size="md"
+        variant="solid"
+        className="min-w-[160px]"
+      />
+
 
       {/* 🗓️ Sélecteur de mois */}
       <Select

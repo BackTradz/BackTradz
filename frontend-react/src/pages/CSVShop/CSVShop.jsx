@@ -3,7 +3,7 @@
 // Boutique CSV Stratify (refactor composants + Select réutilisable)
 // -----------------------------------------------------------------------------
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { listCsvLibrary, downloadCsvByPathUrl } from "../../sdk/catalogApi";
 import { API_BASE } from "../../sdk/apiClient";
 import "./CSVShop.css";
@@ -14,7 +14,7 @@ import PrivateExtraction from "./composants/PrivateExtraction";
 import CSVInfoBanner from "./composants/CSVInfoBanner";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
 import MsgConnexionOverlay from "../../components/overlay/MsgConnexionOverlay";
-
+import DetailButton from "../../components/ui/button/DetailButton";
 // TF à masquer côté front
 const EXCLUDED_TF = new Set(["M1", "D", "D1"]);
 
@@ -37,7 +37,8 @@ export default function CSVShop() {
   // Filtres UI
   const [pair, setPair] = useState("");     // PAIRE (toujours requise)
   const [month, setMonth] = useState("");   // YYYY-MM (optionnel)
-  const [q, setQ] = useState("");           // recherche libre
+  const [q, setQ] = useState("");           // (conservé mais non affiché)
+  const [tf, setTf] = useState("");         // TF (optionnel)
 
   // Extraction inline
   const [showExtract, setShowExtract] = useState(false);
@@ -50,6 +51,25 @@ export default function CSVShop() {
   // Bloc privé “Votre extraction”
   const [extractedFiles, setExtractedFiles] = useState([]); // [{pair,timeframe,year,month,path,source}]
   const [showExtractSection, setShowExtractSection] = useState(true);
+
+
+  // Pagination visuelle (éviter la surcharge à l’écran)
+  // ✅ Mobile aligné sur le CSS: ≤640px → 10 ; sinon 20
+  const initialStepRef = useRef(16);
+  const [visibleCount, setVisibleCount] = useState(initialStepRef.current);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(max-width: 640px)");
+    const apply = () => {
+      const step = mq.matches ? 10 : 16;
+      initialStepRef.current = step;
+      setVisibleCount(step);
+    };
+    apply(); // init
+    // met à jour si l’utilisateur change d’orientation / redimensionne
+    mq.addEventListener?.("change", apply);
+    return () => mq.removeEventListener?.("change", apply);
+  }, []);
 
   // Chargement initial de la librairie (normalise + filtre TF instables)
   useEffect(() => {
@@ -83,6 +103,17 @@ export default function CSVShop() {
     return Array.from(s).sort();
   }, [items]);
 
+  // TF dispo pour la paire sélectionnée
+  const tfs = useMemo(() => {
+    if (!pair) return [];
+    const s = new Set();
+    items.forEach((it) => {
+      if (it.pair === pair && it.timeframe) s.add(it.timeframe);
+    });
+    return Array.from(s).sort();
+  }, [items, pair]);
+
+
   // Init paire par défaut + préremplir le symbole d’extraction
   useEffect(() => {
     if (!pair && pairs.length > 0) {
@@ -91,6 +122,20 @@ export default function CSVShop() {
       setExSymbol(chosen);
     }
   }, [pairs, pair]);
+
+  // Quand la paire change manuellement → reset mois & TF pour éviter confusions
+  useEffect(() => {
+    setMonth("");
+    setTf("");
+    // Réinitialise aussi la pagination visuelle
+    setVisibleCount(initialStepRef.current);
+  }, [pair]);
+
+  // Si TF / mois / recherche changent → reset pagination
+  useEffect(() => {
+    setVisibleCount(initialStepRef.current);
+  }, [tf, month, q]);
+
 
   // Recharge les extractions récentes (persistance côté backend)
   useEffect(() => {
@@ -137,13 +182,40 @@ export default function CSVShop() {
     return items.filter((it) => {
       if (!pair) return false;
       const okPair = it.pair === pair;
+      const okTf = tf ? it.timeframe === tf : true;
       const ym = it.year && it.month ? `${it.year}-${it.month}` : "";
       const okMonth = month ? ym === month : true;
       const text = `${it.name} ${it.pair} ${ym} ${it.timeframe} ${it.path}`.toLowerCase();
       const okQ = q ? text.includes(q.toLowerCase()) : true;
-      return okPair && okMonth && okQ;
+      return okPair && okTf && okMonth && okQ;
     });
-  }, [items, pair, month, q]);
+  }, [items, pair, tf, month, q]);
+
+  // 🔒 Tri stable en amont, puis découpage (doit être déclaré AVANT tout usage)
+  const sortedFiltered = useMemo(() => {
+    const arr = [...filtered];
+    arr.sort((a, b) => {
+      const ymA = `${a.year}-${a.month}`;
+      const ymB = `${b.year}-${b.month}`;
+      if (ymA !== ymB) return ymA < ymB ? 1 : -1; // récents d’abord
+      return a.timeframe.localeCompare(b.timeframe);
+    });
+    return arr;
+  }, [filtered]);
+
+  // Liste à rendre = cap dur (20 desktop / 10 mobile)
+  const toRender = useMemo(
+    () => sortedFiltered.slice(0, visibleCount),
+    [sortedFiltered, visibleCount]
+  );
+
+
+
+  // 🧱 Garde-fou : si la liste devient plus courte, on borne le visibleCount
+  useEffect(() => {
+    setVisibleCount((c) => Math.min(c, sortedFiltered.length || initialStepRef.current));
+  }, [sortedFiltered]);
+
 
   // Rafraîchir la liste (ne touche pas output_live)
   async function refreshList() {
@@ -285,6 +357,7 @@ export default function CSVShop() {
         <CSVShopFilters
           q={q} setQ={setQ}
           pair={pair} setPair={setPair} pairs={pairs}
+          tf={tf} setTf={setTf} tfs={tfs}
           month={month} setMonth={setMonth} months={months}
           showExtract={showExtract} setShowExtract={setShowExtract}
         />
@@ -314,15 +387,9 @@ export default function CSVShop() {
               Aucun fichier trouvé.
             </div>
           ) : (
+              <>
               <div className="csvshop-grid" style={{ marginTop: "1.5rem" }} onClick={handlePublicClick}>
-              {filtered
-                .slice()
-                .sort((a, b) => {
-                  const ymA = `${a.year}-${a.month}`, ymB = `${b.year}-${b.month}`;
-                  if (ymA !== ymB) return ymA < ymB ? 1 : -1;
-                  return a.timeframe.localeCompare(b.timeframe);
-                })
-                .map((it, i) => (
+              {toRender.map((it, i) => (
                   <CsvCard
                     key={i}
                     source="Librairie BackTradz"
@@ -343,6 +410,17 @@ export default function CSVShop() {
                   />
                 ))}
             </div>
+            {sortedFiltered.length > toRender.length && (
+                <div className="csvshop-loadmore">
+                  <DetailButton
+                    onClick={() => setVisibleCount((c) => c + initialStepRef.current)}
+                    title="Afficher plus de fichiers"
+                  >
+                    Afficher plus
+                  </DetailButton>
+                </div>
+              )}
+            </>
           
           )
         )}
