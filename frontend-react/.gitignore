@@ -23,16 +23,20 @@ dist-ssr
 *.sln
 *.sw?
 
-+# --- BackTradz runtime data (do NOT commit) ---
-+backend/output/**
-+backend/output_live/**
-+backend/analysis/**
-+backend/database/**        # anciens chemins
-+backend/data/**            # anciens chemins (audit, etc.)
-+var/**
-+/var/**
-+
-+# DATA_ROOT on Render (monté dans /var/data/backtradz)
-+**/db/**
-+**/private/**
-+**/audit/**
+# --- BackTradz runtime data (do NOT commit) ---
+backend/output/**
+backend/output_live/**
+backend/analysis/**
+backend/database/**        # anciens chemins
+backend/data/**            # anciens chemins (audit, etc.)
+var/**
+/var/**
+
+# DATA_ROOT on Render (monté dans /var/data/backtradz)
+**/db/**
+**/private/**
+**/audit/**
+# Files JSON sensibles créés à la racine de backend (tokens, users)
+backend/users.json
+backend/reset_token.json
+backend/email_recreate.json
