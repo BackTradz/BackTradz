@@ -83,6 +83,7 @@ export const PAIR_PIPS = {
   "^GDAXI": 1, "^GSPC": 1, "^HSI": 1, "^IXIC": 1, "^N225": 1, "^STOXX50E": 1,
   "^TNX": 0.01, "^VIX": 0.1,
   "BTC-USD": 1, "ETH-USD": 0.01,
+  "XRP-USD": 0.0001, "XRPUSD": 0.0001,   // ✅ crypto XRP
   "EURUSD": 0.0001, "GBPUSD": 0.0001, "AUDUSD": 0.0001, "NZDUSD": 0.0001,
   "USDCHF": 0.0001, "USDCAD": 0.0001, "USDSEK": 0.0001, "USDNOK": 0.0001,
   "USDSGD": 0.0001, "USDPLN": 0.0001, "USDILS": 0.0001, "USDHKD": 0.0001,
@@ -90,7 +91,7 @@ export const PAIR_PIPS = {
   "USDKRW": 0.01,
   "USDJPY": 0.01, "EURJPY": 0.01, "GBPJPY": 0.01, "AUDJPY": 0.01,
   "NZDJPY": 0.01, "CHFJPY": 0.01,
- "CHF/JPY": 0.01, // alias si tu as des clés avec slash
+  "CHF/JPY": 0.01, // alias si tu as des clés avec slash
 };
 
 export const getPip = (symbol) => {
@@ -98,6 +99,10 @@ export const getPip = (symbol) => {
   if (symbol?.includes("/")) {
     const noSlash = symbol.replace("/", "");
     if (noSlash in PAIR_PIPS) return PAIR_PIPS[noSlash];
+  }
+  if (symbol?.includes("-")) {
+    const noDash = symbol.replace("-", "");
+    if (noDash in PAIR_PIPS) return PAIR_PIPS[noDash];
   }
   return null;
 };

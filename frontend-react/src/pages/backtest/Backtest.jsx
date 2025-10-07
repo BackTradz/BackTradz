@@ -7,7 +7,7 @@
 // ✅ Plus "SaaS" : titre propre, tabs, grille 2 colonnes, aside sticky.
 // ============================================================
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
    listStrategies,
    strategyParams,
@@ -335,22 +335,85 @@ export default function Backtest() {
     // états + helpers (courts)
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
+  const [etaSeconds, setEtaSeconds] = useState(null); // ⏱️ ETA à afficher
+  const _timerRef = useRef(null);
+  const _t0Ref = useRef(0);
+  const _etaRef = useRef(8000); // estimation ms (par défaut 8s, ajustée ensuite)
 
-  const beginProgress = () => {
-    setShowProgress(true); setProgress(5);
-    if (window.__btTimer) clearInterval(window.__btTimer);
-    window.__btTimer = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 90) return p;
-        const step = p < 30 ? 3 : p < 60 ? 2 : 1;
-        return Math.min(p + step, 90);
-      });
-    }, 120);
+  // 🔎 clef d’historique ETA : (strat, symbol, tf, durée de période)
+  const makeEtaKey = () => {
+    const strat = (tab === "official" ? selectedStratOfficial : selectedStratCustom) || "NA";
+    const sym   = (tab === "official" ? symbol : customSymbol) || "NA";
+    const tfv   = (tab === "official" ? timeframe : customTF) || "NA";
+    const days  = tab === "official"
+      ? daysBetweenIncl(startDate, endDate)
+      : daysBetweenIncl(customStart, customEnd);
+    return `bt_eta::${strat}::${sym}::${tfv}::${Math.max(1, days)}`;
   };
+
+  // 📦 lit/écrit l’historique des durées (ms) en localStorage
+  const loadEtaHist = (key) => {
+    try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
+  };
+  const saveEtaHist = (key, arr) => {
+    try { localStorage.setItem(key, JSON.stringify(arr.slice(-15))); } catch {}
+  };
+  const median = (arr) => {
+    if (!arr?.length) return null;
+    const a = [...arr].sort((x,y)=>x-y);
+    const i = Math.floor(a.length/2);
+    return a.length%2 ? a[i] : Math.round((a[i-1]+a[i])/2);
+  };
+
+  // 🚦 Nouvelle progression “réelle estimée” (plus de blocage à 90%)
+  const beginProgress = () => {
+    // init ETA depuis historique (ou heuristique)
+    const key = makeEtaKey();
+    const hist = loadEtaHist(key);
+    const med = median(hist);
+    // Heuristique douce si pas d’historique: 6s + 0.25s/jour, bornée
+    const days = key.split("::").pop();
+    const guess = Math.min(45000, Math.max(4000, 6000 + (Number(days)||1)*250));
+    _etaRef.current = med ? Math.min(60000, Math.max(3000, med)) : guess;
+
+    _t0Ref.current = performance.now();
+    setShowProgress(true);
+    setProgress(1);
+    setEtaSeconds(Math.ceil(_etaRef.current / 1000));
+
+    if (_timerRef.current) clearInterval(_timerRef.current);
+    _timerRef.current = setInterval(() => {
+      const now = performance.now();
+      const elapsed = now - _t0Ref.current;
+      // ⚖️ Progression monotone : ne redescend JAMAIS
+      if (elapsed <= _etaRef.current) {
+        const raw = (elapsed / _etaRef.current) * 100;
+        const next = Math.max(1, Math.min(98, Math.round(raw)));
+        setProgress((prev) => Math.max(prev, next));
+        const remaining = Math.max(0, Math.ceil((_etaRef.current - elapsed) / 1000));
+        setEtaSeconds(remaining);
+      } else {
+        // Au-delà de l’estimation : on converge lentement vers 99%, ETA 0
+        setProgress((prev) => Math.min(99, prev + 0.5));
+        setEtaSeconds(0);
+      }
+    }, 200);
+  };
+
   const finishProgress = () => {
-    if (window.__btTimer) clearInterval(window.__btTimer);
+    if (_timerRef.current) { clearInterval(_timerRef.current); _timerRef.current = null; }
+    // durée réelle
+    const realMs = Math.max(1, Math.round(performance.now() - _t0Ref.current));
     setProgress(100);
-    setTimeout(() => { setShowProgress(false); setProgress(0); }, 450);
+    setEtaSeconds(0);
+    // persiste dans l’historique (affinage futur)
+    try {
+      const key = makeEtaKey();
+      const hist = loadEtaHist(key);
+      hist.push(realMs);
+      saveEtaHist(key, hist);
+    } catch {}
+    setTimeout(() => { setShowProgress(false); setProgress(0); setEtaSeconds(null); }, 450);
   };
 
   // ─────────────────────────── Rendu résultat (résumé) ───────────────────────────
@@ -441,7 +504,7 @@ export default function Backtest() {
   // ──────────────────────────────── Rendu page ────────────────────────────────
   return (
     <main className="bt-page">
-      <TopProgress active={pageLoading} />
+      <TopProgressBar active={loading && !showProgress} />
       <TopProgressBar show={showProgress} progress={progress} />
 
       {/* Tabs via PillTabs (même style que dashboard) */}
@@ -592,7 +655,6 @@ export default function Backtest() {
                 <CTAButton
                   type="submit"                 // ✅ soumet le form
                   variant="primary"
-                  fullWidth
                   disabled={
                       loading ||
                       !symbol || !timeframe || !startDate || !endDate ||
@@ -601,7 +663,7 @@ export default function Backtest() {
                 >
                   {loading ? " En cours..." : "Lancer le backtest"}
                 </CTAButton>
-                <InlineProgress show={showProgress} progress={progress} />
+                <InlineProgress show={showProgress} progress={progress} etaSeconds={etaSeconds} />
               </div>
 
               </form>
@@ -740,7 +802,6 @@ export default function Backtest() {
                 <CTAButton
                   type="submit"                 // ✅ soumet le form
                   variant="primary"
-                  fullWidth
                   disabled={
                       loading ||
                       !csvFile || !customSymbol || !customTF ||
@@ -750,8 +811,7 @@ export default function Backtest() {
                 >
                   {loading ? " En cours..." : " Lancer (CSV perso)"}
                 </CTAButton>
-
-                <InlineProgress show={showProgress} progress={progress} />
+                <InlineProgress show={showProgress} progress={progress} etaSeconds={etaSeconds} />
               </div>
 
             </form>

@@ -395,9 +395,10 @@
   flex-wrap: nowrap;             /* pas de retour à la ligne sur desktop */
 }
 
-/* le bouton garde sa taille, la barre prend tout l'espace restant */
-.bt-sticky-actions .bt-run{ 
-  flex: 0 0 auto;                /* taille du bouton = contenu */
+/* CTAButton: taille à son contenu (on ne force plus fullWidth) */
+.bt-sticky-actions .dbt-btn,
+.bt-sticky-actions button{
+  flex: 0 0 auto;
 }
 
 .bt-sticky-actions .bt-inline-progress{
@@ -424,6 +425,7 @@
   transition: width .18s ease;
 }
 
+
 .bt-sticky-actions .bt-inline-legend{
   margin-top: 0;
   display: inline-flex;
@@ -431,7 +433,10 @@
   align-items: baseline;
   font-size: .85rem;
   color: #cbd5e1;
-  white-space: nowrap;           /* “64% Analyse en cours…” tient sur une ligne */
+  white-space: normal;           /* ⬅️ autorise le retour à la ligne si besoin */
+  overflow: hidden;              /* ⬅️ jamais d’overflow visuel */
+  text-overflow: ellipsis;       /* ⬅️ coupe proprement si trop long */
+  min-width: 0;                  /* ⬅️ permet au texte de rétrécir */
 }
 
 .bt-sticky-actions .bt-inline-percent{
@@ -504,6 +509,10 @@
 @media (max-width: 640px){
   .bt-sticky-actions{ flex-wrap: wrap; }
   .bt-sticky-actions .bt-inline-progress{ flex-basis: 100%; }
+  .bt-sticky-actions .bt-inline-legend{
+    width: 100%;                 /* ⬅️ passe sous la barre en mobile si besoin */
+    justify-content: flex-end;   /* texte à droite, propre */
+  }
 }
 
 /* Empêche tout dépassement horizontal */

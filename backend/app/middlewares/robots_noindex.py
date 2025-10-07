@@ -2,7 +2,10 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 
 # Liste des chemins qu'on ne veut pas indexer
-NOINDEX_PATHS = ("/login", "/register", "/profile", "/admin", "/pricing")
+NOINDEX_PATHS = (
+    "/login", "/register", "/profile", "/admin", "/pricing",
+    "/backtest", "/csv-shop", "/dashboard", "/support", "/compare"
+)
 
 class RobotsNoIndexMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):

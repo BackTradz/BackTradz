@@ -29,6 +29,10 @@ PAIR_PIPS = {
 
     # --- Crypto ---
     "BTC-USD": 1, "ETH-USD": 0.01,
+    # ✅ XRP (explicite pour éviter le fallback crypto=0.01)
+    "XRP-USD": 0.0001, "XRPUSD": 0.0001,
+    # (si tu utilises les variantes USDT, on les pose aussi en direct)
+    "XRP-USDT": 0.0001, "XRPUSDT": 0.0001,
 
     # --- Forex majeures & crosses ---
     "EURUSD": 0.0001, "GBPUSD": 0.0001, "AUDUSD": 0.0001, "NZDUSD": 0.0001,
@@ -82,7 +86,7 @@ def get_pip(symbol: str) -> Optional[float]:
         return 0.1
 
     if _is_crypto(sym):
-        # BTC-USD déjà mappé. Par défaut: crypto fine = 0.01
+        # BTC/ETH/XRP déjà mappés ci-dessus. Par défaut: crypto fine = 0.01
         base = sym.split("-")[0]
         if base == "BTC":
             return 1.0
