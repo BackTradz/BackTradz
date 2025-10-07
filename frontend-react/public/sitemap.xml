@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- 🌍 Pages publiques principales -->
+  <url>
+    <loc>https://www.backtradz.com/</loc>
+    <priority>1.0</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/a-savoir</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/pricing</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- 📘 Pages légales -->
+  <url>
+    <loc>https://www.backtradz.com/legal/mentions-legales</loc>
+    <priority>0.6</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/legal/cgu</loc>
+    <priority>0.6</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/legal/politique-confidentialite</loc>
+    <priority>0.6</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+
+  <!-- 🔐 Pages utilisateurs (noindex mais connues de Google) -->
+  <url>
+    <loc>https://www.backtradz.com/login</loc>
+    <priority>0.2</priority>
+    <changefreq>never</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/register</loc>
+    <priority>0.2</priority>
+    <changefreq>never</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/resetpassword</loc>
+    <priority>0.2</priority>
+    <changefreq>never</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/profile</loc>
+    <priority>0.3</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/dashboard</loc>
+    <priority>0.3</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <!-- ⚙️ Pages internes (backtest / comparateur / CSVShop / admin) -->
+  <url>
+    <loc>https://www.backtradz.com/backtest</loc>
+    <priority>0.3</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/comparateur</loc>
+    <priority>0.3</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/csvshop</loc>
+    <priority>0.3</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.backtradz.com/admin</loc>
+    <priority>0.1</priority>
+    <changefreq>never</changefreq>
+  </url>
+
+  <!-- 📞 Support -->
+  <url>
+    <loc>https://www.backtradz.com/support</loc>
+    <priority>0.4</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+</urlset>

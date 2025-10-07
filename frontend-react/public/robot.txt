@@ -19,5 +19,4 @@ Allow: /
 Allow: /a-savoir
 Allow: /pricing
 Allow: /legal/
-# Sitemap (si tu en ajoutes un)
-# Sitemap: https://www.backtradz.com/sitemap.xml
+Sitemap: https://www.backtradz.com/sitemap.xml
