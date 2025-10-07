@@ -17,18 +17,16 @@ import MsgConnexionOverlay from "../../components/overlay/MsgConnexionOverlay";
 import DetailButton from "../../components/ui/button/DetailButton";
 import MetaRobots from "../../components/seo/MetaRobots";
 
-// TF à masquer côté front
-const EXCLUDED_TF = new Set(["M1", "D", "D1"]);
-
-// Helper: choix intelligent de la paire par défaut
-function pickPreferredPair(candidates) {
-  if (!candidates || candidates.length === 0) return "";
-  const set = new Set(candidates.map((p) => p.toUpperCase()));
-  if (set.has("BTCUSD")) return "BTCUSD";
-  const btcish = candidates.find((p) => /BTC|XBT/i.test(p));
-  if (btcish) return btcish;
-  return candidates[0];
-}
+// V1.3 Helpers dédiés à CSVShop (déplacés)
+import {
+  EXCLUDED_TF,
+  pickPreferredPair,
+  normalizeLibraryRows,
+  getApiTokenSafe,
+  withToken,
+} from "./helpers/csvshop.helpers";
+// Hook responsive pour la grille (déplacé)
+import useResponsiveGridStep from "./hooks/useResponsiveGridStep";
 
 export default function CSVShop() {
   // Librairie publique (items) et états globaux
@@ -55,39 +53,15 @@ export default function CSVShop() {
   const [showExtractSection, setShowExtractSection] = useState(true);
 
 
-  // Pagination visuelle (éviter la surcharge à l’écran)
-  // ✅ Mobile aligné sur le CSS: ≤640px → 10 ; sinon 20
-  const initialStepRef = useRef(16);
-  const [visibleCount, setVisibleCount] = useState(initialStepRef.current);
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(max-width: 640px)");
-    const apply = () => {
-      const step = mq.matches ? 10 : 16;
-      initialStepRef.current = step;
-      setVisibleCount(step);
-    };
-    apply(); // init
-    // met à jour si l’utilisateur change d’orientation / redimensionne
-    mq.addEventListener?.("change", apply);
-    return () => mq.removeEventListener?.("change", apply);
-  }, []);
+  //V1.3Pagination visuelle (extrait en hook responsive)
+  const { initialStepRef, visibleCount, setVisibleCount } = useResponsiveGridStep();
 
   // Chargement initial de la librairie (normalise + filtre TF instables)
   useEffect(() => {
     (async () => {
       try {
         const data = await listCsvLibrary();
-        let rows = Array.isArray(data) ? data : (Array.isArray(data?.files) ? data.files : []);
-        rows = rows.map((it) => ({
-          pair: (it.pair || it.symbol || "").toUpperCase(),
-          timeframe: (it.timeframe || it.tf || "").toUpperCase(),
-          name: it.name || it.filename || "",
-          path: it.path || it.relative_path || "",
-          year: String(it.year || "").padStart(4, "0"),
-          month: String(it.month || "").padStart(2, "0"),
-          source: it.source || "output",
-        }));
+        let rows = normalizeLibraryRows(data);
         rows = rows.filter((it) => !EXCLUDED_TF.has(it.timeframe));
         setItems(rows);
       } catch (e) {
@@ -225,16 +199,7 @@ export default function CSVShop() {
     setError("");
     try {
       const data = await listCsvLibrary();
-      let rows = Array.isArray(data) ? data : (Array.isArray(data?.files) ? data.files : []);
-      rows = rows.map((it) => ({
-        pair: (it.pair || it.symbol || "").toUpperCase(),
-        timeframe: (it.timeframe || it.tf || "").toUpperCase(),
-        name: it.name || it.filename || "",
-        path: it.path || it.relative_path || "",
-        year: String(it.year || "").padStart(4, "0"),
-        month: String(it.month || "").padStart(2, "0"),
-        source: it.source || "output",
-      }));
+      let rows = normalizeLibraryRows(data);
       rows = rows.filter((it) => !EXCLUDED_TF.has(it.timeframe));
       setItems(rows);
     } catch (e) {
@@ -242,22 +207,6 @@ export default function CSVShop() {
     } finally {
       setLoading(false);
     }
-  }
-
-  // BTZ-PATCH (CSVShop.jsx) : token robuste + conserver f.path
-  function getApiTokenSafe() {
-    try {
-      return localStorage.getItem("apiKey")
-          || (JSON.parse(localStorage.getItem("user")||"{}")?.token)
-          || "";
-    } catch { return localStorage.getItem("apiKey") || ""; }
-  }
-
-  function withToken(url) {
-    const t = getApiTokenSafe();
-    if (!t) return url;
-    const sep = url.includes("?") ? "&" : "?";
-    return `${url}${sep}token=${encodeURIComponent(t)}`;
   }
 
   // v1.2 — visiteur vs connecté (simple, sans appel réseau)
