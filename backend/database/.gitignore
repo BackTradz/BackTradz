@@ -1,0 +1,3 @@
+# backend/database/.gitignore
+*.json
+!.gitkeep
