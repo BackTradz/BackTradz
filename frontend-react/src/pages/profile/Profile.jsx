@@ -12,6 +12,7 @@ import { me } from "../../sdk/authApi";
 import { updateProfile, unsubscribe, deleteAccount } from "../../sdk/userApi";
 import SupportCard from "./composants/SupportCard"
 import PaymentGraceOverlay from "../../components/overlay/PaymentGraceOverlay";
+import MetaRobots from "../../components/seo/MetaRobots";
 
 export default function ProfilPage() {
   const [user, setUser] = useState(null);
@@ -208,6 +209,7 @@ export default function ProfilPage() {
 
   return (
     <div className="page-profile container fade-in">
+      <MetaRobots content="noindex,nofollow" />
       <TopProgress active={pageLoading} />
 
       <h1 className="page-title">Mon profil</h1>

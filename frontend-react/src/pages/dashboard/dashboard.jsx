@@ -8,6 +8,7 @@ import BacktestList from "./composants/BacktestList";
 import CsvList from "./composants/CsvList";
 import PillTabs from "../../components/ui/switchonglet/PillTabs";
 import PinnedInsightsWall from "./composants/PinnedInsightsWall";
+import MetaRobots from "../../components/seo/MetaRobots";
 
 export default function Dashboard() {
   const { user, setUser } = useAuth();
@@ -30,6 +31,7 @@ export default function Dashboard() {
    return (
     // ⛳ Garde anti-sursaut : réserve ~60vh pendant le chargement des listes
     <div className="dash-container dash-wide dash-flat page-skeleton-guard">
+      <MetaRobots content="noindex,nofollow" />
       {/* Onglets */}
       <div className="row-center row-top">
         <PillTabs

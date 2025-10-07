@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./legal.css";
+import MetaRobots from "../../components/seo/MetaRobots";
 
 export default function LegalLayout({ title, children }) {
   const { pathname } = useLocation();
@@ -13,6 +14,7 @@ export default function LegalLayout({ title, children }) {
 
   return (
     <div className="legal-page min-h-screen">
+      <MetaRobots content="index,follow" />
       <header className="legal-hero">
         <div className="container-std">
           <div className="legal-topbar">

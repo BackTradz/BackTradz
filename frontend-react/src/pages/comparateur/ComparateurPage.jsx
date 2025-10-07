@@ -8,6 +8,7 @@ import ChartControls from "./composants/ChartControls";
 import ListeAnalyses from "./composants/ListeAnalyses";
 // ⬇️ mêmes helpers que la liste (pas de mapping en dur)
 import { formatPair, formatStrategy } from "../../lib/labels";
+import MetaRobots from "../../components/seo/MetaRobots";
 
 const METRICS = [
   { value: "session", label: "Sessions (Asia/London/NY)" },
@@ -132,6 +133,8 @@ export default function ComparateurPage() {
 
   return (
     <div className="cmp-page">
+      {/* SEO : comparateur = espace utilisateur → noindex */}
+      <MetaRobots content="noindex,nofollow" />
       <div className="cmp-header">
         <div>
           <h1 className="cmp-title">Comparateur</h1>

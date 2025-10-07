@@ -15,6 +15,8 @@ import CSVInfoBanner from "./composants/CSVInfoBanner";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
 import MsgConnexionOverlay from "../../components/overlay/MsgConnexionOverlay";
 import DetailButton from "../../components/ui/button/DetailButton";
+import MetaRobots from "../../components/seo/MetaRobots";
+
 // TF à masquer côté front
 const EXCLUDED_TF = new Set(["M1", "D", "D1"]);
 
@@ -343,6 +345,7 @@ export default function CSVShop() {
 
     return (
     <>
+      <MetaRobots content="noindex,nofollow" />
       {/* Barre de chargement globale */}
       <TopProgress active={loading} />
       {/* ⛳ Garde anti-sursaut : réserve ~60vh pendant le chargement */}

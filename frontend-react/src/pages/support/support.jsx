@@ -8,6 +8,7 @@ import { api } from "../../sdk/apiClient";
 import PillTabs from "../../components/ui/switchonglet/PillTabs";
 // ⚠️ ajuste le chemin si besoin suivant ton projet
 import CTAButton from "../../components/ui/button/CTAButton";
+import MetaRobots from "../../components/seo/MetaRobots";
 
 export default function SupportPage() {
   const [active, setActive] = useState("contact"); // "contact" | "feedback"
@@ -63,6 +64,7 @@ export default function SupportPage() {
 
   return (
     <div className="support-page min-h-screen">
+      <MetaRobots content="noindex,nofollow" />
       {/* HERO (centré) */}
       <section className="support-hero">
         <div className="container-std" style={{ textAlign: "center" }}>

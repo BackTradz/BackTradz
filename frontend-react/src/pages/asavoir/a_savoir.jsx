@@ -12,8 +12,10 @@ import STRATEGIES_MAP from "../../config/labels/strategies.map";
 import PARAMS_MAP from "../../config/labels/params.map";
 import STRATEGY_DOCS from "../../config/docs/strategies.docs";
 import PairExplorer from "./composants/PairExplorer";
+import MetaRobots from "../../components/seo/MetaRobots";
 
 export default function ASavoirPage() {
+
   // ⚙️ Placeholder data – à compléter plus tard
   const strategies = [
     { key: "ob_pullback_pure", label: "OB pullback (pure)", tags: ["M5", "M15"], todo: true },
@@ -153,6 +155,7 @@ const csvExample = "2025-05-01 03:15:00+00:00,1809.45,1812.07,1808.98,1812.07,65
 
   return (
     <div className="a-savoir-page min-h-screen">
+      <MetaRobots content="index,follow" />
        <TopProgress active={loadingPage} height={3} from="#22d3ee" to="#6366f1" />
 
       {/* HERO */}

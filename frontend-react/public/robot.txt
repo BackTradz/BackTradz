@@ -1,0 +1,23 @@
+User-agent: *
+# Bloqués (pages privées / app intérieure)
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /backtest/
+Disallow: /comparateur/
+Disallow: /csv-shop/
+Disallow: /login
+Disallow: /succes
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /support
+Disallow: /api/
+
+# Autorisés (pages marketing / légales)
+Allow: /
+Allow: /a-savoir
+Allow: /pricing
+Allow: /legal/
+# Sitemap (si tu en ajoutes un)
+# Sitemap: https://www.backtradz.com/sitemap.xml

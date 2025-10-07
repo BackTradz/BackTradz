@@ -8,6 +8,7 @@
 import { useState } from "react";
 import "./admin.css"; // ✅ CSS dédié admin
 import AdminMaintenance from "./composants/AdminMaintenance"; // 👈 AJOUT
+import MetaRobots from "../../components/seo/MetaRobots";
 
 import AdminSidebar from "./composants/AdminSidebar";
 import UserTable from "./composants/UserTable";
@@ -21,6 +22,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-container">
+      {/* SEO : page privée → noindex */}
+      <MetaRobots content="noindex,nofollow" />
       <AdminSidebar active={tab} onChange={setTab} />
 
       <main className="admin-main">

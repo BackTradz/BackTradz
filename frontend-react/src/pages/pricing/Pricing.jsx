@@ -16,6 +16,7 @@ import { me } from "../../sdk/authApi";
 // import reutilisables
 import CTAButton from "../../components/ui/button/CTAButton"
 import TopProgress  from "../../components/ui/progressbar/TopProgress"
+import MetaRobots from "../../components/seo/MetaRobots";
 
 // ⚠️ Garde ces IDs alignés avec le backend
 const RAW_OFFERS = {
@@ -270,6 +271,7 @@ export default function Pricing() {
 
   return (
     <main className="pr-page">
+      <MetaRobots content="index,follow" />
         {/* ✅ Barre de progression en haut, seulement pendant le chargement initial */}
 
         <TopProgress active={loadingInit} height={3} from="#22d3ee" to="#6366f1" />

@@ -11,6 +11,7 @@ import "./auth.css";
 import { login } from "../../sdk/authApi";
 import { useAuth } from "../../auth/AuthContext"; 
 import posthog, { posthogIdentify } from '../../analytics/posthog';
+import MetaRobots from "../../components/seo/MetaRobots";
 
 // Helper: identifie après login en tentant /api/me (pour récupérer l'email)
 // v1.2: utilise le header attendu par le backend: X-API-Key
@@ -201,6 +202,7 @@ export default function AuthPage() {
 
   return (
     <div className="auth-container">
+      <MetaRobots content="noindex,nofollow" />
       {/* BG */}
         <div className="auth-bg" />
 

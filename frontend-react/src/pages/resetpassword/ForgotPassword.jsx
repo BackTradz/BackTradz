@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import BacktradzLogo from "../../components/ui/BacktradzLogo/BacktradzLogo";
 import CTAButton from "../../components/ui/button/CTAButton";
 import "../auth/auth.css"; // même CSS que AuthPage
+import MetaRobots from "../../components/seo/MetaRobots";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -40,6 +41,7 @@ export default function ForgotPassword() {
 
   return (
     <div className="auth-container">
+      <MetaRobots content="noindex,nofollow" />
       <div className="auth-bg" />
 
       <div className="auth-box login-active">

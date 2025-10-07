@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import posthog from '../analytics/posthog';
+import MetaRobots from "../../components/seo/MetaRobots";
 
 const Success = () => {
   const [searchParams] = useSearchParams();
@@ -35,6 +36,7 @@ const Success = () => {
 
   return (
     <div className="container success-page">
+      <MetaRobots content="noindex,nofollow" />
       <h2>🎉 Merci pour votre achat !</h2>
       <p>✅ Offre : <strong>{successData.offer}</strong></p>
       <p>💸 Prix payé : <strong>{successData.price} €</strong></p>

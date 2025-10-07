@@ -41,6 +41,7 @@ import { getUiParamsSpec } from "../../config/labels/params.map"; // 🔥 on uti
 import DetailButton from "../../components/ui/button/DetailButton";
 import ResultInsightsOverlay from "../../components/overlay/ResultInsightsOverlay";
 import MsgConnexionOverlay from "../../components/overlay/MsgConnexionOverlay";
+import MetaRobots from "../../components/seo/MetaRobots";
 
 export default function Backtest() {
   // ───────────────────────── Onglet actif ─────────────────────────
@@ -504,6 +505,7 @@ export default function Backtest() {
   // ──────────────────────────────── Rendu page ────────────────────────────────
   return (
     <main className="bt-page">
+      <MetaRobots content="noindex,nofollow" />
       <TopProgressBar active={loading && !showProgress} />
       <TopProgressBar show={showProgress} progress={progress} />
 

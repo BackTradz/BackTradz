@@ -5,6 +5,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import BacktradzLogo from "../../components/ui/BacktradzLogo/BacktradzLogo";
 import CTAButton from "../../components/ui/button/CTAButton"
 import "../auth/auth.css";
+import MetaRobots from "../../components/seo/MetaRobots";
 
 export default function ResetPassword() {
   const { token } = useParams(); // route: /reset-password/:token
@@ -48,6 +49,7 @@ export default function ResetPassword() {
 
   return (
     <div className="auth-container">
+      <MetaRobots content="noindex,nofollow" />
       <div className="auth-bg" />
 
       <div className="auth-box login-active">
