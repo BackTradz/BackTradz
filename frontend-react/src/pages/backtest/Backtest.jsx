@@ -29,6 +29,9 @@ import ParamInput from "./composants/ParamInput";
 // import BacktestCard from "../../components/backtest/BacktestCard"; // optionnel
 import TopProgressBar from "./composants/TopProgressBar";
 import InlineProgress from "./composants/InlineProgress";
+// Helpers & hook (déplacés pour alléger la page)
+import { parseDateInput, daysBetweenIncl, collectParams } from "./helpers/backtest.helpers";
+import useProgressETA from "./hooks/useProgressETA";
 
 // ✅ Switch réutilisable
 import PillTabs from "../../components/ui/switchonglet/PillTabs";
@@ -89,42 +92,8 @@ export default function Backtest() {
   const [overlayPeriod, setOverlayPeriod] = useState("");  // 👈 nouveau
   const [showLoginOverlay, setShowLoginOverlay] = useState(false); // v1.2 — overlay connexion
 
-
-
-  // ===== Dates helpers (FR + ISO) =====
-  // Parse "DD-MM-YYYY" / "DD/MM/YYYY" / "YYYY-MM-DD" en Date locale minuit
-  const parseDateInput = (s) => {
-    if (!s) return null;
-    const str = String(s).trim();
-
-    // DD-MM-YYYY ou DD/MM/YYYY
-    const m = str.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})$/);
-    if (m) {
-      const [, dd, mm, yyyy] = m;
-      return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-    }
-
-    // YYYY-MM-DD
-    const m2 = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (m2) {
-      const [, yyyy, mm, dd] = m2;
-      return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
-    }
-
-    // Fallback (évite Invalid Date si navigateur parse autre format)
-    const d = new Date(str);
-    return isNaN(d) ? null : d;
-  };
-
-  // Diff inclusif en jours, robuste DST (UTC)
-  const daysBetweenIncl = (a, b) => {
-    const d1 = parseDateInput(a), d2 = parseDateInput(b);
-    if (!d1 || !d2) return 0;
-    const t1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
-    const t2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-    return Math.floor((t2 - t1) / 86400000) + 1;
-  };
-
+  // =====V1.3 Dates helpers déplacés dans helpers/backtest.helpers.js (mêmes signatures) =====
+  
   // ===== Détection admin (serveur only) =====
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -237,24 +206,7 @@ export default function Backtest() {
     }, [pairs]);
 
 
-  // ─────────────── Collecte params dynamiques (utilise data-key pour friendly keys) ───────────────
-  const collectParams = (scope) => {
-    const nodes = document.querySelectorAll(`[data-scope='${scope}'][data-param='1']`);
-    const obj = {};
-    nodes.forEach((el) => {
-      const key = el.name;
-      if (!key) return;
-      if (el.type === "checkbox") {
-        obj[key] = el.checked;
-      } else {
-        if (el.value !== "") {
-          // on laisse string; runBacktestMapped normalisera/castera
-          obj[key] = el.value;
-        }
-      }
-    });
-    return obj;
-  };
+  // ─────────────── V1.3 Collecte params dynamiques déplacée dans helpers/backtest.helpers.js ───────────────
 
   // ───────────────────────────── Run OFFICIEL ─────────────────────────────
   const onRunOfficial = async (e) => {
@@ -333,15 +285,11 @@ export default function Backtest() {
     setCsvFile(f);
   };
 
-    // états + helpers (courts)
-  const [progress, setProgress] = useState(0);
-  const [showProgress, setShowProgress] = useState(false);
-  const [etaSeconds, setEtaSeconds] = useState(null); // ⏱️ ETA à afficher
-  const _timerRef = useRef(null);
-  const _t0Ref = useRef(0);
-  const _etaRef = useRef(8000); // estimation ms (par défaut 8s, ajustée ensuite)
+  // états progression gérés via hook dédié (useProgressETA)
+  const { progress, showProgress, etaSeconds, begin: beginProgress, finish: finishProgress } =
+    useProgressETA(() => makeEtaKey());
 
-  // 🔎 clef d’historique ETA : (strat, symbol, tf, durée de période)
+    // 🔎 clef d’historique ETA : (strat, symbol, tf, durée de période)
   const makeEtaKey = () => {
     const strat = (tab === "official" ? selectedStratOfficial : selectedStratCustom) || "NA";
     const sym   = (tab === "official" ? symbol : customSymbol) || "NA";
@@ -352,70 +300,7 @@ export default function Backtest() {
     return `bt_eta::${strat}::${sym}::${tfv}::${Math.max(1, days)}`;
   };
 
-  // 📦 lit/écrit l’historique des durées (ms) en localStorage
-  const loadEtaHist = (key) => {
-    try { return JSON.parse(localStorage.getItem(key) || "[]"); } catch { return []; }
-  };
-  const saveEtaHist = (key, arr) => {
-    try { localStorage.setItem(key, JSON.stringify(arr.slice(-15))); } catch {}
-  };
-  const median = (arr) => {
-    if (!arr?.length) return null;
-    const a = [...arr].sort((x,y)=>x-y);
-    const i = Math.floor(a.length/2);
-    return a.length%2 ? a[i] : Math.round((a[i-1]+a[i])/2);
-  };
-
-  // 🚦 Nouvelle progression “réelle estimée” (plus de blocage à 90%)
-  const beginProgress = () => {
-    // init ETA depuis historique (ou heuristique)
-    const key = makeEtaKey();
-    const hist = loadEtaHist(key);
-    const med = median(hist);
-    // Heuristique douce si pas d’historique: 6s + 0.25s/jour, bornée
-    const days = key.split("::").pop();
-    const guess = Math.min(45000, Math.max(4000, 6000 + (Number(days)||1)*250));
-    _etaRef.current = med ? Math.min(60000, Math.max(3000, med)) : guess;
-
-    _t0Ref.current = performance.now();
-    setShowProgress(true);
-    setProgress(1);
-    setEtaSeconds(Math.ceil(_etaRef.current / 1000));
-
-    if (_timerRef.current) clearInterval(_timerRef.current);
-    _timerRef.current = setInterval(() => {
-      const now = performance.now();
-      const elapsed = now - _t0Ref.current;
-      // ⚖️ Progression monotone : ne redescend JAMAIS
-      if (elapsed <= _etaRef.current) {
-        const raw = (elapsed / _etaRef.current) * 100;
-        const next = Math.max(1, Math.min(98, Math.round(raw)));
-        setProgress((prev) => Math.max(prev, next));
-        const remaining = Math.max(0, Math.ceil((_etaRef.current - elapsed) / 1000));
-        setEtaSeconds(remaining);
-      } else {
-        // Au-delà de l’estimation : on converge lentement vers 99%, ETA 0
-        setProgress((prev) => Math.min(99, prev + 0.5));
-        setEtaSeconds(0);
-      }
-    }, 200);
-  };
-
-  const finishProgress = () => {
-    if (_timerRef.current) { clearInterval(_timerRef.current); _timerRef.current = null; }
-    // durée réelle
-    const realMs = Math.max(1, Math.round(performance.now() - _t0Ref.current));
-    setProgress(100);
-    setEtaSeconds(0);
-    // persiste dans l’historique (affinage futur)
-    try {
-      const key = makeEtaKey();
-      const hist = loadEtaHist(key);
-      hist.push(realMs);
-      saveEtaHist(key, hist);
-    } catch {}
-    setTimeout(() => { setShowProgress(false); setProgress(0); setEtaSeconds(null); }, 450);
-  };
+  // V1.3 🚦 Progression/ETA déplacée dans hooks/useProgressETA.js — mêmes appels beginProgress()/finishProgress()
 
   // ─────────────────────────── Rendu résultat (résumé) ───────────────────────────
   const resultView = useMemo(() => {
