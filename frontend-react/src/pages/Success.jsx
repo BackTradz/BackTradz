@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import posthog from '../analytics/posthog';
-import MetaRobots from "../../components/seo/MetaRobots";
+import MetaRobots from "../components/seo/MetaRobots";
 
 const Success = () => {
   const [searchParams] = useSearchParams();
