@@ -12,13 +12,12 @@ import { useAuth } from "../../../auth/AuthContext";
 
 //overlay import 
 import ConfirmDialog from "./ConfirmDialog";
-import BacktestDetailsModal from "./BacktestDetailsModal";
+import BacktestInsightsOverlay from "../../../components/overlay/BacktestInsightsOverlay";
 
 // import Reutilisable//
 import CTAButton from "../../../components/ui/button/CTAButton";
 import DeleteButton from "../../../components/ui/button/DeleteButton"
 import DetailButton from "../../../components/ui/button/DetailButton"
-import BacktestInsightsOverlay from "../../../components/overlay/BacktestInsightsOverlay";
 import BacktestPinsSection from "./BacktestPinsSection";
 import "../../../components/overlay/insights.css"; // styles overlay (scopés .ins-*)
 import usePip from "../../../hooks/usePip"; 

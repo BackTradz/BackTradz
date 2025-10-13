@@ -13,6 +13,27 @@
   --cmp-surface-1: rgba(8, 16, 32, 0.70);  /* champs/inputs/éléments internes */
   --cmp-surface-2: rgba(8, 16, 32, 0.60);  /* éléments secondaires (pills/badges) */
 
+  /* 🎴 FONDS — SECTIONS PRINCIPALES (cartes “externes”) — RECETTE AURORA CMP */
+  --cmp-bg-section-outer:
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.10)  0%,
+      rgba(22, 34, 68, 0.09)  42%,
+      rgba(10, 16, 28, 0.08)  62%,
+      rgba(6, 10, 18, 0.06)  82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.65) 0%,
+      rgba(6, 10, 18, 0.65) 100%
+    );
+
+  /* 🎴 FONDS — BLOCS INTERNES (sous-sections) — RECETTE VERRE COMPARATEUR */
+  --cmp-bg-section-inner:
+    radial-gradient(120% 140% at 50% 115%, rgba(0,0,0,.14) 0%, rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(10,16,28,.64) 0%, rgba(8,12,20,.66) 100%);
+
+  /* Ombres renforcées pour profondeur visuelle */
+  --cmp-shadow-soft: 0 4px 16px rgba(0,0,0,0.35), 0 0 32px rgba(20,60,180,0.05);
    /* 🔧 Track de scrollbar sombre (manquait → restait blanc par défaut) */
   --cmp-scroll-track: var(--cmp-surface-1);
   /* 🔧 Thumb de scrollbar (clair sur fond sombre) */
@@ -23,16 +44,25 @@
   --cmp-stroke-0: rgba(255,255,255,0.10);
   --cmp-stroke-1: rgba(255,255,255,0.08);
 
-  /* Ombres cartes */
+  /* Ombres cartes legacy (non utilisée mais gardée si besoin) */
   --cmp-shadow: 0 8px 28px rgba(0,0,0,0.35);
+  /* 🎴 Verre “métrique” (pour chaque item) */
+  --cmp-bg-metric:
+    radial-gradient(120% 160% at 50% 120%, rgba(0,0,0,.18) 0%, rgba(0,0,0,0) 58%),
+    linear-gradient(180deg, rgba(12,18,30,.66) 0%, rgba(10,16,28,.72) 100%);
+  --cmp-stroke-metric: rgba(255,255,255,0.08);
+  --cmp-stroke-metric-hover: rgba(255,255,255,0.14);
 }
 
+/* =============== 02) STRUCTURE PAGE =============== */
 .cmp-page {
-  /* ↓ on réduit le padding bas pour rapprocher du footer */
-  padding: 32px 20px 24px; /* (avant 60px) */
-  min-height: 100vh;             /* ✅ la page occupe toute la hauteur */
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding: 32px 20px 24px;
+  background: var(--cmp-bg-section-outer); /* aurora global */
+  position: relative;
+  z-index: 0;
 }
 
 .cmp-title {
@@ -40,48 +70,105 @@
   font-weight: 800;
   letter-spacing: 0.2px;
   margin: 0;
-}
-.cmp-sub {
-  opacity: 0.8;
-  margin-top: 6px;
+  margin-inline: auto;         /* force le centrage horizontal */
+  /* ✅ retour dans le flux : centrage natif via le parent */
+  position: static;
+  left: auto;
+  top: auto;
+   /* Chrome typographique identique au Hero */
+  color: var(--text-main); /* fallback non-webkit */
+  background: linear-gradient(180deg, #f8faff 0%, #cdd9ff 48%, #9ab4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  /* profondeur subtile + lisibilité (mêmes valeurs que Hero) */
+  text-shadow:
+    0 0 10px rgba(80,130,255,0.06),
+    0 2px 6px rgba(0,0,0,0.35);
+  transition: filter 0.4s ease;
+  will-change: filter; /* micro-optimisation */
+  width: max-content;
+  pointer-events: none;            /* évite de gêner les clics sur le compteur */
 }
 
-.cmp-header {
+.cmp-sub { opacity: 0.8; margin-top: 6px; text-align: center; }
+/* V1.3 — Sous-titre desktop vs mobile */
+.cmp-sub--mob { display: none; }
+@media (max-width: 820px){
+  .cmp-sub--desk { display: none; }
+  .cmp-sub--mob  { display: block; }
+}
+
+.cmp-header{
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
+  flex-direction: column;
+  align-items: center;         /* centre titre + sous-titre */
+  text-align: center;
+  gap: 8px;
   margin-bottom: 24px;
+  width: 100%;                 /* s'étend sur toute la ligne */
 }
 
-.cmp-counter {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.06);
-  padding: 8px 12px;
-  border-radius: 999px;
+
+
+/* ⚓️ Placement explicite (et priorité forte pour éviter tout override) */
+.cmp-box.cmp-tools .cmp-selects { grid-column: 1 !important; }  /* selects à gauche */
+.cmp-box.cmp-tools .cmp-tools-bar { grid-column: 2 !important; }/* compteur à droite */
+/* 🔒 Verrou du layout si un autre style réécrit .cmp-tools (doublon, etc.) */
+.cmp-box.cmp-tools { grid-template-columns: 1fr auto !important; }
+
+.cmp-counter--glass{
+  padding: 6px 10px;                     /* format compact */
   font-weight: 700;
-  backdrop-filter: blur(6px);
+  font-size: 13px;
+  border-radius: 12px;
+  background:
+    radial-gradient(120% 160% at 50% 120%, rgba(0,0,0,.14) 0%, rgba(0,0,0,0) 58%),
+    linear-gradient(180deg, rgba(18,24,38,.42) 0%, rgba(12,18,30,.42) 100%);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 14px rgba(0,0,0,0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
+/* Layout 2 colonnes */
 .cmp-content {
   display: grid;
-  grid-template-columns: 380px 1fr;
+  grid-template-columns: 380px minmax(0, 1fr); /* ⬅️ empêche la colonne droite de déborder */
   gap: 22px;
-  flex: 1;                        /* ✅ le contenu remplit l'espace sous le header */
-  align-items: start;
+  flex: 1;
+  align-items: start;          /* fusion du fix d’alignement */
+  position: relative;          /* fusion du fix d’empilement */
+  z-index: 1;
+}
+/* Empêche la grille et ses colonnes de “pousser” en overflow horizontal */
+.cmp-left, .cmp-right { min-width: 0; }
+.cmp-page { box-sizing: border-box; }
+
+/* ✨ Colonne gauche (bloc liste) en aurora */
+.cmp-left > .cmp-box{
+  background: var(--cmp-bg-section-outer);
+  box-shadow: var(--cmp-shadow-soft);
 }
 
+/* =============== 03) SECTIONS / CARTES =============== */
 .cmp-box {
-  /* ====== CARD / SECTION ====== */
-  background: var(--cmp-surface-0);
+  background: var(--cmp-bg-section-inner);
   border: 1px solid var(--cmp-stroke-0);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: var(--cmp-shadow);
-  /* ↓ évite une marge basse implicite si un style global cible .card */
+  box-shadow: var(--cmp-shadow-soft);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background .25s ease, box-shadow .25s ease;
   margin-bottom: 0;
+  position: relative;
+  z-index: 2;
 }
-
+/* ✅ Espace clair entre la barre de selects (box outils) et le chart */
+.cmp-box.cmp-tools{
+  margin-bottom: 28px;               /* passe APRES .cmp-box → prend l’ascendant */
+}
+/* =============== 04) LISTE GAUCHE =============== */
 .cmp-left-header {
   display: flex;
   align-items: center;
@@ -104,6 +191,37 @@
   background: linear-gradient(90deg, rgba(50,120,255,0.35), rgba(75,0,255,0.30));
   border: 1px solid var(--cmp-stroke-1);
 }
+/* ⬇️ Dans l’en-tête de la liste, “Mes analyses” doit être un TITRE, pas un bouton. */
+.cmp-left-header .cmp-pill{
+  background: transparent;                 /* plus de gradient bouton */
+  border: none;                            /* pas de contour pill */
+  border-radius: 8px;                      /* forme plus “label” que chip */
+  padding: 0 10px;                         /* compacité */
+  font-weight: 800;                        /* titre */
+  letter-spacing: .2px;
+  color: rgba(255,255,255,.88);            /* lisible sur fond aurora */
+  box-shadow: none;
+  cursor: default;                         /* indicateur non-cliquable */
+  position: relative;
+}
+/* Petite barre verticale signature pour le côté “section title” */
+.cmp-left-header .cmp-pill::before{
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1.2em;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(180deg,#4f86ff,#7a5bff);
+}
+/* Neutraliser tout hover hérité (reste titre statique) */
+.cmp-left-header .cmp-pill:hover{
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
 
 .cmp-list {
   /* Liste propre, sans bullet, pens&eacute;e pour de TR&Egrave;S nombreuses analyses */
@@ -121,20 +239,25 @@
   position: relative; /* nécessaire pour le pseudo-élément d’accent */
   border-radius: 12px;
   padding: 10px;
-  background: var(--cmp-surface-1);
-  border: 1px solid var(--cmp-stroke-1);
+  background: var(--cmp-bg-metric);       /* 🧊 verre métrique */
+  border: 1px solid var(--cmp-stroke-metric);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   transition: transform .12s ease, background .12s ease, border-color .12s ease;
 }
 .cmp-item:hover {
   transform: translateY(-1px);
-  background: rgba(8,16,32,0.78);
-  border-color: var(--cmp-stroke-0);
+  border-color: var(--cmp-stroke-metric-hover);
 }
+
 .cmp-item.is-checked {
-  /* fond légèrement relevé au lieu d’un halo bleu */
-  background: linear-gradient(180deg, rgba(70,140,255,0.10), rgba(70,140,255,0.06)), var(--cmp-surface-1);
+  /* surcouche légère bleutée sur le verre (propre, pas de glow sale) */
+  background:
+    linear-gradient(180deg, rgba(70,140,255,0.12), rgba(70,140,255,0.06)),
+    var(--cmp-bg-metric);
   border-color: rgba(90,150,255,0.38);
 }
+
 /* Accent latéral à gauche quand sélectionné (propre, sans “glow”) */
 .cmp-item.is-checked::before {
   content: "";
@@ -194,9 +317,12 @@
 .cmp-badge--trades b { font-size: 14px; line-height: 1; }
 .cmp-badge--trades i { font-style: normal; font-size: 10px; opacity: .85; line-height: 1; }
 
-.cmp-right { display: grid; gap: 16px; }
-.cmp-tools { display: grid; gap: 12px; }
-.cmp-selects { display: flex; gap: 12px; flex-wrap: wrap; }
+.cmp-selects {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;                      /* évite d’imposer une largeur > colonne */ 
+}
 .cmp-select { display: grid; gap: 6px; min-width: 220px; }
 /* Select natif (fallback) — ton Select custom garde ses propres styles,
    mais le conteneur .cmp-box déjà foncé harmonise le rendu global. */
@@ -209,7 +335,20 @@
   outline: none;
 }
 
-.cmp-chart { padding: 0; overflow: hidden; }
+.cmp-chart {                 /* section graph/table */
+  position: relative;
+  z-index: 3;
+  display: block;
+  padding: 0;
+  /* V1.3 Responsive: autorise le scroll horizontal quand l’espace manque */
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+/* Contenu “verrouillé” : évite le rétrécissement ridicule < 560px */
+.cmp-chart-inner{
+  min-width: 560px;          /* base lisible (tab + chart) */
+}
 .cmp-chart-head {
   padding: 16px 16px 0 16px;
   display: grid;
@@ -225,10 +364,10 @@
   border: 1px solid var(--cmp-stroke-1);
   background: var(--cmp-surface-2);
 }
-.cmp-legend-pill.c1 { background: #43A6FF; }
-.cmp-legend-pill.c2 { background: #9B59FF; }
-.cmp-legend-pill.c3 { background: #00D0A6; }
-.cmp-legend-pill.c4 { background: #FFA833; }
+.cmp-legend-pill.c1 { background: #2F6BFF; }  /* Bleu profond */
+.cmp-legend-pill.c2 { background: #7A5BFF; }  /* Mauve profond */
+.cmp-legend-pill.c3 { background: #00A36C; }  /* Vert profond */
+.cmp-legend-pill.c4 { background: #FF9A3E; }  /* Orange lisible */
 .cmp-legend-pill.c5 { background: #FF2E8A; }
 .cmp-legend-pill.c6 { background: #6266FF; }
 
@@ -243,6 +382,7 @@
 }
 .cmp-table {
   width: 100%;
+  min-width: 560px;          /* garde des cellules lisibles, sinon h-scroll */
   border-collapse: collapse;
 }
 .cmp-table th, .cmp-table td {
@@ -253,22 +393,19 @@
 .cmp-table th { opacity: 0.8; font-weight: 700; }
 .cmp-bucket { font-weight: 700; opacity: 0.9; }
 
-.cmp-chart-canvas {
-  /* ✅ on laisse le conteneur grandir ; on garde un plancher visuel propre */
-  min-height: 360px;
+.cmp-chart-canvas {          /* fusion: conserve toutes les props + arrondi */
+  min-height: 360px;                                 /* plancher visuel */
   border-top: 1px solid var(--cmp-stroke-1);
-  /* fond plus sombre sous le canvas pour coller au reste */
   background: linear-gradient(180deg, rgba(8,16,32,0.72), rgba(8,16,32,0.68));
-  /* 🔁 Permettre le scroll horizontal SI le canvas est plus large (mobile) */
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  /* ↓ enlève l’espace inutile sous le chart */
-  margin-bottom: 0;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  margin: 12px 0 0 0;                                /* espace avec la table */
   padding-bottom: 0;
+  border-radius: 0 0 14px 14px;                      /* arrondi bas unique */
 }
 
 .cmp-canvas {
   width: 100%;
+  min-width: 560px;           /* même largeur mini que la table */
   /* ✅ la height réelle vient du prop JS (chartHeight). Ici on garde juste un plancher. */
   min-height: 360px;
   display: block;
@@ -412,11 +549,14 @@
 .cmp-table thead .cmp-period { white-space: nowrap; }
 
 
-/* Responsive */
-@media (max-width: 1080px) {
+/* =============== 05) RESPONSIVE =============== */
+@media (max-width: 820px) {
   .cmp-content {
     grid-template-columns: 1fr;
   }
+  /* Sur mobile, on empile proprement le compteur sous/au-dessus des selects */
+  .cmp-tools { grid-template-columns: 1fr; }
+  .cmp-tools-bar { justify-content: flex-end; }
   /* ✅ sur petits écrans, on laisse quand même plus de place à la liste */
   .cmp-list { max-height: calc(100vh - 240px); }
   .cmp-item { padding: 9px; }
@@ -426,6 +566,13 @@
   .cmp-check-mark { width: 11px; height: 11px; }
   /* 📱 Graphe : réduire les marges et autoriser la largeur mini + scroll si besoin */
   .cmp-page { padding: 24px 12px 48px; }
+  /* Selects: évite le tassage → h-scroll propre si trop d’inputs */
+  .cmp-selects{
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cmp-select{ min-width: 220px; }
   .cmp-chart-head { padding: 12px 12px 0 12px; }
   .cmp-table-wrap { padding: 10px 12px 12px; }
 }
@@ -436,10 +583,51 @@
   .cmp-chart-title { font-size: 16px; }
   .cmp-legend { gap: 6px; }
   .cmp-legend-pill { font-size: 11px; padding: 5px 8px; }
-}
+  .cmp-chart-inner,
+  .cmp-table,
+  .cmp-canvas{ min-width: 600px; }
 
-/* Accessibilité : focus discret sans accent persistant */
+}
+/* =========================
+   V1.3 — MODE 2 COLONNES (≥900px)
+   - Pas de scroll horizontal pour chart/table
+  - Le graphe s’étire sur la largeur utile (plus de bande droite)
+   - Filtres responsive (pas de scrollbar)
+   ========================= */
+@media (min-width: 820px){
+
+  /* ✅ Canvas = plein cadre (supprime la “bande” à droite) */
+  .cmp-canvas{
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;         /* ⬅️ retire les marges latérales source du vide */
+    display: block;
+  }
+
+  /* 2) Section filtres (tools) : wrap propre, zéro scroll */
+  .cmp-selects{
+    flex-wrap: wrap;
+    overflow-x: visible;         /* ⛔️ pas de barre */
+  }
+}
+/* =========================
++   V1.3 — MONO-COLONNE (730–820px)
++   - Chart plein cadre (pas de h-scroll, pas de bande à droite)
++   ========================= */
+@media (min-width: 730px) and (max-width: 819.98px){
+  .cmp-chart{ overflow-x: visible; }
+  .cmp-chart-inner{ min-width: 0; }
+  .cmp-chart-canvas{ overflow-x: visible; }
+  .cmp-canvas{
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    display: block;
+  }
+}
+/* =============== 06) ACCESSIBILITÉ =============== */
 .cmp-item:focus-within {
   border-color: rgba(255,255,255,0.18);
   box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
 }
+

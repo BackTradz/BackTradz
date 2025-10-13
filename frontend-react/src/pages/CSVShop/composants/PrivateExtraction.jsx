@@ -37,7 +37,7 @@ export default function PrivateExtraction({
   if (!extractedFiles?.length) return null;
 
   return (
-    <div style={{ marginTop: "1rem" }}>
+    <section className="csvshop-private">
       <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center" }}>
         <h3 className="csvshop-title" style={{ fontSize: "1.2rem", margin: 0 }}>
           ✅ Votre extraction (non listée)
@@ -53,7 +53,7 @@ export default function PrivateExtraction({
       </div>
 
       {showExtractSection && (
-        <div className="csvshop-grid" style={{ marginTop: 10 }}>
+        <div className="csvshop-grid">
           {extractedFiles.map((it, idx) => {
             const url = it.path ? withToken(downloadCsvByPathUrl(it.path)) : "";
             return (
@@ -69,8 +69,8 @@ export default function PrivateExtraction({
               </div>
             );
           })}
-        </div>
+         </div>
       )}
-    </div>
+    </section>
   );
 }

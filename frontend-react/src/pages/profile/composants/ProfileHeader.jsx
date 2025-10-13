@@ -52,13 +52,8 @@ export default function ProfileHeader({ user }) {
         )}
       </ul>
 
-      {/* ===== Mobile : color picker en dessous de la liste ===== */}
-      <div className="mobile-only mobile-picker">
-        <AvatarColorPicker />
-      </div>
-
-       {/* ===== Desktop : color picker à droite ===== */}
-      <div className="color-picker-wrapper desktop-only">
+      {/* V1.3 — Color picker unique (desktop & mobile) */}
+      <div className="unified-picker">
         <AvatarColorPicker />
       </div>
     </div>

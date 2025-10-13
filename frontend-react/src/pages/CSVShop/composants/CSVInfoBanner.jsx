@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import DetailButton from "../../../components/ui/button/DetailButton";
-
+import { createPortal } from "react-dom";
 /**
  * ℹ️ Bandeau d’information sur le contenu des fichiers CSV vendus
  * - Affiche une ligne condensée (colonnes obligatoires/facultatives)
@@ -23,10 +23,15 @@ export default function CSVInfoBanner({
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
+  const portalRef = useRef(null);  // ↔️ réf. du panneau détaché (portal)
 
   // 🔐 Clic hors composant / touche ESC pour fermer le popover
   useEffect(() => {
-    function onDoc(e){ if(!rootRef.current?.contains(e.target)) setOpen(false); }
+    function onDoc(e){
+      const inRoot   = rootRef.current?.contains(e.target);
+      const inPortal = portalRef.current?.contains(e.target);
+      if (!inRoot && !inPortal) setOpen(false);
+    }
     function onKey(e){ if(e.key === "Escape") setOpen(false); }
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
@@ -68,14 +73,13 @@ export default function CSVInfoBanner({
         </DetailButton>
       </div>
 
-      {/* Popover détaillé */}
-      {open && (
-        <div className="infobar-popover" role="dialog" aria-label="Détails des colonnes CSV">
+       {/* Popover détaillé (portalisé dans <body>) */}
+      {open && createPortal(
+        <div ref={portalRef} className="infobar-popover csvshop-details-panel">
           <div className="popover-head">
-            <div className="title">Détails des colonnes</div>
-            <button className="dbt-btn btn-ghost" onClick={() => setOpen(false)}>Fermer</button>
+            <div className="title">Colonnes disponibles</div>
+            <button className="btn-ghost" onClick={() => setOpen(false)}>Fermer</button>
           </div>
-
           <div className="cols-table cols-table--compact">
             <div className="cols-head">Colonne</div>
             <div className="cols-head">Type</div>
@@ -93,17 +97,18 @@ export default function CSVInfoBanner({
           </div>
 
           {/* Exemple de ligne */}
-          <div className="sample sample--compact">
+          <div className="sample sample--compact" style={{marginTop:12}}>
             <div className="sample-caption">Exemple de ligne {pair ? `(${pair})` : ""}</div>
             <code className="sample-code">{sample}</code>
             <ul className="notes">
               <li>Fuseau horaire : <b>UTC</b> (<code>+00:00</code>).</li>
               <li>{secondHeaderNote}</li>
               <li>Séparateur : virgule, encodage : <b>UTF-8</b>.</li>
-              <li><code>pd.read_csv(..., skiprows=[1], parse_dates=["Datetime"])</code> pour pandas.</li>
+              <li><code>pd.read_csv(..., skiprows=[1], parse_dates={["Datetime"]})</code> pour pandas.</li>
             </ul>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

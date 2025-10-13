@@ -1,798 +1,379 @@
 /* =====================================================================
-   HOME THEME (pro tech, full CSS, no image)
-   - Objectif: thème de la page d'accueil + effets Hero + grilles "Top stratégies"
-   - ⚠️ 0 régression: aucune propriété/valeur n'a été modifiée, uniquement des commentaires.
-   - Remarque: plusieurs blocs :root de largeur existent déjà plus bas (héritage d'itérations).
-               Je ne les modifie pas pour éviter toute régression de cascade.
+   HOME THEME — BackTradz
+   - Nettoyage : doublons supprimés, sections regroupées
+   - ZÉRO RÉGRESSION : mêmes sélecteurs, mêmes valeurs utiles
    ===================================================================== */
 
-/* ===============================
-   [Root Scope] Home page wrapper
-   - Définit des variables locales au scope .home-page (pas globales)
-   - Sert de fond + couleurs de base pour la page
-   =============================== */
-.home-page{
-  --bg:#1e293b;     /* Fond global (dark bleu/gris) — cohérent avec Pricing */
-  --card:#0f1627;   /* Couleur des cartes/nav plus sombre */
-  --ink:#e6ecff;    /* Couleur principale du texte */
-  --muted:#94a3b8;  /* Texte secondaire / descriptions */
-  --dots:#ffffff0a; /* Dots de texture (radial-gradient) */
-  --beam:#ffffff10; /* Rayon “scan” vertical */
-  --glow:#3b82f620; /* Halos légers */
+/* ---------------------------------------------------------------------
+   TOKENS LOCAUX (Home) + WIDTH VARS (regroupées ici)
+   --------------------------------------------------------------------- */
+:root{
+  /* largeurs / containers (valeurs déjà utilisées partout) */
+  --home-max: 1280px;
+  --btz-container: 1280px;
+  --btz-vw: 96vw;
+  --btz-gutter: 12px;
 
-  background:var(--bg);
-  color:var(--ink);
-  min-height:100vh; /* Occupe la hauteur de viewport au minimum */
+  /* gutter CTA mobile (≤600px) */
+  --home-cta-gutter: 14px;
 }
 
-/* ===============================
-   [Layout] Container standard
-   - Contrainte max + padding latéral
-   =============================== */
-.container-std{max-width:1160px;margin:0 auto;padding:20px}
+.home-page{
+  /* couleurs locales (fond global = grille hex, donc transparent ici) */
+  --bg:#1e293b;
+  --card:#0f1627;
+  --ink:#e6ecff;
+  --muted:#94a3b8;
+  --dots:#ffffff0a;
+  --beam:#ffffff10;
+  --glow:#3b82f620;
 
-/* =====================================================================
-   HERO LAYERED EFFECTS
-   - Empilement d'effets décoratifs (dots, sweep, orbs) derrière un contenu
-   - Isolation via z-index (content au-dessus)
-   ===================================================================== */
+  background: transparent; /* on laisse la grille globale s’afficher */
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* conteneur standard */
+.container-std{ max-width:1160px; margin:0 auto; padding:20px; }
+
+/* ---------------------------------------------------------------------
+   HERO (titre + sous-titre + CTA)
+   --------------------------------------------------------------------- */
 .hero{
   position:relative;
-  min-height:80vh;
-  display:flex;align-items:center;justify-content:center;
+  min-height:62vh;
+  display:flex; align-items:center; justify-content:center;
   text-align:center; overflow:hidden;
-  background:var(--bg);
-  isolation:isolate; /* crée un nouveau contexte d'empilement (z-index) */
+  background:transparent;
+  isolation:isolate;
+  padding-top:48px;
 }
 
-/* (Grille retirée) */
-
-/* ---------------------------------
-   [FX] Dots de texture (fond animé)
-   --------------------------------- */
-.hero .fx-dots{
-  position:absolute; inset:-20%; pointer-events:none; z-index:0;
-  background-image: radial-gradient(var(--dots) 1px, transparent 1px);
-  background-size:24px 24px;
-  animation:drift 48s linear infinite; /* lent => discret */
-  will-change: background-position;    /* hint perf */
+.hero h1{
+  font-weight:800; letter-spacing:.2px;
+  /* Effet chrome (identique au slogan HeroMessage), sans animation */
+  background: linear-gradient(180deg, #f8faff 0%, #cdd9ff 48%, #9ab4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 0 10px rgba(80,130,255,0.06),
+    0 2px 6px rgba(0,0,0,0.35);
+   /* Harmonisation: un cran au-dessus du slogan */
+  font-size: clamp(24px, 3.4vw, 34px);
+  line-height: 1.15;
+  letter-spacing: .15px;
 }
 
-/* ---------------------------------
-   [FX] Balayage vertical type “scanner”
-   --------------------------------- */
-.hero .fx-sweep{
-  position:absolute; inset:0; pointer-events:none; z-index:1;
-  background:linear-gradient(180deg, transparent, var(--beam), transparent);
-  transform:translateY(-120%);
-  animation:sweep 16s ease-in-out infinite; /* doux, cyclique */
-  mix-blend-mode:screen; /* éclaircit le passage */
+/* Bleu nuit “signature” pour les mots accentués dans le H1 */
+.hero h1 .accent{
+  background: linear-gradient(180deg, #6aa0ff 0%, #2f51ff 55%, #1a2b6e 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  text-shadow: 0 0 8px rgba(60,110,255,0.25), 0 2px 6px rgba(0,0,0,0.35);
 }
 
-/* ---------------------------------
-   [FX] Orbs (halos flous)
-   --------------------------------- */
-.hero .orb{
-  position:absolute; pointer-events:none; z-index:0; filter:blur(28px);
-  background:radial-gradient(closest-side, var(--glow), transparent 70%);
-  opacity:.8; will-change:transform;
-}
-.hero .orb--tl{ width:42vw; height:42vw; top:-14%; left:-12%; animation:float 28s ease-in-out infinite; }
-.hero .orb--br{ width:46vw; height:46vw; right:-10%; bottom:-18%; animation:float 30s ease-in-out -8s infinite; }
-
-/* ---------------------------------
-   [Typo de base dans le hero]
-   --------------------------------- */
-.hero h1{font-weight:800}
-.hero p{color:var(--muted)}
-
-/* ---------------------------------
-   [Animations keyframes]
-   --------------------------------- */
-@keyframes drift{
-  from{background-position:0 0}
-  to{background-position:180px 120px}
-}
-@keyframes sweep{
-  0%,25%{transform:translateY(-130%); opacity:0}
-  45%,55%{transform:translateY(0%); opacity:1}
-  100%{transform:translateY(130%); opacity:0}
-}
-@keyframes float{
-  0%,100%{transform:translate3d(0,0,0)}
-  50%{transform:translate3d(2.5vw,-1.4vw,0)}
+/* Sous-titre : teinte unique (plus lisible) + emphase sur <strong> */
+.hero p{
+  color: rgba(210,225,255,0.92);
+  max-width:920px; margin:0 auto; opacity:1;
 }
 
-/* ---------------------------------
-   [Hero Canvas] (fond animé éventuel)
-   - Canvas placé derrière le contenu
-   --------------------------------- */
-.hero { position: relative; }
-.hero-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0; /* derrière .content */
+.hero p strong{ color:#ffffff; font-weight:800; }
+
+/* densité compacte (titre/texte/cta) */
+.hero .content{ max-width: 880px; }
+.hero .content-tight > * { margin-top:0 !important; }
+.hero .content-tight > * + * { margin-top:6px !important; }
+.hero .content .hero-note{ margin-top:10px !important; }
+
+/* CTA sizing + “bandeau” safe */
+.hero .content .dbt-btn{ width:auto; min-width:260px; padding-inline:22px; }
+.hero .content .cta-wrap{ display:inline-flex; justify-content:center; }
+
+/* neutralise underline décoratif éventuel */
+.hero h1::after, .hero .hero-underline{
+  content:none !important; display:none !important;
 }
-/* Contenu au-dessus du canvas + effets */
-.hero .content {
-  position: relative;
-  z-index: 2;
+/* HERO — spacing top plus compact (nav ↔ titre) */
+.hero {
+  /* garde ta config existante, on ne change que le top-padding */
+  padding-top: clamp(28px, 4.5vh, 52px);
+}
+.hero h1 {
+  margin-top: 0;             /* au cas où une marge remonte du thème */
+  margin-bottom: 10px;       /* resserre un chouïa sous le titre */
 }
 
-/* =====================================================================
-   TOP STRATEGIES WRAPPER
-   - Conteneur de section + messages d'erreur
-   ===================================================================== */
-.ts-wrap {
-  width: min(1180px, 96vw);
-  margin: 0 auto 40px;
-  padding: 0 8px;
+
+/* micro-tuning mobile */
+@media (max-width:520px){
+  .hero{ padding:18px 0 8px; }
+  .hero .content{ margin-top:-4px; }
+  .hero p{ font-size:1.05rem; }
+}
+@media (max-width:400px){
+  .hero .content{ max-width:92vw; }
+  .hero .content p{ font-size:1.02rem; }
 }
 
-/* Message d'erreur (rouge) */
-.ts-error {
-  color: #ef4444;
-  margin: 8px 0 14px;
+
+/* ---------------------------------------------------------------------
+   BRIDGE (petit paragraphe entre hero & top strategies)
+   --------------------------------------------------------------------- */
+.home-page .home-bridge{
+  margin:12px auto 18px !important;
+  max-width:1100px; text-align:center;
+  font-size:1.05rem; color:#cfe3ff; opacity:.95;
 }
 
-/* =====================================================================
-   GRILLE RESPONSIVE (3 → 2 → 1)
-   - Cartes de “Top stratégies”
-   ===================================================================== */
-.ts-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-@media (max-width: 1024px) {
-  .ts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 640px) {
-  .ts-grid { grid-template-columns: 1fr; }
+/* ---------------------------------------------------------------------
+   TOP STRATEGIES (grille & cartes)
+   --------------------------------------------------------------------- */
+.ts-wrap{
+  box-sizing:border-box !important;
+  width:min(var(--home-max), 98vw) !important;
+  margin:30px auto 32px !important;
+  padding:0 8px !important;
+  /* Couleur locale pour les KPIs gagnants (vert flash unique) */
+  --ts-win-green: #34ff8a; /* vert néon lisible sur fond sombre */
 }
 
-/* =====================================================================
-   CARTE TOP STRATEGY
-   - Carte > header badges > lignes (labels/valeurs)
-   ===================================================================== */
-.ts-card {
-  background: rgba(15, 23, 42, 0.92);          /* sombre, homogène au thème */
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 18px;
-  padding: 16px 16px 14px;
-  box-shadow: 0 10px 26px rgba(2, 6, 23, 0.45);
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-.ts-card:hover {
-  transform: translateY(-2px); /* micro-lift */
-  border-color: rgba(255,255,255,0.10);
-  box-shadow: 0 16px 34px rgba(2, 6, 23, 0.55);
+/* Titre centré + respiration homogène */
+.ts-wrap .section-title,
+.ts-wrap h2{            /* selon l’implémentation de SectionTitle */
+  text-align:center;
+  margin-left:auto; margin-right:auto;
+  max-width:1100px;
 }
 
-/* Header de carte (badges + range) */
-.ts-head {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 10px;
+/* ✨ Titre “chrome” très léger (cohérent avec le Hero) */
+.ts-wrap .section-title,
+.ts-wrap h2{
+  background: linear-gradient(180deg, #f8faff 0%, #cdd9ff 48%, #9ab4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 0 10px rgba(80,130,255,0.06),
+    0 2px 6px rgba(0,0,0,0.35);
+  letter-spacing: .2px;
 }
-.ts-badges { display: flex; gap: 8px; align-items: center; }
-.ts-badge {
-  font-size: 12px; color: #cfe0ff;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(11,18,33,0.85);
-  padding: 6px 10px; border-radius: 999px; white-space: nowrap;
+/* petite barre lumineuse très discrète sous le titre (pas d’underline global) */
+.ts-wrap .section-title::after,
+.ts-wrap h2::after{
+  content:"";
+  display:block;
+  width:120px; height:2px;
+  margin:10px auto 2px;
+  border-radius:999px;
+  background: radial-gradient(60% 120% at 50% 50%, rgba(90,140,255,.45), rgba(90,140,255,.00));
+  filter: drop-shadow(0 0 6px rgba(90,140,255,.25));
 }
-.ts-badge--pair { font-weight: 700; color: #e6ecff; }
-.ts-badge--tf   { opacity: .95; }
-.ts-range {
-  color: rgba(198,210,235,0.75); font-size: 12px;
-}
-.ts-range .mx { opacity: .6; padding: 0 4px; }
 
-/* Corps de carte (lignes) */
-.ts-body { display: grid; gap: 8px; }
-.ts-row {
-  display: grid; grid-template-columns: 1fr auto;
-  align-items: center; gap: 8px;
-  padding: 8px 0;
-  border-top: 1px dashed rgba(255,255,255,0.06);
-}
-.ts-row:first-child { border-top: 0; padding-top: 0; }
+.ts-error{ color:#ef4444; margin:8px 0 20px; }
 
-.ts-label {
-  color: rgba(198,210,235,0.90);
-  font-size: 14px;
+.ts-grid{
+  display:grid; grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:20px !important;
 }
-.ts-value {
-  display: inline-flex; align-items: center; gap: 8px;
-}
-.ts-strat {
-  font-weight: 800; color: #e6ecff;
-}
-.ts-kpi {
-  font-weight: 800; color: #e6ecff;
-}
-.ts-kpi.good { color: #34d399; }  /* signal vert (ex: winrate >= 55%) */
+@media (max-width:1024px){ .ts-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px !important; } }
+@media (max-width:640px){ .ts-grid{ grid-template-columns:1fr; } }
 
-/* Skeleton loading (shimmer) */
-.ts-skel .skel {
-  height: 12px; border-radius: 8px;
-  background: linear-gradient(90deg,
-    rgba(255,255,255,0.06) 0%,
-    rgba(255,255,255,0.10) 50%,
-    rgba(255,255,255,0.06) 100%);
-  background-size: 200% 100%;
+.ts-card{
+  /* Aurora identique à .hero-card--below (HeroMessage) */
+  background:
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12) 0%,
+      rgba(22, 34, 68, 0.09) 42%,
+      rgba(10, 16, 28, 0.08) 62%,
+      rgba(6, 10, 18, 0.06) 82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,
+      rgba(6, 10, 18, 0.62) 100%
+    );
+ border: 1px solid rgba(90,130,255,0.14);          /* bord bleuté */
+  border-radius:16px !important;
+  padding:14px 16px 12px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.035),
+   0 10px 38px rgba(0,0,0,0.40),
+    0 0 12px rgba(0,100,255,0.10);
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  backdrop-filter: blur(4px) saturate(112%);        /* translucide + net */
+  will-change: transform, filter; /* perf GPU pendant l’ani */
+}
+
+/* Désactive transitions & filtres si réduction des animations */
+@media (prefers-reduced-motion: reduce){
+  .ts-card{ transition: none !important; filter: none !important; transform: none !important; }
+}
+
+.ts-card:hover{
+  transform: translateY(-2px);
+ border-color: rgba(100,150,255,0.18);
+  box-shadow:
+    0 14px 40px rgba(0,0,0,0.45),
+    0 0 18px rgba(64,140,255,0.18);
+}
+
+.ts-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px !important; }
+.ts-badges{ display:flex; gap:8px; align-items:center; }
+.ts-badge{
+  font-size:12px !important; color:#cfe0ff;
+  /* + premium translucide : blur léger + saturation */
+  background: rgba(11,18,33,0.58);
+  border:1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(6px) saturate(140%);
+  -webkit-backdrop-filter: blur(6px) saturate(140%);
+  /* inner-glow discret + glow extérieur doux */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 2px 8px rgba(64,140,255,0.10);
+  padding:5px 10px !important; border-radius:999px; white-space:nowrap;
+}
+.ts-badge--pair{ font-weight:700; color:#e6ecff; }
+.ts-badge--tf{ opacity:.92; }
+.ts-range{ color:rgba(198,210,235,.75); font-size:12px; }
+.ts-range .mx{ opacity:.6; padding:0 4px; }
+.ts-body{ display:grid; gap:8px; }
+.ts-row{
+  display:grid; grid-template-columns:1fr auto;
+  align-items:center; gap:8px; padding:7px 0 !important;
+  border-top:1px dashed rgba(255,255,255,0.06);
+}
+.ts-row:first-child{ border-top:0; padding-top:0; }
+.ts-label{ color:rgba(198,210,235,.90); font-size:14px; }
+.ts-value{ display:inline-flex; align-items:center; gap:8px; }
+.ts-strat, .ts-kpi{ font-weight:800; color:#e6ecff; }
+.ts-kpi.good{ color:#34d399; }
+/* ✅ Un seul vert pour tous les winrates positifs */
+.ts-kpi.good,
+.ts-kpi.great{
+  color: var(--ts-win-green);
+  text-shadow: 0 0 8px color-mix(in oklab, var(--ts-win-green) 24%, transparent);
+}
+
+/* Carte "hot" (winrate ≥70) : liseré + glow subtil, cohérent Aurora */
+.ts-card--hot{
+  border-color: rgba(120,180,255,0.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.045),
+    0 12px 40px rgba(0,0,0,0.45),
+    0 0 18px rgba(80,150,255,0.18);
+}
+
+/* Skeleton */
+@keyframes skel{ to{ background-position-x:-200%; } }
+.ts-skel .skel{
+  height:12px; border-radius:8px;
+  background:linear-gradient(90deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.10) 50%, rgba(255,255,255,.06) 100%);
+  background-size:200% 100%;
   animation: skel 1.2s infinite linear;
 }
-@keyframes skel { to { background-position-x: -200%; } }
+/* --------------------  Top Strategies : Mobile polish  -------------------- */
+@media (max-width: 360px){
+  /* Ligne KPI = libellé à gauche, % calé à droite, no-wrap */
+  .ts-row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:nowrap;
+  }
+  .ts-row .ts-label{
+    flex:0 1 auto; max-width:60%;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .ts-row .ts-kpi{
+    flex:0 0 auto; white-space:nowrap; margin-left:auto;
+  }
 
-/* =====================================================================
-   HERO MESSAGE (src/components/home/HeroMessage.css)
-   - Deux variantes: "docked" (ruban compact sous graphe) & "below" (carte)
-   ===================================================================== */
-
-/* Z-index local pour superposer au canvas/effets */
-.hero-msg { z-index:3; }
-
-/* ----- Variante DOCKED: message collé sous le graphe en ruban ----- */
-.hero-msg--docked {
-  position:absolute; inset:0;
-  display:flex; align-items:flex-end; justify-content:center;
-  pointer-events:none; /* laisse cliquer CTA via la card si elle dépasse */
-  padding:12px 16px 18px;
-}
-.hero-card {
-  background: rgba(15,23,42,0.78);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.28);
-  backdrop-filter: blur(8px);
-  border-radius: 16px;
-}
-.hero-card--docked {
-  width: min(1100px, 94%);
-  display:flex; align-items:center; justify-content:space-between;
-  gap:14px; padding: 10px 14px;
-  pointer-events:auto; /* réactive l'interaction sur la card */
-}
-.hero-title--small { margin:0; color:#e6ecff; font-size: clamp(16px,1.8vw,20px); font-weight:800; }
-.hero-docked-left { display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
-.hero-docked-right { display:flex; gap:12px; align-items:center; }
-.chips { display:flex; gap:8px; flex-wrap:wrap; }
-.chips--scroll { overflow-x:auto; max-width:56vw; padding-bottom:4px; }
-.chips--scroll::-webkit-scrollbar { height:6px; }
-.chips--scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:999px; }
-.chip {
-  font-size:12px; color:#cfe0ff;
-  border:1px solid rgba(255,255,255,0.08);
-  background: rgba(11,18,33,0.85);
-  padding:6px 10px; border-radius:999px; white-space:nowrap;
-}
-
-/* ----- Variante BELOW: message sous le graphe, en card plus large ----- */
-.hero-msg--below {
-  position:relative; pointer-events:auto;
-  margin: 22px auto 0; display:flex; justify-content:center;
-}
-.hero-card--below {
-  width: min(980px, 92vw);
-  padding: 18px 20px;
-}
-.hero-title {
-  margin:0 0 6px; font-size: clamp(24px,4vw,36px);
-  font-weight:800; color:#e6ecff; letter-spacing: .2px;
-}
-.accent { color:#39c5ff; }
-.hero-sub {
-  margin:0; color:rgba(198,210,235,0.95);
-  font-size: clamp(14px,2vw,16px); line-height:1.45;
-}
-.hero-actions { display:flex; gap:12px; align-items:center; margin-top:14px; }
-.link-ghost {
-  font-size:14px; color:#cfe6ff; text-decoration:none;
-  padding:8px 10px; border-radius:10px;
-  border:1px solid rgba(255,255,255,0.08);
-  background: rgba(11,18,33,0.6);
-}
-.link-ghost:hover { background: rgba(11,18,33,0.8); }
-
-.hero-bullets {
-  margin:14px 0 0; padding-left:18px; color:rgba(198,210,235,0.92);
-  display:grid; gap:6px; font-size:13px; line-height:1.35;
-}
-
-/* ----- Responsives spécifiques HeroMessage ----- */
-@media (max-width:880px){
-  .chips--scroll{ max-width:60vw; }
-  .hero-docked-right .link-ghost{ display:none; } /* réduit la densité en mobile */
-}
-@media (max-width:640px){
-  .hero-card--docked{ gap:10px; }
-  .hero-title--small{ font-size:16px; }
-}
-
-/* =====================================================================
-   DUPLICATIONS INTENTIONNELLES (héritage)
-   - Les blocs suivants redéfinissent certaines largeurs/marges de HeroMessage
-     et TopStrategies pour alignement visuel plus large (home-wide).
-   - Je n’altère pas l’ordre ni les valeurs pour conserver la cascade existante.
-   ===================================================================== */
-
-/* Conteneur sous le graphe (répété) */
-.hero-msg--below {
-  position: relative;
-  pointer-events: auto;
-  margin: 22px auto 0;
-  display: flex;
-  justify-content: center;
-}
-
-/* Card (répété, avec ombre/backdrop identiques) */
-.hero-card {
-  background: rgba(15,23,42,0.78);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.22);
-  backdrop-filter: blur(8px);
-}
-
-.hero-card--below {
-  /* plus large et respirant */
-  width: min(1280px, 96vw);
-  padding: 18px 22px;
-}
-
-/* version minimal : espaces + compacité */
-.hero-card--minimal {
-  padding: clamp(16px, 2.4vw, 24px);
-}
-
-/* Typo (répété pour compat locale) */
-.hero-title {
-  margin: 0 0 6px;
-  font-size: clamp(26px, 4vw, 38px);
-  font-weight: 800;
-  color: #e6ecff;
-  letter-spacing: 0.1px;
-}
-.accent { color: #39c5ff; }
-
-.hero-sub {
-  margin: 0;
-  color: rgba(198,210,235,0.95);
-  font-size: clamp(14px, 2vw, 16px);
-  line-height: 1.45;
-}
-
-/* Chips réduites à 3 */
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-.chips--minimal .chip {
-  font-size: 12px;
-  color: #cfe0ff;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(11,18,33,0.85);
-  padding: 6px 10px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-/* CTA (répété) */
-.hero-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-top: 14px;
-}
-.link-ghost {
-  font-size: 14px;
-  color: #cfe6ff;
-  text-decoration: none;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(11,18,33,0.6);
-}
-.link-ghost:hover { background: rgba(11,18,33,0.8); }
-
-/* Bullets en grille sur desktop (répété) */
-.hero-bullets {
-  margin: 14px 0 0;
-  padding-left: 18px;
-  color: rgba(198,210,235,0.92);
-  display: grid;
-  gap: 6px;
-  font-size: 13px;
-  line-height: 1.35;
-}
-.hero-bullets--grid {
-  padding-left: 0;            /* supprime les puces natives */
-  list-style: none;
-  gap: 8px;
-}
-.hero-bullets--grid li { padding-left: 0; }
-@media (min-width: 980px) {
-  .hero-bullets--grid {
-    grid-template-columns: repeat(3, 1fr);
+  /* Date (range) : forcer le non-retour à la ligne quel que soit le markup */
+  .ts-card :is(.ts-dates, .ts-date, .date, time){
+    white-space:nowrap; display:inline-block;
   }
 }
 
-/* Ajustements responsives (répétés) */
-@media (max-width: 640px) {
-  .hero-actions .link-ghost { display: none; }
-}
-
-/* =====================================================================
-   HOME LAYOUT OVERRIDES (large)
-   - Largeurs cibles unifiées via variables :root (locales à ce fichier)
-   - Plusieurs blocs :root successifs maintenus pour ne rien casser
-   ===================================================================== */
-
-/* Première déclaration :root de largeur max */
-:root{
-  --home-max: 1280px;   /* augmente si besoin (1360/1400) */
-}
-
-/* Hero message (variant "below") — élargir la card et respirer */
-.home-page .hero-card--below{
-  width: min(var(--home-max), 98vw) !important;
-  padding: clamp(16px, 2.4vw, 26px) !important;
-}
-
-/* Top stratégies — wrapper large + grille plus espacée */
+/* ---------------------------------------------------------------------
+   ALIGNEMENTS LARGEURS (Hero vs TopStrategies) — unifié
+   --------------------------------------------------------------------- */
+.home-page .hero-card--below,
 .home-page .ts-wrap{
-  width: min(var(--home-max), 98vw) !important;
-  margin-top: 28px;   /* espace sous le hero message */
+  box-sizing:border-box !important;
+  width:min(var(--btz-container), var(--btz-vw)) !important;
+  padding-left:var(--btz-gutter) !important;
+  padding-right:var(--btz-gutter) !important;
+  margin-left:auto !important; margin-right:auto !important;
 }
 
-/* Grille + cartes (espacement/compacité) */
-.home-page .ts-grid{
-  gap: 20px !important;
-}
-.home-page .ts-card{
-  padding: 14px 16px 12px !important;
-  border-radius: 16px !important;
-}
+/* enchaînement bridge/ts */
+.home-page .hero-msg + .home-bridge{ margin-top:10px !important; }
+.home-page .home-bridge + .ts-wrap{ margin-top:12px !important; }
 
-/* Header de carte compact */
-.home-page .ts-head{ margin-bottom: 8px !important; }
-.home-page .ts-badge{ padding: 5px 10px !important; font-size: 12px !important; }
+/* bandeaux pleine largeur éventuels */
+.home-wide{ width:100%; max-width:none; margin:0; padding:0; }
+.section-pad{ padding:28px 0; }
 
-/* Lignes intérieures compactes */
-.home-page .ts-row{ padding: 7px 0 !important; }
-
-/* Breakpoints cohérents */
-@media (max-width: 1024px){
-  .home-page .ts-grid{ gap: 16px !important; }
-}
-@media (max-width: 640px){
-  .home-page .hero-card--below{ width: 94vw !important; }
+/* ---------------------------------------------------------------------
+   UTILITAIRES DE VISIBILITÉ
+   --------------------------------------------------------------------- */
+.only-mobile{ display:none; }
+.only-desktop{ display:inline; }
+@media (max-width:1000px){
+  .only-mobile{ display:inline; }
+  .only-desktop{ display:none; }
 }
 
-/* Sections pleine largeur (bandeaux) */
-.home-wide{
-  width:100%;
-  max-width:none;
-  margin:0;
-  padding:0;
-}
-.section-pad{ padding: 28px 0; }
-
-/* Deuxième déclaration :root (largeur cible globale) */
-:root{ --home-max: 1280px; } /* cohérence visuelle */
-
-/* HeroMessage (below) : largeur + centrage garanti */
-.home-page .hero-card--below{
-  width: min(var(--home-max), 98vw) !important;
-  margin: 0 auto !important;   /* centrage horizontal */
-  padding: clamp(16px, 2.4vw, 26px) !important;
-}
-
-/* Wrapper TopStrategies aligné sur HeroMessage */
-.home-page .ts-wrap{
-  width: min(var(--home-max), 98vw) !important;
-  margin: 16px auto 32px !important; /* spacing contrôlé */
-  padding: 0 8px !important;
-}
-
-/* Optionnel: plus d'espace entre cartes */
-.home-page .ts-grid{ gap: 20px !important; }
-
-/* =====================================================================
-   TIGHT SPACING POUR LE HERO (version compacte)
-   - Resserre marges entre titre / paragraphe / CTA
-   ===================================================================== */
-.hero .content-tight > * { margin-top: 0 !important; }
-.hero .content-tight > * + * { margin-top: 8px !important; } /* un seul écart vertical */
-
-.hero .content-tight h1 {
-  margin: 0 !important;
-  line-height: 1.15 !important; /* titre plus dense */
-}
-
-.hero .content-tight p {
-  margin: 0 !important;
-  color: #cfe3ff;              /* lisibilité renforcée */
-  font-size: 1.125rem;
-  opacity: 0.95;
-}
-
-/* Neutralise un margin-top intégré sur certains CTA */
-.hero .content-tight .cta-button,
-.hero .content-tight a[class*="cta"],
-.hero .content-tight a[href="/dashboard"] {
-  margin-top: 0 !important;
-}
-
-/* =====================================================================
-   BRIDGE (phrase entre HeroMessage et TopStrategies)
-   - Micro paragraphe central, faible marge
-   ===================================================================== */
-.home-page .home-bridge{
-  margin: 12px auto 18px !important; /* réduit l'espace vertical */
-  max-width: 1100px;
-  text-align: center;
-  font-size: 1.05rem;
-  color: #cfe3ff;
-  opacity: .95;
-}
-
-/* Réduction de marge sous la carte HeroMessage */
-.home-page .hero-msg{
-  margin-bottom: 14px !important;
-}
-.home-page .hero-msg .hero-card{
-  padding-bottom: 18px !important;
-}
-
-/* Rapproche TopStrategies du bridge */
-.home-page .ts-wrap{
-  margin-top: 14px !important;
-  margin-bottom: 32px !important;
-}
-.home-page .ts-wrap .section-title{
-  margin-top: 6px !important;
-}
-
-/* Sécurité: contrôle des gaps hérités */
-.home-page .hero-msg + .home-bridge{ margin-top: 10px !important; }
-.home-page .home-bridge + .ts-wrap{  margin-top: 12px !important; }
-
-/* =====================================================================
-   ALIGNEMENT LARGEURS (cohérence Hero vs TopStrategies)
-   - Plusieurs redéclarations afin de dominer des styles externes éventuels
-   ===================================================================== */
-
-/* Rappel: wrapper TopStrategies à 1280/96vw */
-.home-page .ts-wrap {
-  width: min(1280px, 96vw) !important; /* aligné sur HeroMessage */
-}
-
-/* Troisième :root (encore même valeur pour ne rien casser) */
-:root { --home-max: 1280px; } /* même valeur pour les deux blocs */
-
-/* HeroMessage vs TopStrategies: même gabarit et centrage */
-.home-page .hero-card--below {
-  width: min(var(--home-max), 96vw) !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-.home-page .ts-wrap {
-  width: min(var(--home-max), 96vw) !important; /* aligné sur hero */
-  margin-left: auto !important;
-  margin-right: auto !important;
-  margin-top: 12px !important; /* rapproche du bridge */
-}
-
-/* ==== FIX WIDTH ALIGNMENT (plus spécifique) ==== */
-:root{
-  --home-max: 1280px;   /* gabarit commun */
-  --home-gutter: 12px;  /* padding latéral commun */
-}
-
-/* 1) même boîte, même padding */
-.home-page .hero-msg .hero-card.hero-card--below,
-.home-page .ts-wrap{
-  box-sizing: border-box !important;
-  width: min(var(--home-max), 96vw) !important;
-  padding-left: var(--home-gutter) !important;
-  padding-right: var(--home-gutter) !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  max-width: none !important; /* neutralise des max-width antérieures */
-}
-
-/* 2) réaffirme la largeur de ts-wrap (éventuels styles anciens) */
-.home-page .ts-wrap{ width: min(var(--home-max), 96vw) !important; }
-
-/* 3) uniformise le padding interne de la card si “visuellement” déborde */
-.home-page .hero-msg .hero-card.hero-card--below{
-  padding-left: var(--home-gutter) !important;
-  padding-right: var(--home-gutter) !important;
-}
-
-/* =====================================================================
-   Unified container pour hero & top strategies
-   - Déclare encore un set de variables conteneur (btz-*)
-   - Conserve plusieurs déclarations pour garder la cascade existante
-   ===================================================================== */
-:root{
-  --btz-container: 1280px;   /* largeur max commune */
-  --btz-vw: 96vw;            /* largeur relative commune */
-  --btz-gutter: 12px;        /* padding latéral identique */
-}
-
-/* HeroMessage card (below) — plus spécifique pour battre HeroMessage.css */
-.home-page .hero-msg.hero-msg--below .hero-card.hero-card--below{
-  box-sizing: border-box !important;
-  width: min(var(--btz-container), var(--btz-vw)) !important;
-  padding-left: var(--btz-gutter) !important;
-  padding-right: var(--btz-gutter) !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-
-/* TopStrategies wrapper (mêmes largeurs/paddings) */
-.home-page .ts-wrap{
-  box-sizing: border-box !important;
-  width: min(var(--btz-container), var(--btz-vw)) !important;
-  padding-left: var(--btz-gutter) !important;
-  padding-right: var(--btz-gutter) !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-
-/* =========================================================
-   📱 Fix mobile ultra-étroit (≤ 360px) — Home only
-   - Empêche le CTA de coller aux bords
-   - Rend la grille Top stratégies 1 colonne, sans overflow
-   ========================================================= */
-@media (max-width: 360px) {
-  /* 1) Hero / CTA */
+/* ---------------------------------------------------------------------
+   MOBILE TIGHT (≤360px) — CTA & grille safe area
+   --------------------------------------------------------------------- */
+@media (max-width:360px){
+  /* hero cards safe padding */
   .home-page .hero-card--docked,
-  .home-page .hero-card--below {
-    padding-left: 12px !important;
-    padding-right: 12px !important; /* espace latéral sûr */
+  .home-page .hero-card--below{
+    padding-left:12px !important; padding-right:12px !important;
   }
-
-  .hero-actions {
-    flex-direction: column;           /* CTA + liens empilés */
-    align-items: stretch;             /* largeur pleine */
-    gap: 10px;
-  }
+  /* actions empilées */
+  .hero-actions{ flex-direction:column; align-items:stretch; gap:10px; }
   .hero-actions .cta-button,
   .hero-actions a[class*="cta"],
-  .hero-actions a[href="/dashboard"] {
-    width: 100%;                      /* bouton pleine largeur */
-  }
+  .hero-actions a[href="/dashboard"]{ width:100%; }
 
-  /* 2) Top stratégies */
-  .home-page .ts-wrap {
-    padding-left: 10px !important;    /* marge interne pour éviter collage bord */
-    padding-right: 10px !important;
-  }
-
-  .home-page .ts-grid {
-    grid-template-columns: 1fr !important; /* 1 colonne en 300px */
-    gap: 12px !important;
-  }
-
-  .home-page .ts-card {
-    padding: 12px !important;         /* compacité sans couper le contenu */
-    border-radius: 14px !important;
-  }
-
-  .home-page .ts-head {
-    flex-direction: column;           /* évite la casse horizontale */
-    align-items: flex-start;
+  /* grille TS compacte */
+  .home-page .ts-wrap{ padding-left:10px !important; padding-right:10px !important; }
+  .home-page .ts-grid{ grid-template-columns:1fr !important; gap:12px !important; }
+  .home-page .ts-card{ padding:12px !important; border-radius:14px !important; }
+  /* Header carte : badges à gauche, date à droite, même ligne */
+  .home-page .ts-head{
+    flex-direction: row;
+    align-items: center;
     gap: 6px;
+    flex-wrap: nowrap;          /* empêche la date de descendre */
   }
-  .home-page .ts-badges {
-    flex-wrap: wrap;                  /* badges sur plusieurs lignes si besoin */
-    row-gap: 6px;
+  .home-page .ts-badges{
+    flex: 0 1 auto;
+    min-width: 0;               /* autorise le wrap des chips si besoin */
   }
-  .home-page .ts-range {
-    font-size: 11px;                  /* un peu plus compact */
+  .home-page .ts-range{
+    margin-left: auto;          /* pousse totalement à droite */
+    white-space: nowrap;        /* date sur une seule ligne */
+    font-size: 11.5px;          /* compaction légère pour 320px */
+    letter-spacing: .1px;
   }
-
-  .home-page .ts-row {
-    grid-template-columns: 1fr;       /* label au-dessus, valeur dessous si trop étroit */
-    gap: 6px;
-  }
-}
-/* =========================================================
-   📱 Ajustements finaux mobile (≤ 360px)
-   - Padding interne CTA principal
-   - Bouton "Voir les détails" en full width
-   ========================================================= */
-@media (max-width: 360px) {
-  /* CTA principal dans le hero */
-  .hero-actions .cta-button,
-  .hero-actions a[class*="cta"],
-  .hero-actions a[href="/dashboard"] {
-    width: 100%;               
-    padding-left: 14px;        /* léger padding interne */
-    padding-right: 14px;
-  }
-
-  /* Bouton "Voir les détails" dans les cartes */
-  .home-page .ts-card .cta-button,
-  .home-page .ts-card a[class*="cta"] {
-    display: block;            /* occupe toute la ligne */
-    width: 100%;
-    text-align: center;        /* texte centré */
-    margin-top: 8px;           /* un peu d’air */
-  }
+  .home-page .ts-range .mx{ padding:0 3px; } /* espace flèche réduit */
+  .home-page .ts-badges{ flex-wrap:wrap; row-gap:6px; }
+  .home-page .ts-range{ font-size:11px; }
+  /* on garde l’affichage flex défini plus haut, ici on réduit juste l’espace */
+  .home-page .ts-row{ gap:6px; }
 }
 
-/* =========================================================
-   📱 Hotfix mobile ≤360px — CTA & "Voir les détails"
-   ========================================================= */
-@media (max-width: 360px) {
-  /* --- HERO: marge interne sûre autour du CTA --- */
-  .home-page .hero .content,
-  .home-page .hero-card,
-  .home-page .hero-card--docked,
-  .home-page .hero-card--below {
-    padding-left: 14px !important;
-    padding-right: 14px !important;
-    box-sizing: border-box;
+/* ---------------------------------------------------------------------
+   MOBILE SAFE GUTTER (≤600px) — CTA principal
+   --------------------------------------------------------------------- */
+@media (max-width:600px){
+  .home-hero, .hero, .hero-content, .hero-inner{
+    padding-left:var(--home-cta-gutter) !important;
+    padding-right:var(--home-cta-gutter) !important;
+    box-sizing:border-box;
   }
-  /* Si ton CTA est dans un wrapper .hero-actions */
-  .home-page .hero-actions {
-    padding-left: 2px !important;   /* micro air supplémentaire */
-    padding-right: 2px !important;
-    gap: 10px !important;
-  }
-  /* Bouton CTA principal plein largeur + padding interne */
-  .home-page .hero-actions .cta-button,
-  .home-page .hero-actions a,
-  .home-page .hero-actions button {
-    display: block !important;
-    width: 100% !important;
-    text-align: center !important;
-    padding-left: 14px !important;
-    padding-right: 14px !important;
-  }
-
-  /* --- TOP STRATÉGIES: bouton "Voir les détails" full width --- */
-  .home-page .ts-card .cta-button,
-  .home-page .ts-card a,
-  .home-page .ts-card button {
-    display: block !important;
-    width: 100% !important;
-    text-align: center !important;
-    margin-top: 8px !important;
-  }
-}
-
-/* =========================================================
-   HOME — Gutter CTA hero (≤600px)
-   - Ajoute un padding horizontal au wrapper du hero
-   - Le CTA ne touche plus jamais les bords (quel que soit 350–600px)
-   ========================================================= */
-@media (max-width: 600px) {
-  :root { --home-cta-gutter: 14px; } /* ajuste si tu veux un peu plus/moins */
-
-  /* On met le gutter sur le conteneur du hero (peu importe son nom) */
-  .home-hero,
-  .hero,
-  .hero-content,
-  .hero-inner {
-    padding-left: var(--home-cta-gutter) !important;
-    padding-right: var(--home-cta-gutter) !important;
-    box-sizing: border-box;
-  }
-
-  /* Sécurité : le bouton respecte la largeur dispo (pas de calc exotique) */
-  .home-hero .dbt-btn,
-  .hero .dbt-btn {
-    max-width: 100% !important;
-    width: 100% !important;   /* rempli la zone moins le gutter du wrapper */
-    box-sizing: border-box;
+  .home-hero .dbt-btn, .hero .dbt-btn{
+    max-width:100% !important; width:100% !important; box-sizing:border-box;
   }
 }

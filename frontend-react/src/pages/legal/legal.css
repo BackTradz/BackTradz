@@ -20,63 +20,143 @@
   --legal-badge-bg:    rgba(34,197,94,.15);     /* badge "ok" */
   --legal-badge-txt:   #34d399;                 /* badge texte */
   --legal-gap:         10px;                    /* gap fichiers */
+
+  /* Fond verre/aurora pour champs (Select + Input) */
+  --legal-verre-bg:
+    radial-gradient(130% 90% at 50% 70%,
+      rgba(56,96,220,.12) 0%,
+      rgba(22,34,68,.09) 42%,
+      rgba(10,16,28,.08) 62%,
+      rgba(6,10,18,.06) 82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg, rgba(5,8,14,.62) 0%, rgba(6,10,18,.62) 100%);
+  --legal-verre-bd: rgba(90,130,255,.14);
+  --legal-verre-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 12px rgba(0,100,255,.12);
+
+  /* [V1.3] Aurora “HeroMessage” réutilisable pour les cartes */
+  --legal-card-aurora:
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12) 0%,
+      rgba(22, 34, 68, 0.09) 42%,
+      rgba(10, 16, 28, 0.08) 62%,
+      rgba(6, 10, 18, 0.06) 82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,
+      rgba(6, 10, 18, 0.62) 100%
+    );
+  --legal-card-aurora-bd: rgba(90,130,255,0.14);     /* bord bleuté */
+  --legal-card-aurora-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
+
 }
 
 /* ======================================================================
    HERO (titre + sous-titre)
    ====================================================================== */
+/* Contexte de stacking propre pour placer le canvas en arrière-plan */
+.legal-page{
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+/* Canvas du fond global : toujours derrière, non cliquable */
+#hex-canvas{
+  position: fixed;
+  inset: 0;
+  z-index: 0;           /* envoie le bg sous le contenu */
+  pointer-events: none;
+}
+/* ✅ contenu légal au-dessus du canvas */
+.legal-content{
+  position: relative;
+  z-index: 1;
+}
+
 .legal-hero {
   padding: 26px 0 16px;
 }
-.legal-title {
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 6px 0 8px;
+.legal-hero .container-std{
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;               /* ✅ centre titre + sous-titre */
 }
-.legal-subtitle { color: #9aa3b2; /* var(--legal-muted) */ }
+
+.legal-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 8px 0 8px;
+   /* Chrome typographique identique au Hero */
+  color: var(--text-main); /* fallback non-webkit */
+  background: linear-gradient(180deg, #f8faff 0%, #cdd9ff 48%, #9ab4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  /* profondeur subtile + lisibilité (mêmes valeurs que Hero) */
+  text-shadow:
+    0 0 10px rgba(80,130,255,0.06),
+    0 2px 6px rgba(0,0,0,0.35);
+  transition: filter 0.4s ease;
+  will-change: filter; /* micro-optimisation */
+}
+.legal-subtitle { color: #9aa3b2; /* var(--legal-muted) */ margin-bottom: 8px; }
 
 /* ======================================================================
    ONGLETS (nav locale : CGU, Confidentialité, Mentions…)
    ====================================================================== */
 .legal-tabs {
-  margin-top: 14px;
+  margin-top: 16px;
   display: flex; gap: 10px; flex-wrap: wrap;
+  justify-content: center;           /* ✅ centre les onglets */
 }
 .legal-tab {
-  padding: 8px 12px;
-  border: 1px solid rgba(255,255,255,.12);      /* var(--legal-pill-bd) */
-  background: rgba(255,255,255,.04);            /* var(--legal-pill-bg) */
+  padding: 8px 14px;
+  border: 1px solid var(--legal-pill-bd);
+  background: var(--legal-pill-bg);
   border-radius: 999px;
   text-decoration: none;
-  color: #dbe3f0; font-weight: 700;             /* var(--legal-text) */
+  color: var(--legal-text); font-weight: 700;
+  transition: transform .12s ease, box-shadow .18s ease, background .2s ease;
 }
 .legal-tab.is-active {
-  background: #3b82f6; color: #0b1220; border-color: transparent;
-  box-shadow: 0 8px 22px rgba(59,130,246,.25);
+  background: linear-gradient(180deg,#3b82f6 0%, #2563eb 100%); /* ✅ bleu signature */
+  color: #0b1220; border-color: transparent;
+  box-shadow: 0 8px 22px var(--legal-pill-shadow);
 }
+.legal-tab:hover{ transform: translateY(-1px); box-shadow: 0 6px 18px rgba(59,130,246,.18); }
+ 
 
 /* ======================================================================
    MINI-NAV (fil d’Ariane local / ancres internes)
    ====================================================================== */
-.mini-nav { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.mn-link { color:#60a5fa; text-decoration:none; font-weight:700; }
-.mn-link:hover { text-decoration: underline; }
-.mn-sep { color:#7b8794; }
+.mini-nav { 
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 6px;
+  justify-content: center;                      /* ✅ centre le fil d’Ariane */
+}
+.mn-link { 
+  color:#60a5fa;                                /* ✅ bleu signature */
+  text-decoration:none; font-weight:700; 
+}
+.mn-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.mn-sep { color:#7b8794; opacity:.85; }
+ 
 
 /* ======================================================================
    CARTE (conteneur du contenu légal)
    - bloc central, ombré, largeur max contrôlée
    ====================================================================== */
 .legal-card{
-  margin: 14px auto 40px;
+  margin: 1px auto 40px;
   padding: 20px 22px;
   border-radius: 14px;
-  background: #0b1220;                            /* var(--legal-card-bg) */
-  border: 1px solid rgba(255,255,255,.06);        /* var(--legal-card-bd) */
-  box-shadow:
-    0 30px 70px rgba(2,8,23,.55),
-    0 0 0 1px rgba(255,255,255,.04) inset,
-    0 20px 40px rgba(2,8,23,.25);
+  background: var(--legal-card-aurora);                            /* var(--legal-card-bg) */
+  border: 1px solid var(--legal-card-aurora-bd);        /* var(--legal-card-bd) */
+  box-shadow: var(--legal-card-aurora-shadow);
   max-width: 1000px;
 }
 

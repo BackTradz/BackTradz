@@ -1,11 +1,12 @@
 // src/components/ui/CSVcard/CsvCard.jsx
 import React from "react";
-import CTAButton from "../button/CTAButton";      // << chemins UI actuels
-import "../button/Button.css";                    // couleurs/gradients du CTA
+import CTAButton from "../button/CTAButtonHome";      // << chemins UI actuels
+import "../button/CTAButtonHome.css";                    // couleurs/gradients du CTA
 import "./CSVcard.css";         // styles de la carte (extraits)
 
 // 🆕 helpers labels
 import { formatPair } from "../../../lib/labels";
+import CTAButtonHome from "../button/CTAButtonHome";
 
 
 /* ===== utils affichage ===== */
@@ -86,7 +87,7 @@ export default function CsvCard(props) {
        {/* actions */}
        <div className="csv-actions">
         {downloadUrl ? (
-          <CTAButton
+          <CTAButtonHome
             as="a"                    /* ✅ lien direct comme avant */
             href={downloadUrl}       /* ✅ inclut ?token=... (voir CsvList.jsx ci-dessous) */
             title={downloadTitle}
@@ -94,7 +95,7 @@ export default function CsvCard(props) {
             leftIcon={downloadIcon}
           >
             {downloadLabel}
-          </CTAButton>
+          </CTAButtonHome>
         ) : (
                      <CTAButton disabled fullWidth>Indisponible</CTAButton>
          )}

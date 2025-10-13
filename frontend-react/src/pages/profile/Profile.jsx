@@ -13,6 +13,9 @@ import { updateProfile, unsubscribe, deleteAccount } from "../../sdk/userApi";
 import SupportCard from "./composants/SupportCard"
 import PaymentGraceOverlay from "../../components/overlay/PaymentGraceOverlay";
 import MetaRobots from "../../components/seo/MetaRobots";
+import CTAButton from "../../components/ui/button/CTAButton";
+import DetailButton from "../../components/ui/button/DetailButton";
+import DeleteButton from "../../components/ui/button/DeleteButton";
 
 export default function ProfilPage() {
   const [user, setUser] = useState(null);
@@ -218,18 +221,11 @@ export default function ProfilPage() {
 
       {/* Actions compte rapides */}
       <div className="quick-actions slide-up">
-        <button
-          className="btn btn-ghost"
+        <CTAButton
           onClick={() => { localStorage.removeItem("apiKey"); window.location.href = "/login"; }}
-        >
-          Se déconnecter
-        </button>
-        <button className="btn btn-outline" onClick={onUnsubscribe}>
-          Se désabonner
-        </button>
-        <button className="btn btn-danger" onClick={onDelete}>
-          Supprimer le compte
-        </button>
+        >Se déconnecter</CTAButton>
+        <DetailButton onClick={onUnsubscribe}>Se désabonner</DetailButton>
+        <DeleteButton onClick={onDelete}>Supprimer le compte</DeleteButton>
       </div>
 
       <AccountSettings
@@ -269,18 +265,12 @@ export default function ProfilPage() {
                     onFocus={(e)=>e.target.select()}
                     className="alert-link-input"
                   />
-                  <button
-                    className="btn btn-outline"
-                    onClick={() => { navigator.clipboard?.writeText(alert.link); }}
-                  >
+                  <DetailButton onClick={() => { navigator.clipboard?.writeText(alert.link); }}>
                     Copier
-                  </button>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => window.open(alert.link, "_blank", "noopener,noreferrer")}
-                  >
+                  </DetailButton>
+                  <CTAButton onClick={() => window.open(alert.link, "_blank", "noopener,noreferrer")}>
                     Ouvrir
-                  </button>
+                  </CTAButton>
                 </div>
               )}
             </div>
@@ -288,10 +278,10 @@ export default function ProfilPage() {
           
           <p className="mb-2 opacity-80">Un e-mail de confirmation te sera envoyé. Clique le lien pour débloquer 2 crédits.</p>
                 <div className="flex gap-2 flex-wrap">
-                    <button className="btn btn-primary" onClick={onVerifyEmail} disabled={verifyLoading}>
-                      {verifyLoading ? "Envoi en cours..." : "Renvoyer l’e-mail de vérification"}
-                    </button>
-                  </div>
+                  <CTAButton onClick={onVerifyEmail} disabled={verifyLoading}>
+                    {verifyLoading ? "Envoi en cours..." : "Renvoyer l’e-mail de vérification"}
+                  </CTAButton>
+                </div>
                 </div>
               ) : (
                 <div className="card slide-up">
@@ -315,8 +305,8 @@ export default function ProfilPage() {
         <li>Aide technique & facturation</li>
 
       </ul>
-      <div className="text-center">
-        <a href="support/support" className="btn btn-outline">Contacter le support</a>
+       <div className="text-center">
+        <CTAButton href="support/support">Contacter le support</CTAButton>
       </div>
     </div>
 

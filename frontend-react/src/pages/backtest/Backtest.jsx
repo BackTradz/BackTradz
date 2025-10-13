@@ -340,10 +340,10 @@ export default function Backtest() {
               return (
                 <div className="bt-result-actions">
                   <DetailButton as="button" onClick={handleDownload}>
-                    📥 Télécharger le rapport (.xlsx)
+                    Télécharger le rapport (.xlsx)
                   </DetailButton>
 
-                  <DetailButton
+                  <CTAButton
                     as="button"
                     onClick={(e) => {
                       e.preventDefault();
@@ -352,8 +352,8 @@ export default function Backtest() {
                       setShowOverlay(true);
                     }}
                   >
-                    👁️ Voir les résultats
-                  </DetailButton>
+                    Voir les résultats
+                  </CTAButton>
                 </div>
               );
             })()}
@@ -389,13 +389,13 @@ export default function Backtest() {
 
   // ──────────────────────────────── Rendu page ────────────────────────────────
   return (
-    <main className="bt-page">
+    <main className="bt-page "> 
       <MetaRobots content="noindex,nofollow" />
       <TopProgressBar active={loading && !showProgress} />
       <TopProgressBar show={showProgress} progress={progress} />
 
-      {/* Tabs via PillTabs (même style que dashboard) */}
-      <div className="bt-pills">
+      {/* Tabs via PillTabs (centré) */}
+    <div className="bt-pills layer-top">{/* [v1.3] au-dessus du canvas */}
         <PillTabs
           items={[
             { id: "official", label: "Données officielles", icon: "" },
@@ -408,10 +408,17 @@ export default function Backtest() {
       </div>
             {/* Titre + sous-texte */}
       <header className="bt-header">
-        <h1 className="text-3xl font-bold text-sky-400 tracking-wide">Backtest de stratégies</h1>
-        <p className="bt-muted">Lance des analyses détaillées sur nos données officielles ou sur ton CSV personnalisé.</p>
-      </header>
+        {/* V1.3 — Titres adaptatifs */}
+        <h1 className="bt-title bt-title--desk">Backtest de stratégies</h1>
+        <h1 className="bt-title bt-title--mob">Backtest</h1>
 
+        <p className="bt-sub bt-sub--desk">
+          Lance des analyses détaillées sur nos données officielles ou sur ton CSV personnalisé.
+        </p>
+        <p className="bt-sub bt-sub--mob">
+          Analyse tes données ou nos données officielles.
+        </p>
+      </header>
 
         {/* Grille principale : conteneur uniforme */}
         <div className="bt-container">
@@ -420,8 +427,7 @@ export default function Backtest() {
             <div className="lg:col-span-12 space-y-6">
           {/* OFFICIEL */}
           {tab === "official" && (
-            <form onSubmit={onRunOfficial} className="bt-form">
-
+            <form onSubmit={onRunOfficial} className="bt-form layer-top">{/* [v1.3] */}
 
               {/* Stratégie */}
                <div className="bt-field">
@@ -559,7 +565,7 @@ export default function Backtest() {
 
           {/* CUSTOM */}
           {tab === "custom" && (
-            <form onSubmit={onRunCustom} className="bt-form">
+            <form onSubmit={onRunCustom} className="bt-form layer-top">{/* [v1.3] */}
               <div className="bt-field">
                   <label>CSV (custom)</label>
                   <input
@@ -710,7 +716,7 @@ export default function Backtest() {
               <div className="bt-aside sticky top-24 space-y-6">
 
             {/* Bloc infos */}
-            <section className="bt-alert info">
+            <section className="bt-alert info layer-top">
               <div className="font-semibold mb-1">Conseils rapides</div>
               <div className="text-slate-300 space-y-1 text-sm">
                 <p>• Choisis la paire et l’unité de temps en cohérence avec tes données CSV.</p>
@@ -730,7 +736,7 @@ export default function Backtest() {
 
             {/* Bloc erreurs */}
             {error && (
-              <section className="bt-card">
+              <section className="bt-card layer-top">{/* [v1.3] */}
                 <h3 className="bt-section-title">❌ Erreur</h3>
                 <div className="bt-error">
                    {error}
@@ -741,7 +747,7 @@ export default function Backtest() {
 
             {/* Bloc résultats */}
             {result && (
-              <section className="bt-card">
+              <section className="bt-card layer-top">
                 <h3 className="bt-section-title">Résultats</h3>
                 {resultView}
 

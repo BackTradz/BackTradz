@@ -24,8 +24,8 @@ const RAW_OFFERS = {
   CREDIT_10: { id: "CREDIT_10", type: "one_shot",     price_eur: 10, credits: 12, label: "12 crédits — 10 €", bonus_triggered: false, promo_code_applicable: true },
   CREDIT_20: { id: "CREDIT_20", type: "one_shot",     price_eur: 20, credits: 25, label: "25 crédits — 20 €", bonus_triggered: false, promo_code_applicable: true },
   CREDIT_50: { id: "CREDIT_50", type: "one_shot",     price_eur: 50, credits: 75, label: "75 crédits — 50 €", bonus_triggered: true,  promo_code_applicable: true },
-  SUB_9:     { id: "SUB_9",     type: "subscription", price_eur: 9,  credits_monthly: 10, discount_rate: 0.10, priority_backtest: true, label: "Starter — 9 €/mois", duration_days: 30 },
-  SUB_25:    { id: "SUB_25",    type: "subscription", price_eur: 25, credits_monthly: 30, discount_rate: 0.10, priority_backtest: true, label: "Pro — 25 €/mois", duration_days: 30 },
+  SUB_9:     { id: "SUB_9",     type: "subscription", price_eur: 9,  credits_monthly: 10, discount_rate: 0.10, label: "Starter — 9 €/mois", duration_days: 30 },
+  SUB_25:    { id: "SUB_25",    type: "subscription", price_eur: 25, credits_monthly: 30, discount_rate: 0.10, label: "Pro — 25 €/mois", duration_days: 30 },
 };
 
 // Ordre : crédits d’abord, puis abonnements
@@ -277,9 +277,16 @@ export default function Pricing() {
         <TopProgress active={loadingInit} height={3} from="#22d3ee" to="#6366f1" />
 
       <header className="pr-header">
-        <h1>Nos offres — Crédits & Abonnements</h1>
-        <div className="pr-muted">
-          Accède à des données de trading fiables et à des backtests détaillés. Choisis entre crédits à l’unité ou abonnements mensuels, selon ton usage.
+        {/* V1.3 — Titres & sous-titres adaptatifs */}
+        <h1 className="pr-title pr-title--desk">Nos offres — Crédits & Abonnements</h1>
+        <h1 className="pr-title pr-title--mob">Nos offres</h1>
+
+        <div className="pr-sub pr-sub--desk">
+          Accède à des données de trading fiables et à des backtests détaillés.
+          Choisis entre crédits à l’unité ou abonnements mensuels, selon ton usage.
+        </div>
+        <div className="pr-sub pr-sub--mob">
+          Crédits à l’unité ou abonnements mensuels
         </div>
         {/* v1.2 — Message d’erreur déplacé ici (header), style léger + redirection vers Inscription */}
         {msg && msg.includes("/login?tab=register&next=") && (
@@ -308,7 +315,7 @@ export default function Pricing() {
       </header>
 
       {/* Grille unique : 6 cartes */}
-      <section className="pr-grid">
+      <section className="pr-grid layer-top">
         {ALL_OFFERS.map((of) => {
           const highlighted = of.id === "SUB_9" || of.id === "SUB_25"; // bons plans mis en avant
           // ✅ seulement si user est SUB_9, on propose d’upgrader vers SUB_25

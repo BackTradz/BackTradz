@@ -9,10 +9,10 @@
 // ------------------------------------------------------------------
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import PillTabs from "../ui/switchonglet/PillTabs";
+import PillTabs from "../ui/switchonglet/PillTabsOverlay";
 import { xlsxMeta, xlsxSheet } from "../../sdk/backtestXlsxApi";
 import { formatPair, formatStrategy } from "../../lib/labels";
-
+import Select from "../ui/select/Select";
 
 // ---- Libellés FR (affichage uniquement) ----
 const SHEET_LABEL_FR = {
@@ -167,19 +167,27 @@ export default function BacktestInsightsOverlay({ open, onClose, item }) {
       }));
   }, [meta]);
 
-  // --- Onglet par défaut : "Global" si dispo, sinon 1ʳᵉ feuille, sinon "pins"
+  // --- Onglet par défaut :
+  //     - si des feuilles existent → "Global" si présente, sinon 1ʳᵉ feuille
+  //     - s'il n'y a AUCUNE feuille (après chargement) → "pins"
   useEffect(() => {
-    if (tab) return;
-    if (sheetItems.length) {
+    if (!open) return;                         // uniquement overlay ouvert
+    if (sheetItems.length > 0) {
       const prefer =
         sheetItems.find(s => s.id.toLowerCase() === "sheet:global") ||
         sheetItems.find(s => /^sheet:tp2[_ ]?global$/i.test(s.id));
-      setTab(prefer ? prefer.id : sheetItems[0].id);
-    } else {
+      setTab(prev => {
+        // si on était sur "pins" en attendant le chargement, on corrige
+        if (!prev || prev === "pins" || !prev.startsWith("sheet:")) {
+          return prefer ? prefer.id : sheetItems[0].id;
+        }
+        return prev; // ne pas écraser un choix manuel
+      });
+    } else if (!loadingMeta) {
+      // pas de feuilles une fois le chargement terminé → épingles
       setTab("pins");
     }
-  }, [sheetItems, tab]);
-
+  }, [open, sheetItems, loadingMeta]);
     // reset du tab quand on change de dossier (évite de rester sur l’ancien onglet)
   useEffect(() => { if (open) setTab(""); }, [open, folder]); // reset tab seulement si ouvert
 
@@ -406,8 +414,21 @@ function DataSheetView({ active, folder, sheet, meta, isMobile, onSelectSheet })
 
     // ----- Heures (Par_Heure) : sélecteur de fuseau + transformation d'affichage -----
     const isHourSheet = /par[_ ]?heure/i.test(String(sheet || ""));
-    const [tzOffset, setTzOffset] = useState(0); // en heures, ex: +2 => Europe/Paris été
+    // Fuseau : offset dérivé d'une zone IANA sélectionnée (par défaut Europe/Brussels)
+    const [tzOffset, setTzOffset] = useState(0);         // offset (heures)
+    const [tzZone, setTzZone]   = useState("Europe/Brussels");
 
+    // calcule l'offset (heures) d'une zone IANA "zone" par rapport à l'UTC à la date courante
+    function offsetFromZone(zone){
+      try{
+        const now = new Date();
+        const local = new Date(now.toLocaleString("en-US",{ timeZone: zone }));
+        const utc   = new Date(now.toLocaleString("en-US",{ timeZone: "UTC" }));
+        const diffH = (local - utc) / 36e5; // peut être décimal selon la zone
+        return Math.round(diffH);           // ⬅️ arrondi heure entière (cohérent avec nos 24 lignes)
+      }catch{ return 0; }
+    }
+    useEffect(()=>{ setTzOffset(offsetFromZone(tzZone)); }, [tzZone]);
     // détecte la colonne qui contient l'heure (0..23, "0h", "01", "01h", etc.)
     const hourCol = useMemo(() => {
       const byName = headers.find(h => /^(hour|heure|hr)$/i.test(String(h).trim()));
@@ -544,59 +565,53 @@ function DataSheetView({ active, folder, sheet, meta, isMobile, onSelectSheet })
     <div className="ins-data">
       {/* Switch rapide de feuille en mobile */}
       <div className="toolbar">
-        {isMobile && (
-          <select
-            value={sheet}
-            onChange={(e)=>onSelectSheet(e.target.value)}
-            className="bt-select"
-          >
-            {(() => {
-              const list = (meta?.sheets || []).filter(s => (s?.rows ?? 0) > 0);
-              const seen = new Set();
-              return list
-                .map(s => String(s.name || "").trim())
-                .filter(name => {
-                  const key = name.toLowerCase();
-                  if (seen.has(key)) return false;
-                  seen.add(key);
-                  return !!name;
-                })
-                .map(name => <option key={name} value={name}>{SHEET_LABEL_FR[name] || name}</option>);
-            })()}
-          </select>
-        )}
+
 
         {/* Sélecteur de fuseau - visible seulement sur Par_Heure */}
         {isHourSheet && (
-          <div className="tz-switch">
+         <div className="tz-switch">
             <label className="tz-label">Fuseau&nbsp;:</label>
-            <select
-              className="bt-select"
-              value={tzOffset}
-              onChange={(e)=>setTzOffset(parseInt(e.target.value, 10))}
-              aria-label="Décalage horaire"
-            >
-              {Array.from({length: 27}, (_,i)=> i-12).map(off => (
-                <option key={off} value={off}>
-                  {off>=0 ? `UTC+${off}` : `UTC${off}`}
-                </option>
-              ))}
-            </select>
+            <Select
+              id="tz-switch"
+              value={tzZone}
+              onChange={(val)=>setTzZone(val)}
+              options={[
+                { value:"Europe/Brussels",   label:"Europe centrale (CET/CEST)" },
+                { value:"Europe/London",     label:"Royaume-Uni (UK)" },
+                { value:"Europe/Berlin",     label:"Allemagne (CET/CEST)" },
+                { value:"Europe/Paris",      label:"France (CET/CEST)" },
+                { value:"America/New_York",  label:"États-Unis — Est (ET)" },
+                { value:"America/Chicago",   label:"États-Unis — Centre (CT)" },
+                { value:"America/Denver",    label:"États-Unis — Montagnes (MT)" },
+                { value:"America/Los_Angeles",label:"États-Unis — Pacifique (PT)" },
+                { value:"America/Sao_Paulo", label:"Brésil (BRT)" },
+                { value:"Asia/Dubai",        label:"Golfe — Dubaï (GST)" },
+                { value:"Asia/Singapore",    label:"Singapour (SGT)" },
+                { value:"Asia/Tokyo",        label:"Japon (JST)" },
+              ]}
+              size="md"
+              zStack="global"
+            />
           </div>
         )}
       </div>
 
 
-      {/* Table */}
+      {/* Table — style unifié (verre) géré en CSS global sans classe conditionnelle */}
         <div className="table-wrap">
           <table role="table">
             <thead role="rowgroup">
               <tr role="row">
-                {headers.map((h) => (
-                  <th role="columnheader" key={h} className={colAlignClass(h)}>
-                    {translateHeader(h)}
-                  </th>
-                ))}
+                {headers.map((h) => {
+                  const label = translateHeader(h);
+                  const isHourHeader = isHourSheet && hourCol === h;
+                  const tzLabel = tzOffset >= 0 ? `UTC+${tzOffset}` : `UTC${tzOffset}`;
+                  return (
+                    <th role="columnheader" key={h} className={colAlignClass(h)}>
+                      {isHourHeader ? `${label} (${tzLabel})` : label}
+                    </th>
+                  );
+                })}
 
                 <th role="columnheader" className="right">Actions</th>
               </tr>

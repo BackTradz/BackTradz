@@ -4,15 +4,17 @@
 // Corrigé : supporte meta.sheets = [string | {name,...}], clés uniques.
 // -----------------------------------------------------------------------------
 
-import React, { useEffect, useMemo, useState } from "react";
-import PillTabs from "../ui/switchonglet/PillTabs";
+import React, { useMemo, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import PillTabs from "../ui/switchonglet/PillTabsOverlay";
 import { xlsxMeta, xlsxSheet } from "../../sdk/PublicXlsxApi";
 import { formatPair, formatStrategy } from "../../lib/labels";
-import CTAButton from "../ui/button/CTAButton";
-
+import ResultButton from "../ui/button/ResultButton";
+import Select from "../ui/select/Select";
 
 import "./insights.css";
 import "./insightspublic.css"
+import CTAButton from "../ui/button/CTAButton";
 
 // ---- Libellés FR (affichage uniquement) ----
 const SHEET_LABEL_FR = {
@@ -138,6 +140,8 @@ export default function PublicInsightsOverlay({ open, onClose, item }) {
     if (!raw) return "";
     try { return formatStrategy(raw) || raw; } catch { return raw; }
   })();
+
+  
   const periodLabel = formatPeriodPublic(item?.period || folderMeta.period || "");
 
   // responsive
@@ -199,11 +203,9 @@ export default function PublicInsightsOverlay({ open, onClose, item }) {
   );
 
 
-
-
-  if (!open) return null;
-
-  return (
+  // ✅ garde le même plan de pile que le Backtest (au-dessus navbar/footer)
+ if (!open) return null;
+  const node = (
     <div className="ins-root" role="dialog" aria-modal="true">
       <div className="ins-backdrop" onClick={onClose} />
       <div className="ins-panel">
@@ -217,7 +219,7 @@ export default function PublicInsightsOverlay({ open, onClose, item }) {
               </div>
             )}
           </div>
-          <button className="x" onClick={onClose} aria-label="Fermer">✕</button>
+          <button type="button" className="x" onClick={onClose} aria-label="Fermer">✕</button>
         </header>
 
 
@@ -242,6 +244,8 @@ export default function PublicInsightsOverlay({ open, onClose, item }) {
       </div>
     </div>
   );
+  // 👉 aligne le public sur le backtest : rendu tout en haut du DOM
+  return createPortal(node, document.body);
 }
 
 /* ============================================================================
@@ -281,7 +285,19 @@ function PublicDataSheetView({ folder, sheet }) {
 
   // ===== Fuseau horaire (UTC) pour Par_Heure =====
   const isHourSheet = /par[_ ]?heure/i.test(String(sheet || ""));
-  const [tzOffset, setTzOffset] = useState(0);   // en heures, ex: +2 (Paris été)
+  const [tzOffset, setTzOffset] = useState(0);            // utilisé par la logique existante
+  const [tzZone, setTzZone] = useState("Europe/Brussels"); // zone IANA choisie dans le Select
+
+  // calcule l’offset (heures) pour une zone IANA à la date courante
+  function offsetFromZone(zone){
+    try{
+      const now   = new Date();
+      const local = new Date(now.toLocaleString("en-US",{ timeZone: zone }));
+      const utc   = new Date(now.toLocaleString("en-US",{ timeZone: "UTC" }));
+      return Math.round((local - utc) / 36e5); // on reste à l’heure entière (24 lignes)
+    }catch{ return 0; }
+  }
+  useEffect(()=>{ setTzOffset(offsetFromZone(tzZone)); }, [tzZone]);
 
   // Détecte la colonne "hour/heure" (00..23, "0h", "01", "01h", etc.)
   const hourCol = useMemo(() => {
@@ -357,18 +373,30 @@ function PublicDataSheetView({ folder, sheet }) {
         {/par[_ ]?heure/i.test(String(sheet || "")) && (
           <div className="tz-left">
             <label className="tz-label">Fuseau&nbsp;:</label>
-            <select
-              className="bt-select"
-              value={tzOffset}
-              onChange={(e)=>setTzOffset(parseInt(e.target.value, 10))}
-              aria-label="Décalage horaire"
-            >
-              {Array.from({length: 27}, (_,i)=> i-12).map(off => (
-                <option key={off} value={off}>
-                  {off>=0 ? `UTC+${off}` : `UTC${off}`}
-                </option>
-              ))}
-            </select>
+            <Select
+              id="tz-public"
+              value={tzZone}
+              onChange={(val)=>setTzZone(val)}
+              options={[
+                // Europe
+                { value:"Europe/Brussels",    label:"Europe centrale (CET/CEST)" },
+                { value:"Europe/London",      label:"Royaume-Uni (UK)" },
+                { value:"Europe/Berlin",      label:"Allemagne (CET/CEST)" },
+                { value:"Europe/Paris",       label:"France (CET/CEST)" },
+                // Amériques
+                { value:"America/New_York",   label:"États-Unis — Est (ET)" },
+                { value:"America/Chicago",    label:"États-Unis — Centre (CT)" },
+                { value:"America/Denver",     label:"États-Unis — Montagnes (MT)" },
+                { value:"America/Los_Angeles",label:"États-Unis — Pacifique (PT)" },
+                { value:"America/Sao_Paulo",  label:"Brésil (BRT)" },
+                // Asie / Golfe
+                { value:"Asia/Dubai",         label:"Golfe — Dubaï (GST)" },
+                { value:"Asia/Singapore",     label:"Singapour (SGT)" },
+                { value:"Asia/Tokyo",         label:"Japon (JST)" },
+              ]}
+              size="md"
+              zStack="global"
+            />
           </div>
         )}
 

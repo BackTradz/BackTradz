@@ -5,14 +5,15 @@
 // -----------------------------------------------------------------------------
 
 import React, { useEffect, useMemo, useState } from "react";
-import PillTabs from "../ui/switchonglet/PillTabs";
+import { createPortal } from "react-dom";
+import PillTabs from "../ui/switchonglet/PillTabsOverlay";
 import { xlsxMeta, xlsxSheet } from "../../sdk/backtestXlsxApi";
 import { formatPair, formatStrategy } from "../../lib/labels";
-
+import Select from "../ui/select/Select";               // ✅ même composant que le backtest
 
 
 import "./insights.css";
-import "./insightspublic.css"
+
 
 // ---- Libellés FR (affichage uniquement) ----
 const SHEET_LABEL_FR = {
@@ -201,9 +202,9 @@ export default function PublicInsightsOverlay({ open, onClose, item }) {
 
 
 
-  if (!open) return null;
-
-  return (
+// ✅ garde le même plan de pile que le Backtest (au-dessus navbar/footer)
+ if (!open) return null;
+  const node = (
     <div className="ins-root" role="dialog" aria-modal="true">
       <div className="ins-backdrop" onClick={onClose} />
       <div className="ins-panel">
@@ -242,6 +243,8 @@ export default function PublicInsightsOverlay({ open, onClose, item }) {
       </div>
     </div>
   );
+  // 👉 aligne le public sur le backtest : rendu tout en haut du DOM
+  return createPortal(node, document.body);
 }
 
 /* ============================================================================
@@ -292,8 +295,19 @@ function PublicDataSheetView({ folder, sheet }) {
 
   // ===== Fuseau horaire (UTC) pour Par_Heure =====
   const isHourSheet = /par[_ ]?heure/i.test(String(sheet || ""));
-  const [tzOffset, setTzOffset] = useState(0);   // en heures, ex: +2 (Paris été)
+  const [tzOffset, setTzOffset] = useState(0);           // offset dérivé ci-dessous
+  const [tzZone, setTzZone]   = useState("Europe/Brussels"); // ✅ zone IANA, identique au backtest
 
+  // calcule l’offset (heures) de la zone IANA sélectionnée
+  function offsetFromZone(zone){
+    try{
+      const now   = new Date();
+      const local = new Date(now.toLocaleString("en-US",{ timeZone: zone }));
+      const utc   = new Date(now.toLocaleString("en-US",{ timeZone: "UTC" }));
+      return Math.round((local - utc) / 36e5); // arrondi heure entière (00h→23h)
+    }catch{ return 0; }
+  }
+  useEffect(()=>{ setTzOffset(offsetFromZone(tzZone)); }, [tzZone]);
   // Détecte la colonne "hour/heure" (00..23, "0h", "01", "01h", etc.)
   const hourCol = useMemo(() => {
     const byName = headers.find(h => /^(hour|heure|hr)$/i.test(String(h).trim()));
@@ -362,41 +376,55 @@ function PublicDataSheetView({ folder, sheet }) {
 
   return (
     <div className="ins-data">
-    {/* Toolbar publique : CTA toujours visible ; select affiché seulement sur "Par_Heure" */}
-      <div className={`pub-toolbar ${/par[_ ]?heure/i.test(String(sheet || "")) ? "has-left" : ""}`}>
-        {/* Zone gauche : select UTC seulement sur Par_Heure */}
-        {/par[_ ]?heure/i.test(String(sheet || "")) && (
+    {/* Toolbar : même Select que le backtest, visible seulement sur "Par_Heure" */}
+      <div className={`pub-toolbar ${isHourSheet ? "has-left" : ""}`}>
+        {isHourSheet && (
           <div className="tz-left">
             <label className="tz-label">Fuseau&nbsp;:</label>
-            <select
-              className="bt-select"
-              value={tzOffset}
-              onChange={(e)=>setTzOffset(parseInt(e.target.value, 10))}
-              aria-label="Décalage horaire"
-            >
-              {Array.from({length: 27}, (_,i)=> i-12).map(off => (
-                <option key={off} value={off}>
-                  {off>=0 ? `UTC+${off}` : `UTC${off}`}
-                </option>
-              ))}
-            </select>
+            <Select
+              id="tz-result"
+              value={tzZone}
+              onChange={(val)=>setTzZone(val)}
+              options={[
+                // Europe
+                { value:"Europe/Brussels",    label:"Europe centrale (CET/CEST)" },
+                { value:"Europe/Paris",       label:"France (CET/CEST)" },
+                { value:"Europe/Berlin",      label:"Allemagne (CET/CEST)" },
+                { value:"Europe/London",      label:"Royaume-Uni (UK)" },
+                // Amériques
+                { value:"America/New_York",   label:"États-Unis — Est (ET)" },
+                { value:"America/Chicago",    label:"États-Unis — Centre (CT)" },
+                { value:"America/Denver",     label:"États-Unis — Montagnes (MT)" },
+                { value:"America/Los_Angeles",label:"États-Unis — Pacifique (PT)" },
+                { value:"America/Sao_Paulo",  label:"Brésil (BRT)" },
+                // Asie / Golfe
+                { value:"Asia/Dubai",         label:"Golfe — Dubaï (GST)" },
+                { value:"Asia/Singapore",     label:"Singapour (SGT)" },
+                { value:"Asia/Tokyo",         label:"Japon (JST)" },
+              ]}
+              size="md"
+              zStack="global"   // panel au-dessus de l’overlay
+            />
           </div>
         )}
-
       </div>
-
 
       <div className="table-wrap">
         <table>
           <thead>
-              <tr>
-                {headers.map((h) => (
+            <tr>
+              {headers.map((h) => {
+                const label = translateHeader(h);
+                const isHourHeader = isHourSheet && /^(hour|heure|hr)$/i.test(String(h).trim());
+                const tzLabel = tzOffset >= 0 ? `UTC+${tzOffset}` : `UTC${tzOffset}`;
+                return (
                   <th key={h} className={isNumCol(h) ? "right" : ""}>
-                    {translateHeader(h)}
+                    {isHourHeader ? `${label} (${tzLabel})` : label}
                   </th>
-                ))}
-              </tr>
-            </thead>
+                );
+              })}
+            </tr>
+          </thead>
             <tbody>
               {viewRows.map((r, i) => (
                 <tr key={i}>

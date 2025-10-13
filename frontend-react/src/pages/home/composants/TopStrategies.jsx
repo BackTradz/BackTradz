@@ -7,22 +7,30 @@
 // -----------------------------------------------------------------------------
 
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { formatStrategy } from "../../../lib/labels";
 import { API_BASE } from "../../../sdk/apiClient"; // garde ton chemin actuel
 
 import SectionTitle from "../../../components/ui/SectionTitle";
 import "../../../pages/home/Home.css";
 import PublicInsightsOverlay from "../../../components/overlay/PublicInsightsOverlay";
-import DetailButton from "../../../components/ui/button/DetailButton";
-// Animations légères
-const container = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { staggerChildren: 0.12, duration: 0.5, ease: "easeOut" } },
+import ResultButton from "../../../components/ui/button/CTAButtonHome";
+import CTAButtonHome from "../../../components/ui/button/CTAButtonHome";
+
+// Variants uniques (section & cartes) — clean + lisible
+const sectionVariants = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1, y: 0,
+    transition: { duration: 0.38, ease: "easeOut", staggerChildren: 0.06, delayChildren: 0.04 }
+  }
 };
-const item = {
-  hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+const cardVariants = {
+  hidden: { opacity: 0, y: 16, scale: 0.985, filter: "blur(6px)" },
+  show: {
+    opacity: 1, y: 0, scale: 1, filter: "blur(0px)",
+    transition: { duration: 0.45, ease: [0.22, 0.61, 0.36, 1] }
+  }
 };
 
 // Retourne le chemin XLSX (peu importe le nom utilisé par l’API)
@@ -51,12 +59,30 @@ function toOverlayItem(s) {
   };
 }
 
+// Effet tech discret à l’apparition (stagger)
+const tsContainer = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.06, delayChildren: 0.04 }
+  }
+};
+
+const tsCardFx = {
+  hidden: { opacity: 0, y: 16, scale: 0.985, filter: "blur(6px)" },
+  show: {
+    opacity: 1, y: 0, scale: 1, filter: "blur(0px)",
+    transition: { duration: 0.45, ease: [0.22, 0.61, 0.36, 1] }
+  }
+};
+
+
 
 export default function TopStrategies() {
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState({ open: false, item: null });
+  const prefersReduced = useReducedMotion();
 
   // Fetch Top stratégies (public)
   useEffect(() => {
@@ -78,25 +104,34 @@ export default function TopStrategies() {
 
   return (
     <motion.section
-      className="ts-wrap"
-      initial="hidden"
-      whileInView="show"
+      className="ts-wrap layer-top"
+      variants={sectionVariants}
+      initial={prefersReduced ? false : "hidden"}
+      whileInView={prefersReduced ? false : "show"}
       viewport={{ once: true, amount: 0.2 }}
-      variants={container}
     >
       {/* Titre */}
-      <motion.div variants={item}>
-        <SectionTitle>Top stratégies du moment</SectionTitle>
+      <motion.div variants={sectionVariants}>
+        <SectionTitle>
+          <span className="only-desktop">Top stratégies du moment</span>
+          <span className="only-mobile">Top stratégies</span>
+        </SectionTitle>
       </motion.div>
 
       {error && <p className="ts-error">{error}</p>}
 
       {/* Grille */}
-      <motion.div className="ts-grid" variants={container}>
+      <motion.div className="ts-grid" variants={sectionVariants}>
         {(loading ? skel : strategies.length ? strategies : skel).map((_, i) => {
           const s = strategies[i];
           return (
-            <motion.article key={i} className="ts-card" variants={item}>
+            <motion.article
+              key={i}
+              className={`ts-card${
+                s && Number(s.winrate_tp1) >= 70 ? " ts-card--hot" : ""
+              }`}
+              variants={cardVariants}
+              >
               {s ? (
                 <>
                   {/* Head : badges & période */}
@@ -124,7 +159,12 @@ export default function TopStrategies() {
 
                     <div className="ts-row">
                       <span className="ts-label">Winrate TP1 RR (1:1)</span>
-                      <span className={`ts-kpi ${Number(s.winrate_tp1) >= 55 ? "good" : ""}`}>
+                      <span
+                        className={`ts-kpi ${
+                          Number(s.winrate_tp1) >= 70 ? "great"
+                          : Number(s.winrate_tp1) >= 55 ? "good" : ""
+                        }`}
+                      >
                         {s.winrate_tp1 != null ? `${Number(s.winrate_tp1).toFixed(2)}%` : "—"}
                       </span>
                     </div>
@@ -139,13 +179,13 @@ export default function TopStrategies() {
                     {/* CTA : TON bouton — on ouvre toujours l’overlay
                         (si folder absent => message explicite dans l’overlay) */}
                     <div className="ts-cta-row">
-                      <DetailButton
+                      <CTAButtonHome
                         onClick={() => setPreview({ open: true, item: toOverlayItem(s) })}
                         aria-label="Voir les détails de la stratégie"
                         className="ts-cta"
                       >
-                        Voir les résultats
-                      </DetailButton>
+                        voir les résultats
+                      </CTAButtonHome>
                     </div>
                   </div>
                 </>

@@ -39,8 +39,39 @@
 
   /* Boutons / CTA */
   --cta-inset: 12px;
+  /* Fond verre/aurora pour champs (Select + Input) */
+  --field-bg:
+    radial-gradient(130% 90% at 50% 70%,
+      rgba(56,96,220,.12) 0%,
+      rgba(22,34,68,.09) 42%,
+      rgba(10,16,28,.08) 62%,
+      rgba(6,10,18,.06) 82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg, rgba(5,8,14,.62) 0%, rgba(6,10,18,.62) 100%);
+  --field-bd: rgba(90,130,255,.14);
+  --field-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 12px rgba(0,100,255,.12);
 
-  /* Tabs */
+  /* [V1.3] Aurora “HeroMessage” réutilisable pour les cartes */
+  --card-aurora:
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12) 0%,
+      rgba(22, 34, 68, 0.09) 42%,
+      rgba(10, 16, 28, 0.08) 62%,
+      rgba(6, 10, 18, 0.06) 82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,
+      rgba(6, 10, 18, 0.62) 100%
+    );
+  --card-aurora-bd: rgba(90,130,255,0.14);     /* bord bleuté */
+  --card-aurora-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
+
+    /* Tabs */
   --tab-bd: rgba(91,141,255,.25);
   --tab-bg: rgba(18,25,40,.85);
   --tab-active: linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);
@@ -51,8 +82,9 @@
 
   /* Titres */
   --title-pad-left: 2px;
-  --title-accent: linear-gradient(180deg,#22d3ee 0%,#2563eb 100%);
-
+  /* 🔵 Accent plus profond (plus de “bleu ciel”) */
+  --title-accent: linear-gradient(180deg,#1e3a8a 0%, #2563eb 100%);
+  --title-accent-bd: rgba(91,141,255,.45);  /* liseré discret autour du “pin” */
   /* Alignement visuel inputs/labels (si besoin) */
   --field-pad-x: 10px;
 }
@@ -80,24 +112,10 @@
    ========================= */
 .row-center.row-top {
   display:flex; justify-content:center;
-  margin: 12px auto 1px;
+  margin: 12px auto 0px;
   padding-inline: var(--page-pad-x);
   flex-wrap: wrap;
-}
-.pill-tabs, .tabs {
-  display:inline-flex; gap:6px; padding:6px;
-  background: var(--tab-bg);
-  border: 1px solid var(--tab-bd);
-  border-radius: 16px;
-}
-.tab-btn {
-  padding: 10px 18px; border: 0; border-radius: 12px;
-  background: transparent; color: #b9c6dc; cursor: pointer; transition: .2s;
-}
-.tab-btn:hover { color: #e7f0ff; }
-.tab-btn.active {
-  background: var(--tab-active); color: #fff;
-  box-shadow: 0 6px 22px rgba(37,99,235,.25);
+  position: relative; z-index: 30; /* au-dessus des cartes */
 }
 
 
@@ -107,22 +125,76 @@
 .panel { background: transparent; border: 0; box-shadow: none; margin: 0; padding: 0; }
 
 .panel .panel-title {
-  margin: 0 0 22px 0; /* <-- anti-saccade: spacing stable */
+  margin: 0 0 18px 0; /* <-- anti-saccade: spacing stable */
+  padding-bottom: 4px;
   padding-left: var(--title-pad-left);
-  font-size: clamp(22px, 2.6vw, 28px);
+  font-size: clamp(26px, 2.4vw, 34px);
   line-height: 1.15;
   font-weight: 800;
-  letter-spacing: .2px;
+  letter-spacing: .3px;
   display: flex; align-items: center; gap: 10px;
-  color: var(--text-main);
+   /* Chrome typographique identique au Hero */
+  color: var(--text-main); /* fallback non-webkit */
+  background: linear-gradient(180deg, #f8faff 0%, #cdd9ff 48%, #9ab4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   position: relative;
+  /* profondeur subtile + lisibilité (mêmes valeurs que Hero) */
+  text-shadow:
+    0 0 10px rgba(80,130,255,0.06),
+    0 2px 6px rgba(0,0,0,0.35);
+  transition: filter 0.4s ease;
+  will-change: filter; /* micro-optimisation */
 }
 
 .panel .panel-title::before {
   content: "";
   width: 6px; height: 1.1em; border-radius: 999px;
   background: var(--title-accent);
-  box-shadow: 0 0 16px rgba(37,99,235,.35);
+  /* liseré + halo doux (fini le bleu ciel) */
+  border: 1px solid var(--title-accent-bd);
+  box-shadow:
+    0 0 18px rgba(37,99,235,.28),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+/* Soulignement premium discret qui se fond vers la droite */
+.panel .panel-title::after{
+  content:"";
+  flex: 1 1 auto;
+  height: 1px;
+  margin-left: 14px;
+  transform: translateY(3px);   /* ✅ descend légèrement le filet */
+  background: linear-gradient(
+    90deg,
+    rgba(56,120,255,.38),
+    rgba(56,120,255,.16) 38%,
+    rgba(0,0,0,0) 82%
+  );
+  filter: saturate(110%);
+  opacity: .65;
+}
+
+/* ❗ Ne pas doubler la ligne sous "Mes backtests" (on a déjà .section-sep) */
+.panel .panel-title.db-title::after{
+  content: none;
+}
+
+/* Séparateur de section (entre épingles et backtests) */
+.section-sep{
+  height: 1px;
+  margin: 18px 0 14px;
+  position: relative;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0), rgba(56,120,255,.25) 16%, rgba(56,120,255,.35) 35%, rgba(56,120,255,.25) 54%, rgba(0,0,0,0) 86%);
+}
+.section-sep::after{
+  content:"";
+  position:absolute; inset:-8px 0 -8px 0;  /* halo très léger */
+  pointer-events:none;
+  background: radial-gradient(60% 180% at 50% -40%, rgba(56,120,255,.12), transparent 70%);
+  filter: blur(6px);
+  opacity:.5;
 }
 
 
@@ -138,19 +210,40 @@
 }
 .bt-ctrl { display: grid; grid-template-rows: auto 1fr; align-items: start; min-width: 220px; }
 .bt-label { margin: 0 0 6px; font-size: 13px; color: var(--text-soft); }
-.bt-select, .bt-input {
+.bt-select, .bt-input{
   height: 44px; border-radius: 10px;
-  background: #0f1627; color: #cfe1ff;
-  border: 1px solid rgba(91,141,255,.25);
+  /* ✅ même verre/aurora que sur tes Selects */
+  background: var(--field-bg);
+  color:#cfe1ff;
+  border: 1px solid var(--field-bd);
+  box-shadow: var(--field-shadow);
   padding: 0 12px; outline: none;
+  backdrop-filter: blur(4px) saturate(112%);
+  -webkit-backdrop-filter: blur(4px) saturate(112%);
 }
-.bt-select:focus, .bt-input:focus { box-shadow: 0 0 0 3px rgba(96,165,250,.25); }
+.bt-select:focus, .bt-input:focus{
+  box-shadow:
+    0 0 0 3px rgba(96,165,250,.25),
+    var(--field-shadow);
+  border-color: rgba(255,255,255,.10);
+}
+
+/*===== input =====*/
 .bt-input-wrap { position: relative; }
 .bt-input-ico {
   position: absolute; left: 10px; top: 50%;
-  transform: translateY(-50%); opacity: .7; pointer-events: none;
+  transform: translateY(-50%);
+  opacity: .9;                 /* plus lisible */
+  pointer-events: none;
+  z-index: 2;                  /* ✅ au-dessus de l’input (plus de flou) */
 }
 .bt-input { padding-left: 34px; }
+
+/* Placeholder clair (même esprit que le texte) */
+.bt-input::placeholder{
+  color: #eaf2ff;              /* ou var(--text-main) */
+  opacity: .72;
+}
 
 /* menus des Select au premier plan */
 .bt-toolbar .strt-select { width: 100%; }
@@ -239,12 +332,15 @@
    ========================= */
 .dbt-card{
   position: relative;
-  background: var(--card-bg);
-  border:1px solid var(--card-bd);
+  /* [V1.3] même aurora que HeroMessage (verre + lueur interne) */
+  background: var(--card-aurora, var(--card-bg));   /* fallback si var absente */
+  border: 1px solid var(--card-aurora-bd, var(--card-bd));
   border-radius: var(--radius);
   padding:14px;
   display:flex; flex-direction:column; gap:12px;
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--card-aurora-shadow, var(--card-shadow));
+  backdrop-filter: blur(4px) saturate(112%);
+  -webkit-backdrop-filter: blur(4px) saturate(112%);
   transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
   overflow:hidden;
 }
@@ -257,6 +353,9 @@
   border-color: rgba(120,170,255,.45);
   box-shadow: 0 0 0 2px rgba(15,110,255,.25), var(--card-shadow);
 }
+
+/* [V1.3] Spécificité sûre (au cas où un vieux CSS override le fond) */
+.dash-container .dbt-card{ background: var(--card-aurora, var(--card-bg)); }
 
 /* Le header n’utilise plus space-between pour éviter le “flottement”
   quand la date passe sur 2 lignes. On pousse la date à droite avec
@@ -296,16 +395,24 @@
 }
 
 .dbt-actions-primary{
-  margin-top: 8px; padding: 0 var(--cta-inset);
-  display:flex; justify-content:center;
+  /* [V1.3] Layout propre — même padding que la rangée secondaire */
+  margin-top: 12px;
+  display:flex; justify-content:center; align-items:center; gap:0;
+  padding: 0 var(--cta-inset);
+  background: transparent; border: 0; box-shadow: none;
 }
-.dbt-actions-primary .dbt-btn{
-  width: min(100%, 420px); box-sizing: border-box;
+
+/* Le CTA gère déjà ses dimensions */
+.dbt-actions-primary .cta-btn{
+  width: 100%;
+  max-width: 420px;
 }
+
 .dbt-actions-secondary{
   display:grid; grid-template-columns: 1fr 1fr; gap:10px;
-  margin-top:10px; padding:0 var(--cta-inset);
+  margin-top:10px; padding:0 var(--cta-inset);   /* identique au CTA */
 }
+
 @media (max-width:520px){ .dbt-actions-secondary{ grid-template-columns:1fr; } }
 
 /* Les boutons remplissent leur colonne (100% largeur) */
@@ -315,47 +422,34 @@
 .dbt-actions-secondary button,
 .dbt-actions-secondary a{ width:100%; }
 
-.dbt-btn{
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:10px 14px; border-radius:12px; font-weight:600;
-  text-decoration:none; border:0;
-  transition: filter .15s ease, transform .06s ease;
-}
-.dbt-btn:hover{ filter: brightness(1.06); }
-.dbt-btn:active{ transform: translateY(1px); }
-
-.dbt-primary{
-  background: linear-gradient(135deg,#0ea5e9 0%, #2563eb 100%);
-  color:#fff;
-}
-.dbt-neutral{
-  background: linear-gradient(180deg, #2a3446 0%, #1f2937 100%);
-  color:#e8effa; border:1px solid rgba(255,255,255,.08);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 20px rgba(0,0,0,.25);
-}
-.dbt-neutral:hover{
-  background: linear-gradient(180deg, #334155 0%, #1f2937 100%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 22px rgba(0,0,0,.28);
-}
-.dbt-danger{
-  background: rgba(255,87,87,.12);
-  color:#ffb3b3; border:1px solid rgba(255,87,87,.35);
-}
-.dbt-danger:hover{ filter: brightness(1.08); }
-.dbt-danger:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(239,68,68,.35); }
-
-
 /* =========================
    9) CARTES CSV (dashboard)
    ========================= */
 /* scope .csv-page pour ne pas toucher le CSV Shop */
 .csv-page .csv-card{
-  background: #0e1a2b;
-  border: 1px solid var(--card-bd);
+  background:
+    /* aurora : lueur centrale/basse bleutée, très douce */
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12)  0%,     /* halo un poil moins dense */
+      rgba(22, 34, 68, 0.09)  42%,
+      rgba(10, 16, 28, 0.08)  62%,
+      rgba(6, 10, 18, 0.06)  82%,
+      transparent 100%
+    ),
+    /* couche de profondeur quasi noire (comme la navbar) */
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,         /* base plus transparente */
+      rgba(6, 10, 18, 0.62) 100%
+    );
+  border: 1px solid rgba(90,130,255,0.14);      /* bord un peu moins présent */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),   /* léger relief interne */
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
+  transition: box-shadow .4s ease, transform .4s ease, border-color .4s ease;
+  backdrop-filter: blur(4px) saturate(112%);   /* +blur, -saturation = plus “verre” */
   border-radius: var(--radius);
   padding: 18px 20px;
-  box-shadow: 0 12px 24px rgba(0,0,0,0.25);
-  transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .csv-page .csv-card:hover{
   transform: translateY(calc(-1 * var(--hover-raise)));
@@ -461,13 +555,16 @@
   white-space: nowrap; border: 0;
 }
 
+/*===============mes epingles============== */
+
 /* Bouton "Afficher plus" */
 .list-more{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top:16px; }
 .list-more .dbt-btn{ min-width: 180px; }
 .list-more-meta{ font-size:.9rem; color: var(--text-soft); }
 
-/* dashboard.css */
-.pins-section { margin-top: 24px; }
+
+.pins-section { margin-top: 16px; position: relative; z-index: 25; }
+
 .pins-header {
   display:flex; align-items:center; justify-content:space-between;
   padding: 8px 4px; border-top: 1px solid rgba(255,255,255,.06);
@@ -484,11 +581,10 @@
   margin: 32px 0 16px;
 }
 
-/* Conteneur du mur d’épingles */
-.pins-panel {
-  margin-top: 12px;
-}
-
+ .pins-panel {
+  margin-top: 10px;
+  position: relative; z-index: 25;   /* passe bien au-dessus de la grille suivante */
+ }
 /* Carte épingle */
 .pin-card {
   display: grid;
@@ -498,7 +594,27 @@
   padding: 14px 16px;
   margin: 12px 0;
   /* ✅ même look que .dbt-card */
-  background: #0f172a;
+  background:
+    /* aurora : lueur centrale/basse bleutée, très douce */
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12)  0%,     /* halo un poil moins dense */
+      rgba(22, 34, 68, 0.09)  42%,
+      rgba(10, 16, 28, 0.08)  62%,
+      rgba(6, 10, 18, 0.06)  82%,
+      transparent 100%
+    ),
+    /* couche de profondeur quasi noire (comme la navbar) */
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,         /* base plus transparente */
+      rgba(6, 10, 18, 0.62) 100%
+    );
+  border: 1px solid rgba(90,130,255,0.14);      /* bord un peu moins présent */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),   /* léger relief interne */
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
+  transition: box-shadow .4s ease, transform .4s ease, border-color .4s ease;
+  backdrop-filter: blur(4px) saturate(112%);   /* +blur, -saturation = plus “verre” */
   border: 1px solid var(--card-bd);
   border-radius: var(--radius);
 }

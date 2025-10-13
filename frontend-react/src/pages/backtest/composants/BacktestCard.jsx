@@ -33,7 +33,7 @@ export default function BacktestCard({ bt }) {
       {/* Bouton téléchargement si fichier dispo */}
       {bt.xlsx_filename && (
         <a href={downloadXlsxUrl(bt.xlsx_filename)} target="_blank" rel="noreferrer">
-          <Button className="mt-2">📥 Télécharger .xlsx</Button>
+          <Button className="mt-2"> Télécharger .xlsx</Button>
         </a>
       )}
     </Card>

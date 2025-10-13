@@ -28,7 +28,7 @@ export default function Footer() {
         </nav>
 
         {/* Droite */}
-        <p className="footer-side footer-right">v1 beta</p>
+        <p className="footer-side footer-right">Beta v1.3</p>
       </div>
     </footer>
   );

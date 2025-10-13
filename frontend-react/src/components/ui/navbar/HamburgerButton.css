@@ -11,13 +11,24 @@
   z-index: 60;
 }
 
+
+
 .bar {
   display: block;        /* ✅ nécessaire sur iOS Safari */
   width: 100%;           /* ✅ prend la largeur du bouton */
   height: 3px;
-  background-color: #e5e7eb;
+  /* ✅ Fermé : blanc propre (lisible sur fond sombre) */
+  background: #ffffff;
   border-radius: 2px;
   transition: all 0.3s ease;
+}
+
+.hamburger-btn:hover .bar { filter: drop-shadow(0 0 6px rgba(50,86,255,.25)); }
+/* en état ouvert, on renforce le bleu (bleu néon léger) */
+
+/* ✅ Ouvert (croix) : bleu néon */
+.hamburger-btn.open .bar {
+  background: linear-gradient(90deg, rgb(122,162,255), rgb(50,86,255));
 }
 
 /* Animation en mode ouvert */

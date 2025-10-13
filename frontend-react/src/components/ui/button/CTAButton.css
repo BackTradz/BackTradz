@@ -1,0 +1,43 @@
+/* ===== [V1.3] CTA Résultats — Bleu signature verre/aurora ===== */
+.cta-btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:44px; padding:10px 16px;
+  border-radius:12px; font-weight:600; line-height:1; text-decoration:none;
+  color:#E9EEFF;
+  border:0;
+  background-clip: padding-box;      /* évite toute “ligne” de jointure visuelle */
+  backdrop-filter: blur(4px) saturate(112%); -webkit-backdrop-filter: blur(4px) saturate(112%);
+  transition: filter .15s, transform .08s, box-shadow .25s, background .25s;
+  text-shadow: 0 1px 0 rgba(0,0,0,.35); /* lisibilité sur bleu + foncé */
+  cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
+}
+.cta-btn.cta-primary{
+  /* Fond plus profond & distinct des cartes */
+  background:
+    radial-gradient(115% 90% at 50% 72%, rgba(64,120,255,0.22) 0%, rgba(6,9,16,0.10) 58%, rgba(0,0,0,0) 100%),
+    linear-gradient(0deg, rgba(46,96,255,0.06) 0%, rgba(46,96,255,0.04) 100%),
+    /* base bleu-nuit plus sombre que la carte */
+    linear-gradient(180deg, rgba(7,10,18,0.98) 0%, rgba(6,9,16,0.98) 100%),
+    /* petit sheen interne, pas un contour */
+    linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 38%);
+  box-shadow:
+    /* pas de halo périphérique : uniquement de la profondeur */
+    inset 0 -10px 22px rgba(40,90,255,0.11),
+    0 10px 24px rgba(0,0,0,.26);
+}
+.cta-btn.cta-primary:hover{
+  filter:brightness(1.05); transform:translateY(-1px);
+  box-shadow:
+    inset 0 -12px 26px rgba(60,110,255,0.14),
+    0 14px 32px rgba(0,0,0,.32);
+}
+.cta-btn:active{ transform:translateY(0); }
+.cta-btn:focus-visible{
+  outline:0;
+  box-shadow:
+    0 0 0 3px rgba(15,110,255,.22),
+    0 0 0 7px rgba(15,110,255,.10);   /* ring doux, pas de glow périphérique */
+}
+.cta-btn-block{ width:100%; }
+.cta-ic{ display:inline-flex; align-items:center; margin-right:6px; line-height:0; }
+.cta-disabled{ background:linear-gradient(180deg, rgba(20,28,42,.52) 0%, rgba(14,20,30,.52) 100%); color:#9fb2d6; cursor:not-allowed; border-color:rgba(255,255,255,.06); box-shadow:none; transform:none; }

@@ -1,6 +1,6 @@
 // src/components/ui/CTAButton.jsx
 import React from "react";
-import "./Button.css";
+import "./CTAButton.css";
 
 function cx(...c) { return c.filter(Boolean).join(" "); }
 
@@ -30,14 +30,14 @@ export default function CTAButton({
   const Element = isLink ? "a" : "button";
 
     const variantClass = disabled
-      ? "dbt-disabled"
-      : variant === "secondary"
-      ? "dbt-secondary"
-      : variant === "danger"
-      ? "dbt-danger"
-      : "dbt-primary";
+    ? "cta-disabled"
+    : variant === "secondary"
+    ? "cta-secondary"
+    : variant === "danger"
+    ? "cta-danger"
+    : "cta-primary";
   const common = {
-    className: cx("dbt-btn", variantClass, fullWidth && "dbt-btn-block", className),
+    className: cx("cta-btn", variantClass, fullWidth && "cta-btn--block", className),
     ...(isLink
       ? { href, download, target, rel: target === "_blank" ? rel || "noopener noreferrer" : rel }
       : { type: "button", onClick: disabled ? undefined : onClick, disabled }),
@@ -46,9 +46,9 @@ export default function CTAButton({
 
   return (
     <Element {...common}>
-      {leftIcon ? <span className="dbt-ic">{leftIcon}</span> : null}
+      {leftIcon ? <span className="cta-ic">{leftIcon}</span> : null}
       <span>{children}</span>
-      {rightIcon ? <span className="dbt-ic">{rightIcon}</span> : null}
+      {rightIcon ? <span className="cta-ic">{rightIcon}</span> : null}
     </Element>
   );
 }

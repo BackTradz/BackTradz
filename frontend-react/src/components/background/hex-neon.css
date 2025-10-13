@@ -1,0 +1,24 @@
+/* ========================================================================
+   [v1.3 - retouche design] Presets visuels du background Hex (overrides vars)
+   Usage : <div class="app-layout ... bg-hex-normal"> … </div>
+   ======================================================================== */
+
+/* Base par défaut (si aucune classe n'est posée, on garde les valeurs d'index.css) */
+
+/* Densité / taille des alvéoles */
+.bg-hex-sparse  { --hex-edge: 96; --hex-gap: 2; }   /* alvéoles + grandes, lignes fines   */
+.bg-hex-normal  { --hex-edge: 80; --hex-gap: 3; }   /* preset par défaut (prod-friendly)  */
+.bg-hex-dense   { --hex-edge: 64; --hex-gap: 2.5; } /* alvéoles + petites, lignes + serrées */
+
+/* Intensité de l’éclat */
+.bg-hex-soft    { --hex-gap: 2;   --hex-glow: rgba(180,90,255,.30); }   /* violet doux  */
+.bg-hex-strong  { --hex-gap: 3.5; --hex-glow: rgba(180,90,255,.55); }   /* violet fort  */
+
+/* Palette “gris profond + interstices noirs” (par défaut via index.css) */
+.bg-hex-purple  {
+  --hex-gap: 3;
+  --hex-glow: rgba(180,90,255,.45);
+}
+
+/* Coupe le fond (pratique pour debug/design) */
+.bg-hex-hidden #hex-canvas { display: none !important; }

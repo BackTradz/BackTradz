@@ -299,10 +299,15 @@ export default function CSVShop() {
       <TopProgress active={loading} />
       {/* ⛳ Garde anti-sursaut : réserve ~60vh pendant le chargement */}
       <div className="csvshop-container page-skeleton-guard">
-        <h2 className="csvshop-title">CSV de trading disponibles</h2>
-        <p className="csvshop-description">
-          Données CSV <b>propres</b> et <b>normalisés</b> (OHLCV + indicateurs), prêts à l’emploi pour vos
-          <b> backtests</b>, votre <b>trading algorithmique</b> et l’<b>vos modèles IA</b>.
+        {/* V1.3 — Titres/sous-titres adaptatifs */}
+        <h2 className="csvshop-title csvshop-title--desk">CSV de trading disponibles</h2>
+        <h2 className="csvshop-title csvshop-title--mob">CSV disponibles</h2>
+        <p className="csvshop-description csvshop-desc--desk">
+          Données CSV <b>propres</b> et <b>normalisées</b> (OHLCV + indicateurs), prêtes pour tes
+          <b> backtests</b>, ton <b>trading algo</b> et tes <b>modèles IA</b>.
+        </p>
+        <p className="csvshop-description csvshop-desc--mob">
+          CSV propres & normalisés. Télécharge, backteste, entraîne tes modèles.
         </p>
         <CSVInfoBanner />
 

@@ -1,543 +1,366 @@
-/* =====================================================================
-   PAGE "À SAVOIR"
-   - Thème global sombre, aligné avec Pricing/Home
-   - Structure: Hero + Layout (TOC + contenu) + cartes strat, specs CSV,
-                FAQ, About, etc.
-   - ⚠️ 0 régression : aucune valeur changée, uniquement des commentaires
-   ===================================================================== */
+/* ==========================================================================
+   BackTradz — À savoir (V1.4 Clean)
+   - 🧠 Variables root centralisées : fonds outer/inner, typo, accents
+   - 🎴 Cartes/sections : aurora + verre alignés avec Pricing/CSV Shop
+   - 🧭 TOC (sidebar + mobile) inclus
+   - 🧹 Doublons retirés, sections commentées, responsive intact
+   ========================================================================== */
 
-/* src/pages/asavoir/a_savoir.css */
-/* 🎨 Thème global uniforme */
-.a-savoir-page {
-  --bg0: #1e293b;        /* gris foncé (fond général, comme Pricing) */
-  --card: #0f172a;       /* cartes + navbar plus sombres */
-  --text: #e6ecff;
-  --muted: #94a3b8;
-  --primary: #3b82f6;
-  --primary-25: rgba(59,130,246,.25);
+/* =========================
+   🎛️ VARIABLES GLOBALES
+   - Retouches rapides (fonds/typo/accents) 👉 modifie seulement ici
+   ========================= */
+:root {
+  /* Layout */
+  --asv-max: 1160px;
+  --asv-pad-x: 20px;
+  --asv-anchor-offset: 96px;
+  /* V1.3 — Calques (superposition) */
+  --asv-layer-base: 1;
+  --asv-layer-flyout: 50;   /* menus, listes déroulantes */
 
-  background: var(--bg0);   /* 👉 fond uni, pas de dégradé */
-  color: var(--text);
-  min-height: 100vh;
+  /* Typo (couleurs) */
+  --asv-text: #e6ecff;           /* texte principal */
+  --asv-muted: #94a3b8;          /* texte atténué */
+  --asv-title-accent:#2563eb;      /* accent sur titres (chrome “chrome du titre”) */
+  --asv-primary:#2563eb;        /* bleu utilitaire (contenu) */
+
+  /* 🎨 ACCENTS / PINS / CTA (bleu signature aligné prod) */
+  --asv-accent-blue: #2563eb;          /* signature */
+  --asv-accent-blue-deep: #1e3a8a;     /* racine du pin */
+  --asv-accent-pin-grad: linear-gradient(180deg, var(--asv-accent-blue-deep) 0%, var(--asv-accent-blue) 100%);
+
+  /* 🧊 VERRE (bordures/ombres communes à toutes les cartes) */
+  --asv-glass-bd: rgba(90,130,255,0.14);
+  --asv-glass-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
+
+   /* ── Recette AURORA (sections principales) ─────────────────────────────── */
+  --asv-aurora-bd: rgba(90,130,255,.14);
+  --asv-aurora-bg:
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56,96,220,.10) 0%,
+      rgba(22,34,68,.09) 42%,
+      rgba(10,16,28,.08) 62%,
+      rgba(6,10,18,.06) 82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg, rgba(5,8,14,.65) 0%, rgba(6,10,18,.65) 100%);
+  --asv-aurora-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 10px 38px rgba(0,0,0,.45),
+    0 0 12px rgba(0,100,255,.12);
+  --asv-aurora-backdrop: blur(8px) saturate(110%);
+
+  /* ── Recette VERRE MÉTRIQUE (sous-sections) ───────────────────────────── */
+  --asv-verre-bd: rgba(120,170,255,.10);
+  --asv-verre-bg:
+    radial-gradient(120% 140% at 50% 115%, rgba(0,0,0,.14) 0%, rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(10,16,28,.64) 0%, rgba(8,12,20,.66) 100%);
+  --asv-verre-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 12px 28px rgba(0,0,0,.32);
+  --asv-verre-backdrop: blur(10px) saturate(112%);
+
 }
 
-/* Conteneur standard centré + padding latéral confortable */
-.container-std { max-width: 1160px; margin: 0 auto; padding: 20px; }
+/* =========================
+   🧱 PAGE & CONTENEUR
+   ========================= */
+.a-savoir-page { color: var(--asv-text); min-height: 100vh; }
+.container-std { max-width: var(--asv-max); margin: 0 auto; padding: var(--asv-pad-x); }
 
-/* =====================================================================
-   HERO (Titre + sous-titre)
-   ===================================================================== */
-.a-savoir-hero {
-  padding: 36px 0 16px;
-  background: var(--bg0);   /* même couleur que fond */
+/* =========================
+   🏷️ HERO
+   ========================= */
+.a-savoir-hero { padding: 10px 0 0px; }
+.title{
+  font-weight: 800; font-size: 28px; text-align: center; margin: 0;
+  /* “chrome” de titre comme home/dashboard */
+  background: linear-gradient(180deg, #f8faff 0%, #cdd9ff 48%, #9ab4ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px rgba(80,130,255,0.06), 0 2px 6px rgba(0,0,0,0.35);
 }
-.title { font-weight: 800; font-size: 28px; }
-.subtitle { margin-top: 6px; color: var(--muted); }
+.subtitle{ color: var(--asv-muted); text-align: center; margin: 8px 0 0; }
 
-/* =====================================================================
-   LAYOUT (Sidebar TOC sticky + contenu)
-   - Desktop: grille 260px / auto
-   - Mobile (≤1024px): 1 colonne, TOC non sticky
-   ===================================================================== */
-.layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 20px;
-}
-@media (max-width: 1024px) {
-  .layout { grid-template-columns: 1fr; }
-  .toc-wrap { position: static; }
-}
-.toc-wrap { position: sticky; top: 84px; height: max-content; }
+/* =========================
+   📐 LAYOUT (TOC + CONTENU)
+   ========================= */
+.layout{ display: grid; grid-template-columns: 260px 1fr; gap: 20px; margin-top: 8px; }
+.toc-wrap{ position: sticky; top: 84px; height: max-content; }
+@media (max-width:1024px){ .layout{ grid-template-columns: 1fr; } .toc-wrap{ display:none; } }
 
-/* =====================================================================
-   CONTENU + CARTES génériques
-   ===================================================================== */
-.content { display: flex; flex-direction: column; gap: 24px; }
-.card-std {
-  background: var(--card);   /* cartes/nav plus sombres */
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 18px;
-}
-
-/* En-tête de section: titre à gauche, hint à droite */
-.section-head {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:12px;
-}
-.section-title { font-size: 18px; font-weight: 700; }
-.section-hint { color: var(--muted); font-size: 12px; }
-
-.muted { color: var(--muted); }
-
-/* Listes à puces propres, espacées et teintées */
-.bullets { padding-left: 18px; display: grid; gap: 6px; color: var(--muted); }
-.bullets li::marker { color: var(--primary); }
-
-/* =====================================================================
-   STRATEGY CARDS (grille 2 → 1 col)
-   ===================================================================== */
-.strategy-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-@media (max-width: 800px) { .strategy-grid { grid-template-columns: 1fr; } }
-
-.strategy-card {
-  background: var(--card);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 16px;
-}
-.strategy-title { font-weight: 700; }
-
-/* Badges / tags */
-.badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-.badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.06);
-  color: var(--primary);
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.badge.todo { border-style: dashed; color: var(--muted); }
-
-/* =====================================================================
-   Strategy Explorer (master–detail)
-   - Liste sticky à gauche + détail à droite
-   ===================================================================== */
-.strat-explorer{ display:grid; grid-template-columns: 320px 1fr; gap:16px; }
-@media (max-width: 980px){ .strat-explorer{ grid-template-columns: 1fr; } }
-
+/* =========================
+   🎴 CARTES / SECTIONS — OUTER
+   - fonds des sections principales
+   ========================= */
+.card-std,
+.a-savoir-page .content > section,
+.a-savoir-page .section-block,
+.toc-mobile-button,
+.toc-mobile .toc-mobile-panel,
 .strat-list{
-  background: var(--card);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:12px;
-  padding:12px;
-  position:sticky; top:88px;
-  align-self:start;
+  background: var(--asv-aurora-bg);
+  border: 1px solid var(--asv-aurora-bd);
+  border-radius: 14px;
+  backdrop-filter: var(--asv-aurora-backdrop);
+  background-clip: padding-box;
+  box-shadow: var(--asv-aurora-shadow);
 }
+/* V1.3 — Chaque section a un z-index de base (ordre naturel) */
+.a-savoir-page .content > section{ position: relative; z-index: var(--asv-layer-base); }
+
+/* V1.3 — Sections avec selects : menus doivent passer AU-DESSUS des suivantes */
+#techniques,
+#pairs{
+  position: relative;
+  z-index: var(--asv-layer-flyout);
+  overflow: visible; /* garantit que les menus ne soient pas coupés */
+}
+
+/* V1.3 — Conteneurs internes des selects (explorers) : calque élevé + pas de clipping */
+.strat-explorer,
+.strat-list{
+  position: relative;
+  z-index: var(--asv-layer-flyout);
+  overflow: visible;
+}
+
+/* V1.3 — Menus déroulants génériques dans ces sections (selon les libs) */
+#techniques [role="listbox"],
+#pairs      [role="listbox"],
+#techniques .dropdown-menu,
+#pairs      .dropdown-menu{
+  position: relative;       /* si déjà absolu par la lib, le z-index s’applique pareil */
+  z-index: calc(var(--asv-layer-flyout) + 5);
+}
+
+/* espacements outer */
+.card-std,
+.a-savoir-page .content > section,
+.a-savoir-page .section-block { padding: 16px; }
+
+/* .strat-list = colonne sticky (outer pour contraste) */
+.strat-list{ padding: 12px; border-radius: 12px; position: sticky; top: 88px; align-self: start; }
+
+/* =========================
+   🎴 CARTES / BLOCS — INNER
+   - fonds des blocs internes (dans une section)
+   ========================= */
+.strategy-card,
+.strat-detail,
+.value-card,
+.faq details,
+.blk,
+.step{
+  background: var(--asv-verre-bg);
+  border: 1px solid var(--asv-verre-bd);
+  border-radius: 14px;
+  backdrop-filter: var(--asv-verre-backdrop);
+  background-clip: padding-box;
+  box-shadow: var(--asv-verre-shadow);
+}
+
+/* espacements inner */
+.strategy-card,
+.strat-detail,
+.value-card,
+.faq details,
+.step{ padding: 16px; }
+.blk{ padding: 12px; border-radius: 12px; }
+
+/* =========================
+   📄 CONTENU (texte & helpers)
+   ========================= */
+.content{ display:flex; flex-direction:column; gap:24px; }
+.section-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.section-title{ font-size:18px; font-weight:700; }
+.section-hint{ color: var(--asv-muted); font-size:12px; }
+.muted{ color: var(--asv-muted); }
+.bullets{ padding-left:18px; display:grid; gap:6px; color:var(--asv-muted); }
+.bullets li::marker{ color: var(--asv-primary); }
+
+/* =========================
+   🗂️ STRATEGY — LISTE & DÉTAIL
+   ========================= */
+.strategy-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:14px; }
+@media (max-width:800px){ .strategy-grid{ grid-template-columns:1fr; } }
+
+.strategy-title{ font-weight:700; }
+.badges{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.badge{ font-size:11px; padding:2px 8px; border-radius:999px; background: rgba(255,255,255,.08); color: var(--asv-primary); border:1px solid rgba(255,255,255,.1); }
+.badge.todo{ border-style:dashed; color: var(--asv-muted); }
+.badge--blue{ background: rgba(37,99,235,.16); color:#9ec2ff; border-color: rgba(37,99,235,.30); }
+
+.strat-explorer{ display:grid; grid-template-columns: 320px 1fr; gap:16px; }
+@media (max-width:980px){ .strat-explorer{ grid-template-columns: 1fr; } }
+
 .strat-search{ display:flex; gap:8px; align-items:center; margin-bottom:10px; }
 .strat-search input{
-  flex:1; height:40px; padding:0 12px;
-  background: var(--bg); color: var(--text);
-  border:1px solid rgba(255,255,255,.08); border-radius:10px;
-  outline:none;
+  flex:1; height:40px; padding:0 12px; border-radius:10px; outline:none;
+  background: rgba(15,23,42,.7); color: var(--asv-text); border:1px solid rgba(255,255,255,.10);
 }
-.strat-search input:focus{ border-color: var(--primary-25); box-shadow:0 0 0 2px var(--primary-25); }
-.strat-count{ font-size:12px; color: var(--muted); }
+.strat-search input:focus{ border-color: rgba(59,130,246,.35); box-shadow: 0 0 0 2px rgba(59,130,246,.20); }
+.strat-count{ font-size:12px; color: var(--asv-muted); }
 
 .strat-items{ list-style:none; margin:0; padding:0; display:grid; gap:6px; max-height:60vh; overflow:auto; }
 .strat-item{
-  width:100%; text-align:left; cursor:pointer; border:1px solid rgba(255,255,255,.06);
-  background: rgba(255,255,255,.03); color: var(--text);
-  border-radius:10px; padding:10px 12px; display:grid; gap:6px;
-  transition: border-color .18s ease, background .18s ease, transform .06s ease;
+  width:100%; text-align:left; cursor:pointer;
+  background: rgba(12,18,30,.72); color: var(--asv-text);
+  border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px 12px;
+  display:grid; gap:6px; transition: border-color .18s ease, background .18s ease;
 }
 .strat-item:hover{ background: rgba(255,255,255,.05); }
-.strat-item.is-active{ border-color: var(--primary-35); box-shadow:0 0 0 2px var(--primary-15); }
-.strat-item-title{ font-weight:700; }
+.strat-item.is-active{ border-color: rgba(59,130,246,.40); box-shadow: 0 0 0 2px rgba(59,130,246,.18); }
+.strat-item-title{ font-weight:800; }
 .strat-item-tags{ display:flex; gap:6px; flex-wrap:wrap; }
-.badge{ font-size:11px; padding:2px 8px; border-radius:999px; background: rgba(255,255,255,.06); color: var(--primary); border:1px solid rgba(255,255,255,.1); }
-.badge.todo{ color: var(--muted); border-style:dashed; }
 
-.strat-detail{
-  background: var(--card);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:12px; padding:16px;
-}
 .strat-detail-head{ display:grid; gap:6px; margin-bottom:10px; }
 .strat-detail-head h3{ margin:0; font-size:1.25rem; font-weight:800; }
-.strat-detail-head .tagline{ color: var(--muted); font-size:.95rem; }
+.strat-detail-head .tagline{ color: var(--asv-muted); font-size:.95rem; }
 .strat-detail-head .tags{ display:flex; gap:6px; flex-wrap:wrap; }
 
-/* Grille interne des blocs (2 → 1 col) */
-.strat-detail-grid{
-  display:grid; gap:14px;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-}
-@media (max-width: 980px){ .strat-detail-grid{ grid-template-columns: 1fr; } }
-.blk{ background: rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:12px; }
+.strat-detail-grid{ display:grid; gap:14px; grid-template-columns: repeat(2,minmax(0,1fr)); }
+@media (max-width:980px){ .strat-detail-grid{ grid-template-columns:1fr; } }
 .blk-title{ font-weight:800; margin-bottom:6px; }
 
-/* Table des paramètres */
-.param-table{ width:100%; border-collapse: collapse; }
-.param-table th, .param-table td{ padding:8px; border-bottom:1px solid rgba(255,255,255,.06); }
-.param-table th{ text-align:left; color: var(--muted); font-weight:700; }
-.param-table code{ background: rgba(255,255,255,.06); padding:2px 6px; border-radius:6px; }
-
-/* =====================================================================
-   Variante select + fiche (grand texte)
-   - Pour lecture verticale, 1 colonne
-   ===================================================================== */
-.strat-select-layout{ display:grid; gap:14px; }
-.strat-select-row{ max-width: 720px; } /* largeur confortable du select */
-.strat-detail.long .strat-detail-grid{ grid-template-columns: 1fr; } /* 1 colonne, pas de cases étroites */
-.strat-detail.long .blk{ padding:14px; } /* un peu plus d'air */
-
-/* Paramètres : tableau 2 colonnes (nom | description) */
-.param-2col thead th:nth-child(1),
-.param-2col td:nth-child(1){ width: 34%; }
-.param-2col thead th:nth-child(2),
-.param-2col td:nth-child(2){ width: auto; }
-
-/* =====================================================================
-   Spécifications CSV (table + exemples + code)
-   ===================================================================== */
+/* =========================
+   📄 SPÉCIFICATIONS CSV
+   ========================= */
 .csv-spec .spec-table{
-  width:100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border:1px solid rgba(148,163,184,.18);
-  border-radius: 10px;
-  overflow:hidden;
+  width:100%; border-collapse:separate; border-spacing:0;
+  border:1px solid rgba(148,163,184,.18); border-radius:10px; overflow:hidden;
   margin: 12px 0 14px;
 }
-.csv-spec .spec-table thead th{
-  background: rgba(255,255,255,.04);
-  text-align:left;
-  color:#9fb0c6;
-  font-weight:700;
-}
-.csv-spec .spec-table th,
-.csv-spec .spec-table td{
-  padding:10px 12px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-.csv-spec .spec-table tbody tr:nth-child(even) td{
-  background: rgba(255,255,255,.02);
-}
+.csv-spec .spec-table thead th{ background: rgba(255,255,255,.04); text-align:left; color:#9fb0c6; font-weight:700; }
+.csv-spec .spec-table th, .csv-spec .spec-table td{ padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.06); }
+.csv-spec .spec-table tbody tr:nth-child(even) td{ background: rgba(255,255,255,.02); }
 
 .csv-spec .csv-example{ margin: 10px 0 12px; }
 .csv-spec .csv-example .lbl{ font-weight:700; margin-bottom:6px; }
 .csv-spec .csv-example input.mono{
-  width:100%;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius: 8px;
-  padding: 8px 10px;
-  color: #e5ecf5;
+  width:100%; padding: 8px 10px; border-radius: 8px;
+  background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+  color: #e5ecf5; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .csv-spec .code-block .lbl{ font-weight:700; margin: 10px 0 6px; }
 .csv-spec .code-block pre{
-  margin:0;
-  background: rgba(0,0,0,.35);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius: 8px;
-  padding: 10px 12px;
-  overflow:auto;
+  margin:0; padding: 10px 12px; overflow:auto; border-radius: 8px;
+  background: rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.12);
 }
 
-/* =====================================================================
-   Qui sommes-nous
-   ===================================================================== */
-.about-section p {
-  margin-bottom: 10px;
-  line-height: 1.6;
-}
-.about-section b {
-  color: var(--primary);
+/* =========================
+   👥 ABOUT / CRÉDITS / SÉCURITÉ
+   ========================= */
+.about-section p{ margin-bottom:10px; line-height:1.6; }
+.about-section b{ color: var(--asv-primary); }
+
+#credits .blk, #security .blk{ margin-bottom:14px; }
+#credits .blk-title, #security .blk-title{ font-size:15px; font-weight:700; margin-bottom:8px; }
+#credits .bullets li b{ color: var(--asv-primary); }
+#credits .badge{ background: rgba(59,130,246,.25); color: var(--asv-text); font-size:11px; }
+
+#security .link{ color: var(--asv-primary); text-decoration:none; transition: color .2s; }
+#security .link:hover{ text-decoration:underline; color:#60a5fa; }
+
+/* =========================
+   ❓ FAQ
+   ========================= */
+.faq summary{ cursor:pointer; font-weight:700; list-style:none; }
+.faq summary::-webkit-details-marker{ display:none; }
+.faq details[open] summary{ color: var(--asv-primary); }
+.faq .answer{ margin-top:8px; color: var(--asv-text); }
+.faq .answer p{ margin:6px 0; }
+.faq .answer .link{ color: var(--asv-primary); text-decoration:none; }
+.faq .answer .link:hover{ text-decoration:underline; color:#60a5fa; }
+/* V1.3 — Espacement entre éléments FAQ (cartes non collées) */
+.faq details{ margin: 0; }                 /* reset sûr */
+.faq details + details{ margin-top: 10px; } /* inter-carte discret */
+@media (max-width: 600px){
+  .faq details + details{ margin-top: 8px; }  /* léger resserrage en mobile */
 }
 
-/* =====================================================================
-   Crédits & limites
-   ===================================================================== */
-#credits .blk {
-  margin-bottom: 14px;
+/* =========================
+   ⭐ VALUE / CTA
+   ========================= */
+#value .value-wrap{ display:grid; gap:14px; }
+.value-grid{ display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:14px; }
+@media (max-width:980px){ .value-grid{ grid-template-columns:1fr; } }
+.vc-title{ font-weight:800; margin-bottom:6px; }
+.value-card p{ margin: 6px 0 8px; }
+
+.value-cta{ display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+.value-cta .btn-primary, .value-cta .btn-ghost{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:40px; padding:0 14px; border-radius:10px; font-weight:700; text-decoration:none;
+  border:1px solid rgba(255,255,255,.10);
 }
-#credits .blk-title {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-#credits .bullets li b {
-  color: var(--primary);
-}
-#credits .badge {
-  background: var(--primary-25);
-  color: var(--text);
-  font-size: 11px;
+.value-cta .btn-primary{ background: var(--asv-accent-pin-grad); color:#0b1220; border-color:transparent; box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 10px 22px rgba(37,99,235,.30); }
+.value-cta .btn-primary:hover{ filter: brightness(1.05); }
+.value-cta .btn-ghost{ background: rgba(255,255,255,.04); color: var(--asv-text); }
+.value-cta .btn-ghost:hover{ background: rgba(255,255,255,.06); }
+
+/* =========================
+   🧭 TOC MOBILE (details/summary)
+   ========================= */
+.toc-mobile{ display:none; }
+@media (max-width:1024px){
+  .toc-mobile{ display:block; position:sticky; top:84px; z-index:30; margin-bottom:10px; }
+  .toc-mobile-button{ display:inline-flex; align-items:center; gap:8px; padding:10px 14px; font-weight:800; }
+  .toc-mobile[open] .toc-mobile-button{ box-shadow: 0 12px 34px rgba(2,8,23,.5), 0 0 14px rgba(64,140,255,.16); border-color: rgba(100,150,255,.18); }
+  .toc-mobile .toc-mobile-panel{ margin-top:8px; border-radius:12px; padding:10px 12px; max-height:60vh; overflow:auto; }
+  .toc-mobile-link{ display:block; padding:10px 8px; color:#e6ecff; text-decoration:none; border-radius:8px; }
+  .toc-mobile-link:hover{ background: rgba(255,255,255,.04); }
 }
 
-/* =====================================================================
-   Sécurité & responsabilités
-   ===================================================================== */
-#security .blk {
-  margin-bottom: 14px;
-}
-#security .blk-title {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-#security .link {
-  color: var(--primary);
-  text-decoration: none;
-  transition: color .2s;
-}
-#security .link:hover {
-  text-decoration: underline;
-  color: #60a5fa; /* un bleu un peu plus clair au hover */
+/* =========================
+   🧷 ANCRAGES / MISC
+   ========================= */
+section[id]{ scroll-margin-top: var(--asv-anchor-offset); }
+html{ scroll-behavior: smooth; }
+.layout > *, .content, .strat-explorer, .strat-detail, .strat-list{ min-width:0; }
+.a-savoir-page, .a-savoir-page .container-std{ overflow-x: clip; }
+.a-savoir-page table, .a-savoir-page pre, .a-savoir-page textarea, .a-savoir-page input{ max-width:100%; }
+
+/* =========================
+   📱 RESPONSIVE TABLES
+   ========================= */
+@media (max-width:680px){
+  .csv-spec .spec-table{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px; }
+  .csv-spec .spec-table thead, .csv-spec .spec-table tbody, .csv-spec .spec-table tr{ width:max-content; }
 }
 
-/* =====================================================================
-   FAQ (accordéon <details>)
-   ===================================================================== */
-.faq details {
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 10px;
-  padding: 10px 12px;
-  margin-bottom: 10px;
-}
-.faq summary {
-  cursor: pointer;
-  font-weight: 700;
-  list-style: none;
-}
-.faq summary::-webkit-details-marker { display: none; }
-.faq details[open] summary { color: var(--primary); }
-
-.faq .answer {
-  margin-top: 8px;
-  color: var(--text);
-}
-.faq .answer p { margin: 6px 0; }
-.faq .answer .link {
-  color: var(--primary);
-  text-decoration: none;
-}
-.faq .answer .link:hover {
-  text-decoration: underline;
-  color: #60a5fa;
+/* =========================
+   🔎 TEXT SIZE ADJUST
+   ========================= */
+@media (max-width:600px){
+  .container-std{ padding: 16px 12px; }
+  .title{ font-size:22px; }
+  .section-title{ font-size:16px; }
 }
 
-/* =====================================================================
-   Value / Teaser (cartes + CTA)
-   ===================================================================== */
-#value .value-wrap { display: grid; gap: 14px; }
-
-.value-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap: 14px;
-}
-@media (max-width: 980px) {
-  .value-grid { grid-template-columns: 1fr; }
-}
-
-.value-card {
-  background: var(--card);
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 12px;
-  padding: 14px;
-}
-.value-card p { margin: 6px 0 8px; }
-.vc-title {
-  font-weight: 800;
-  margin-bottom: 6px;
-}
-
-.value-cta {
-  display: flex; gap: 10px; flex-wrap: wrap;
-  margin-top: 4px;
-}
-.value-cta .btn-primary,
-.value-cta .btn-ghost {
-  display: inline-flex; align-items: center; justify-content: center;
-  height: 40px; padding: 0 14px; border-radius: 10px;
-  text-decoration: none; font-weight: 700;
-  border: 1px solid rgba(255,255,255,.1);
-}
-.value-cta .btn-primary {
-  background: var(--primary); color: #0b1220; border-color: transparent;
-}
-.value-cta .btn-primary:hover { filter: brightness(1.05); }
-.value-cta .btn-ghost {
-  background: rgba(255,255,255,.04); color: var(--text);
-}
-.value-cta .btn-ghost:hover { background: rgba(255,255,255,.06); }
-
-/* =====================================================================
-   Ancrage / Navigation
-   ===================================================================== */
-:root { --anchor-offset: 96px; }
-section[id] { scroll-margin-top: var(--anchor-offset); }
-
-/* (optionnel) scroll doux pour les ancres natives */
-html { scroll-behavior: smooth; }
-
-/* --- TOC responsive --- */
-@media (max-width: 1024px) {
-  /* cacher la sidebar sur mobile */
-  .toc-wrap { display: none; }
-}
-
-/* Composant mobile (details/summary) pour TOC */
-.toc-mobile { display: none; }
-@media (max-width: 1024px) {
-  .toc-mobile {
-    display: block;
-    position: sticky;
-    top: 84px;             /* sous la navbar */
-    z-index: 30;
-    margin-bottom: 10px;
-  }
-  .toc-mobile-button {
-    list-style: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    background: var(--card);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 10px;
-    font-weight: 800;
-    color: var(--text);
-    user-select: none;
-  }
-  .toc-mobile[open] .toc-mobile-button {
-    box-shadow: 0 10px 30px rgba(2,8,23,.5);
-    border-color: rgba(255,255,255,.2);
-  }
-  .toc-mobile .toc-mobile-panel {
-    margin-top: 8px;
-    background: var(--card);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 12px;
-    padding: 10px 12px;
-    max-height: 60vh;
-    overflow: auto;
-  }
-  .toc-mobile-link {
-    display: block;
-    padding: 10px 8px;
-    color: #e6ecff;
-    text-decoration: none;
-    border-radius: 8px;
-  }
-  .toc-mobile-link:hover { background: rgba(255,255,255,.04); }
-}
-
-/* =====================================================================
-   FIX RESPONSIVE & SÉCURITÉ (overflow & largeur)
-   ===================================================================== */
-
-/* --- Fix overflow mobile : autoriser les colonnes grid à rétrécir --- */
-.layout > * { min-width: 0; }           /* sidebar & content */
-.content { min-width: 0; }
-.strat-explorer, .strat-detail, .strat-list { min-width: 0; }
-
-/* Sécurité : pas d’overflow horizontal global */
-.a-savoir-page,
-.a-savoir-page .container-std {
-  overflow-x: clip;                      /* évite la barre de scroll horizontale */
-}
-
-/* Les éléments "rigides" ne doivent jamais dépasser */
-.a-savoir-page table,
-.a-savoir-page pre,
-.a-savoir-page textarea,
-.a-savoir-page input {
-  max-width: 100%;
-}
-
-/* Tables : sur mobile, on scrolle la table au lieu d’élargir la page */
-@media (max-width: 680px) {
-  .csv-spec .spec-table {
-    display: block;                      /* permet overflow horizontal */
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 10px;
-  }
-  .csv-spec .spec-table thead,
-  .csv-spec .spec-table tbody,
-  .csv-spec .spec-table tr {
-    width: max-content;                  /* garde les colonnes lisibles */
-  }
-}
-
-/* Petits ajustements de spacing mobile (confort) */
-@media (max-width: 600px) {
-  .container-std { padding: 16px 12px; }
-  .card-std { padding: 14px; border-radius: 12px; }
-  .title { font-size: 22px; }
-  .section-title { font-size: 16px; }
-}
-
-/* === FAQ: empêcher le débordement des blocs/code === */
-.faq .answer code,
-.faq .answer kbd,
-.faq .answer samp {
-  white-space: normal;        /* pas de pre dans l'inline code */
-  word-break: break-word;     /* coupe proprement */
-  overflow-wrap: anywhere;    /* autorise la césure même sans espaces */
-  display: inline-block;      /* pour max-width */
-  max-width: 100%;
-}
-
-.faq .answer pre,
-.faq .answer .mono {
-  white-space: pre-wrap;      /* conserve les retours à la ligne mais autorise le wrap */
-  word-break: break-word;     /* évite les lignes infinies */
-  max-width: 100%;
-}
-
-/* =====================================================================
-   How it works (steps) — bloc pédagogique en 2 → 1 colonnes
-   ===================================================================== */
-.steps-grid{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 12px;
-}
-@media (max-width: 860px){
-  .steps-grid{ grid-template-columns: 1fr; }
-}
-.step{
-  display: grid;
-  grid-template-columns: 36px 1fr;
-  gap: 10px;
-  align-items: start;
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 12px;
-  padding: 12px;
-}
+/* =========================
+   🧩 HOW IT WORKS (steps)
+   ========================= */
+.steps-grid{ display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:12px; }
+@media (max-width:860px){ .steps-grid{ grid-template-columns:1fr; } }
+.step{ display:grid; grid-template-columns:36px 1fr; gap:10px; align-items:start; }
 .step-num{
-  width: 36px; height: 36px;
-  display: grid; place-items: center;
-  font-weight: 800;
-  color: #0b1220;
-  background: var(--primary, #3b82f6);
-  border-radius: 10px;
-  box-shadow: 0 6px 18px rgba(59,130,246,.25);
+  width:36px; height:36px; display:grid; place-items:center; font-weight:800; color:#0b1220;
+  background: var(--asv-accent-pin-grad); border-radius:10px; box-shadow: 0 6px 18px rgba(37,99,235,.25);
 }
-.step-title{
-  font-weight: 800;
-  margin-bottom: 4px;
+.step-title{ font-weight:800; margin-bottom:4px; }
+.step-body p{ margin:0; }
+
+/* =========================
+   📌 UTILITAIRES ACCENTS (PINS)
+   ========================= */
+.pin-left{ display:flex; align-items:center; gap:10px; }
+.pin-left::before{
+  content:""; display:inline-block; width:6px; height:22px; border-radius:999px;
+  background: var(--asv-accent-pin-grad);
+  box-shadow: 0 0 10px rgba(37,99,235,.35);
 }
-.step-body p{ margin: 0; }
-
-/* =========================================================
-   À SAVOIR — Hero centré + spacing réduit vers la 1re section
-   ========================================================= */
-
-/* Centre le titre + sous-titre et neutralise les marges natives */
-.a-savoir-hero .title{
-  text-align: center;
-  margin: 0;                /* supprime les marges par défaut des h1/h2 */
-}
-.a-savoir-hero .subtitle{
-  text-align: center;
-  margin-top: 8px;          /* léger espace sous le titre */
-  margin-bottom: 0;         /* pas d’espace supplémentaire vers la section */
-}
-
-/* Réduit encore le “gap” hero → layout */
-.a-savoir-hero{ padding-bottom: 8px; }  /* avant 16px */
-
-/* Assure un très faible écart au-dessus de la 1re section */
-.a-savoir-page .layout{ margin-top: 8px; }

@@ -1,17 +1,23 @@
 // src/pages/auth/AuthPage.jsx
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom"; // ✅ gère la redirection next
+//Background//
+import HexNeonBackground from "../../components/background/HexNeonBackground";
+//formulaire //
 import LoginForm from "./composants/LoginForm";
 import RegisterForm from "./composants/RegisterForm";
+//bouton//
 import CTAButton from "../../components/ui/button/CTAButton";
+import CTAbuttonHome from "../../components/ui/button/CTAButtonHome"
 import BacktradzLogo from "../../components/ui/BacktradzLogo/BacktradzLogo";
 import SignupSuccessOverlay from "./composants/SignupSuccessOverlay"; 
 import PillTabs from "../../components/ui/switchonglet/PillTabs";        // ✅ NEW
 import "./auth.css";
 import { login } from "../../sdk/authApi";
 import { useAuth } from "../../auth/AuthContext"; 
-import posthog, { posthogIdentify } from '../../analytics/posthog';
+//import posthog, { posthogIdentify } from '../../analytics/posthog';
 import MetaRobots from "../../components/seo/MetaRobots";
+import CTAButtonHome from "../../components/ui/button/CTAButtonHome";
 
 // Helper: identifie après login en tentant /api/me (pour récupérer l'email)
 // v1.2: utilise le header attendu par le backend: X-API-Key
@@ -203,8 +209,8 @@ export default function AuthPage() {
   return (
     <div className="auth-container">
       <MetaRobots content="noindex,nofollow" />
-      {/* BG */}
-        <div className="auth-bg" />
+      {/* BG global (hex neon) */}
+        <HexNeonBackground />
 
         {/* ✅ SUPERPOSITION: on garde la box et on ajoute l'overlay au-dessus */}
         {showSignupSuccess && (
@@ -220,8 +226,9 @@ export default function AuthPage() {
         <div className={`auth-box ${isLoginActive ? "login-active" : "register-active"}`}>
           {/* 🔹 Panneau gauche */}
           <div className="info-panel">
-            <div className="flex items-center justify-start p-6">
-              <BacktradzLogo size="lg" to="/" className="select-none" />
+            {/* V1.3: wrapper sans padding + marge ultra courte */}
+            <div className="info-logo">
+              <BacktradzLogo size="xl" to="/" className="select-none" />
             </div>
 
             {isLoginActive ? (
@@ -230,28 +237,31 @@ export default function AuthPage() {
                 <p>
                   Rejoins <strong>BackTradz</strong> et prends une longueur d’avance sur tes backtests.
                 </p>
-                <CTAButton onClick={() => setIsLoginActive(false)} variant="primary" fullWidth>
+                <CTAbuttonHome onClick={() => setIsLoginActive(false)} variant="primary" fullWidth>
                   Créer un compte
-                </CTAButton>
+                </CTAbuttonHome>
               </>
             ) : (
               <>
                 <h2>Déjà inscrit&nbsp;?</h2>
                 <p>Connecte-toi et reprends ton grind là où tu t’étais arrêté.</p>
-                <CTAButton onClick={() => setIsLoginActive(true)} variant="primary" fullWidth>
+                <CTAButtonHome onClick={() => setIsLoginActive(true)} variant="primary" fullWidth>
                   Se connecter
-                </CTAButton>
+                </CTAButtonHome>
               </>
             )}
           </div>
 
          {/* ✅ v1.2 — Header mobile : logo au-dessus des pilltabs (uniquement ≤900px) */}
-          <div className="auth-mobile-header" aria-hidden="true">
+          <div className="auth-mobile-header" role="banner">
             {/* Re-use du même composant logo (aucune nouvelle dépendance) */}
             <BacktradzLogo
-              size="sm"  
+              size="md"  
+              variant="compact"
+              tradzX={98}
+              clipX={90}
               to="/"
-              className="select-none"
+              className="select-none btz-logo--auth" 
             />
           </div>
 

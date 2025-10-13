@@ -1,36 +1,34 @@
 /* ==========================================================================
-   Stratify — CSV Shop
-   - CSS réorganisée avec menu :root
-   - 🚫 aucun style sur <select> (géré par Select.css)
-   - ✅ 0 régression : mêmes classes conservées
+   BackTradz — CSV Shop (V1.3 Clean)
+   - CSS réorganisée & documentée
+   - Variables centralisées
+   - Aucun style sur <Select> custom (géré ailleurs)
+   - Panneau Détails (popover) AU-DESSUS DE TOUT
    ========================================================================== */
 
 /* =========================
-   🎛️ MENU :ROOT — Réglages rapides
+   🎛️ :root — Variables
    ========================= */
-:root{
-  /* Page / largeur */
-  --shop-max: 1520px;                         /* largeur max du contenu (comme dashboard) */
-  --shop-pad-x: clamp(16px, 4vw, 48px);       /* gutter latéral */
-  --shop-pad-t: 28px;                         /* padding top */
-  --shop-pad-b: 56px;                         /* padding bottom */
+:root {
+  
+  /* Layout */
+  --shop-max: 1520px;
+  --shop-pad-x: clamp(16px, 4vw, 48px);
+  --shop-pad-t: 28px;
+  --shop-pad-b: 56px;
 
-  /* Grille */
+  /* Grid */
   --grid-gap: 28px;
   --cols-lg: 4;
   --cols-md: 3;
   --cols-sm: 2;
   --cols-xs: 1;
 
-  /* Cartes CSV */
+  /* Cards */
   --card-radius: 16px;
   --card-pad-y: 18px;
   --card-pad-x: 20px;
-  --card-min-h: 148px;
-  --card-bg: #0f172a;
   --card-bd: rgba(255,255,255,.07);
-  --card-shadow: 0 10px 24px rgba(0,0,0,.24);
-  --card-shadow-hover: 0 14px 32px rgba(0,0,0,.28);
 
   /* Typo */
   --txt-main: #eaf2ff;
@@ -38,107 +36,144 @@
   --txt-mute: #94a3b8;
   --title-accent: #38bdf8;
 
-  /* Inputs / CTA align */
+  /* Inputs */
   --input-h: 44px;
   --input-radius: 10px;
+
+  /* Z-index scale */
+  --layer-content: 10;    /* cartes */
+  --layer-ui: 20;         /* titres / filtres / extracteur */
+  --layer-float: 60;      /* popovers standards */
+  /* ⚠️ react-select menu est souvent à z-index: 9999 → on passe au-dessus */
+  --layer-overlay: 1200000; /* panneau Détails (au-dessus des selects & boutons) */
+  --details-top: 88px;    /* ancrage sous navbar */
 }
 
 /* =========================
-   🧱 Container & titres
+   🧱 Container & Titres
    ========================= */
-.csvshop-container{
+.csvshop-container {
   width: min(94vw, var(--shop-max));
   margin: 0 auto;
   padding: var(--shop-pad-t) var(--shop-pad-x) var(--shop-pad-b);
   color: var(--txt-main);
   box-sizing: border-box;
+  position: relative;
+  overflow: visible; /* évite le clipping des ombres/popovers */
 }
-.csvshop-title{
+.csvshop-title {
   font-size: clamp(1.6rem, 2.4vw, 2rem);
   font-weight: 700;
-  color: var(--title-accent);
+  /* Chrome typographique identique au Hero */
+  color: var(--text-main); /* fallback non-webkit */
+  background: linear-gradient(180deg, #f8faff 0%, #cdd9ff 48%, #9ab4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  /* profondeur subtile + lisibilité (mêmes valeurs que Hero) */
+  text-shadow:
+    0 0 10px rgba(80,130,255,0.06),
+    0 2px 6px rgba(0,0,0,0.35);
+  transition: filter 0.4s ease;
+  will-change: filter; /* micro-optimisation */
   text-align: center;
   margin: 0 0 12px;
+  position: relative; z-index: var(--layer-ui);
 }
-.csvshop-description{
+.csvshop-description {
   text-align: center;
   max-width: 760px;
   margin: 0 auto 22px;
   font-size: .95rem;
   line-height: 1.5;
   color: var(--txt-mute);
+  position: relative; z-index: var(--layer-ui);
+}
+/* V1.3 — Titre/sous-titre desktop vs mobile */
+.csvshop-title--mob, .csvshop-desc--mob { display: none; }
+@media (max-width: 820px){
+  .csvshop-title--desk, .csvshop-desc--desk { display: none; }
+  .csvshop-title--mob,  .csvshop-desc--mob  { display: block; }
 }
 
+
 /* =========================
-   🔎 Filtres (recherche + CTA Extracteur)
+   🔎 Filtres + CTA extracteur
    ========================= */
 .csvshop-filters{
   display:flex; flex-wrap:wrap; justify-content:center; gap:12px;
   margin-bottom: 24px;
+  position: relative; z-index: var(--layer-ui);
 }
-
-/* Inputs natifs uniquement (on NE touche plus les <select> custom) */
+/* Inputs natifs (les Select custom ne sont PAS stylés ici) */
 .csvshop-filters input{
   height: var(--input-h);
   background: #0f172a; color:#f8fafc;
   padding: 0 12px;
   border-radius: var(--input-radius);
   border: 1px solid #334155;
-  outline: none; cursor: text;
-  font-size: .95rem;
+  outline: none;
 }
-
-/* CTA dans la barre de filtres */
-.csvshop-cta-filters.dbt-btn{
-  height: var(--input-h);
-  padding: 0 16px;
-}
+.csvshop-cta-filters.dbt-btn{ height: var(--input-h); padding: 0 16px; }
 
 /* =========================
-   🗂️ Grille de cartes
+   🗂️ Grille des cartes
    ========================= */
 .csvshop-grid{
   display: grid;
   gap: var(--grid-gap);
   grid-template-columns: repeat(var(--cols-lg), minmax(0, 1fr));
   width: 100%;
+  position: relative; z-index: var(--layer-content);
 }
-
-/* Bouton “Afficher plus” (centré, spacing cohérent) */
-.csvshop-loadmore {
-  display: flex;
-  justify-content: center;
-  margin: 1rem 0 2rem;
-}
-
-
 @media (max-width: 1400px){ .csvshop-grid{ grid-template-columns: repeat(var(--cols-md), 1fr); } }
 @media (max-width: 1050px){ .csvshop-grid{ grid-template-columns: repeat(var(--cols-sm), 1fr); } }
 @media (max-width: 640px) { .csvshop-grid{ grid-template-columns: repeat(var(--cols-xs), 1fr); } }
 
+.csvshop-loadmore { display:flex; justify-content:center; margin: 1rem 0 2rem; }
+
 /* =========================
-   📦 Carte CSV
+   📦 Carte CSV (UI/da cohérente)
    ========================= */
 .csvshop-card,
-.csvshop-grid > .dashboard-card{
-  background: var(--card-bg);
-  border: 1px solid var(--card-bd);
-  border-radius: var(--card-radius);
+.csvshop-grid > .dashboard-card {
+  background:
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12)  0%,
+      rgba(22, 34, 68, 0.09)  42%,
+      rgba(10, 16, 28, 0.08)  62%,
+      rgba(6, 10, 18, 0.06)  82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,
+      rgba(6, 10, 18, 0.62) 100%
+    );
+  border: 1px solid rgba(90,130,255,0.14);
+  /* Verre */
+  backdrop-filter: blur(4px) saturate(112%);
+  -webkit-backdrop-filter: blur(4px) saturate(112%);
+  background-clip: padding-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
+  transition: box-shadow .4s ease, transform .4s ease, border-color .4s ease;
   padding: var(--card-pad-y) var(--card-pad-x);
-  min-height: var(--card-min-h);
-  box-shadow: var(--card-shadow);
-  transition: transform .16s ease, box-shadow .18s ease, border-color .18s ease;
-  width: 100%; box-sizing: border-box;
+  border-radius: var(--card-radius);
+  width: 100%;
   overflow: hidden;
 }
 .csvshop-card:hover,
 .csvshop-grid > .dashboard-card:hover{
-  transform: translateY(-3px);
-  border-color: rgba(56,189,248,.55);
-  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+  border-color: rgba(100,150,255,0.18);
+  box-shadow:
+    0 14px 40px rgba(0,0,0,0.45),
+    0 0 18px rgba(64,140,255,0.18);
 }
 
-/* Header / méta */
+/* Contenu carte (titres/méta/actions) */
 .csvshop-card .dashboard-card__header .title-row{ display:flex; align-items:center; gap:10px; }
 .csvshop-card .dashboard-card__header .title{ font-weight:700; font-size:18px; color:#e9f1ff; }
 .csvshop-card .dashboard-card__header .badge-tf{
@@ -146,15 +181,12 @@
   background: rgba(80,140,255,.18); color:#8db3ff; font-weight:600; font-size:13px;
 }
 .csvshop-card .csv-period{ margin-top:6px; font-size:14px; color:#b9c6da; text-align:left; }
-
 .csvshop-card .csv-meta{ margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; }
 .csvshop-card .csv-meta .meta-line{ display:flex; gap:8px; }
 .csvshop-card .csv-meta .meta-label{ color: var(--txt-mute); font-size:13px; }
 .csvshop-card .csv-meta .meta-value{ color:#e6eefc; font-weight:600; font-size:14px; }
 .csvshop-card .csv-source.library{ color:#a8c5ff; }
 .csvshop-card .csv-source.live   { color:#fca5a5; }
-
-/* Actions */
 .csvshop-card .csv-actions{ margin-top:16px; display:flex; gap:12px; width:100%; }
 .csvshop-card .csv-actions > *{ flex:1 1 0; min-width:0; }
 .csvshop-card .csv-actions .dbt-btn{ height:48px; display:flex; align-items:center; justify-content:center; width:100%; }
@@ -162,119 +194,94 @@
 /* =========================
    ✅ Section “Votre extraction”
    ========================= */
-.csvshop-private{ margin-top: 28px; }
-.csvshop-header{ display:flex; align-items:center; gap:10px; margin-bottom:6px; color:var(--txt-main); }
-.csvshop-cta-toggle.dbt-btn{ height:36px; padding:6px 12px; border-radius:10px; font-size:14px; }
-
-/* =========================
-   ⛏️ Extracteur inline (form)
-   ========================= */
-.extractor{
-  background: var(--card-bg);
-  border: 1px solid var(--card-bd);
-  border-radius: 12px;
-  padding: 20px;
-  margin-top: 8px;
-}
-.extractor__title{ margin:0; text-align:center; font-size:1.1rem; color:var(--txt-soft); font-weight:700; }
-.extractor__subtitle{ text-align:center; margin:4px 0 16px; color:var(--txt-mute); font-size:.9rem; }
-
-.extractor__presets{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px; }
-.chip{
-  background: transparent; border:1px solid #334155; color:#e2e8f0;
-  padding:6px 10px; border-radius:999px; font-size:.8rem; cursor:pointer;
-}
-.chip:hover{ border-color: var(--title-accent); }
-
-.extractor__form{
-  display:grid; gap:12px; grid-template-columns: 1.1fr .9fr 1fr 1fr auto; align-items:end;
-}
-@media (max-width: 860px){ .extractor__form{ grid-template-columns: 1fr 1fr; } }
-@media (max-width: 520px){ .extractor__form{ grid-template-columns: 1fr; } }
-
-.extractor__field label{ display:block; font-size:.8rem; color:var(--txt-mute); margin-bottom:6px; }
-.extractor__field input{
-  height: var(--input-h); background:#0f172a; color:#f8fafc;
-  padding:0 12px; border-radius: var(--input-radius);
-  border:1px solid #334155; outline:none; width:100%;
-}
-
-.segmented{ display:inline-flex; background:#0f172a; border:1px solid #334155; border-radius:10px; padding:3px; }
-.segmented__btn{ background:transparent; color:#cbd5e1; border:0; padding:8px 12px; border-radius:8px; cursor:pointer; font-size:.9rem; }
-.segmented__btn:hover{ color:#fff; }
-.segmented__btn.is-active{ background: var(--title-accent); color:#0b1220; }
-
-.extractor__actions{ display:flex; align-items:center; gap:10px; }
-.extractor__error{ color:#ef4444; font-size:.85rem; }
-
-/* =========================
-   📱 Responsif fin
-   ========================= */
-@media (max-width: 480px){
-  .csvshop-card{ padding: calc(var(--card-pad-y) - 4px) calc(var(--card-pad-x) - 4px); min-height: 132px; }
-  .csvshop-title{ font-size: 1.4rem; }
-}
-
-/* Carte extraction privée = pleine largeur */
+.csvshop-private{ margin-top: 28px; position: relative; z-index: var(--layer-ui); }
 .csvshop-private .csvshop-card,
 .csvshop-private .dashboard-card {
   grid-column: 1 / -1;
   width: 100%;
   max-width: 100%;
-}
+  background:
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12)  0%,
+      rgba(22, 34, 68, 0.09)  42%,
+      rgba(10, 16, 28, 0.08)  62%,
+      rgba(6, 10, 18, 0.06)  82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,
+      rgba(6, 10, 18, 0.62) 100%
+    ) !important;
+  /* ✅ mêmes bordure/verre/padding que les autres cartes */
+  border: 1px solid rgba(90,130,255,0.14);
+  backdrop-filter: blur(4px) saturate(112%);
+  -webkit-backdrop-filter: blur(4px) saturate(112%);
+  background-clip: padding-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
+  border-radius: var(--card-radius);
+  padding: var(--card-pad-y) var(--card-pad-x);
+ }
 
-/* Badge LIVE (privé) */
-.csvshop-card .badge-live {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.2;
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  margin-left: auto;
-}
-
-/* Header aligné avec badge live */
-.dashboard-card.csv-card .dashboard-card__header{
-  display:flex; align-items:center; justify-content:space-between;
+/* 🖱️ Hover identique aux cartes de la grille */
+.csvshop-private .csvshop-card:hover,
+.csvshop-private .dashboard-card:hover{
+  transform: translateY(-2px);
+  border-color: rgba(100,150,255,0.18);
+  box-shadow:
+    0 14px 40px rgba(0,0,0,0.45),
+    0 0 18px rgba(64,140,255,0.18);
 }
 
 /* =========================
-   ℹ️ Bandeau d'infos CSV — STRIP + POPOVER
+   ℹ️ Infobar (strip) + Popover
    ========================= */
 .csvshop-infobar.infobar--strip{
-  background: var(--card-bg);
+  background:
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12)  0%,
+      rgba(22, 34, 68, 0.09)  42%,
+      rgba(10, 16, 28, 0.08)  62%,
+      rgba(6, 10, 18, 0.06)  82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,
+      rgba(6, 10, 18, 0.62) 100%
+    );
   border: 1px solid var(--card-bd);
   border-radius: 10px;
   padding: 10px 12px;
   margin: 8px 0 14px;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  position: relative;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  position: relative; z-index: var(--layer-ui);
+  /* Verre */
+  backdrop-filter: blur(4px) saturate(112%);
+  -webkit-backdrop-filter: blur(4px) saturate(112%);
+  background-clip: padding-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
 }
 .infobar-strip-left{ display:flex; align-items:center; gap:10px; min-width:0; }
-.infobar-icon{
-  width: 22px; height: 22px; display:grid; place-items:center;
-  border-radius: 6px; background: rgba(56,189,248,.14); color:#7dd3fc;
-  border: 1px solid rgba(56,189,248,.25); font-size: 12px;
-}
+.infobar-icon{ width:22px; height:22px; display:grid; place-items:center; border-radius:6px; background: rgba(56,189,248,.14); color:#7dd3fc; border:1px solid rgba(56,189,248,.25); font-size:12px; }
 .infobar-strip-text{ display:flex; flex-direction:column; gap:2px; }
-.infobar-strip-text strong{ color: var(--txt-main); font-size: .95rem; }
-.infobar-strip-text .muted{ color: var(--txt-mute); font-size: .85rem; }
-
+.infobar-strip-text strong{ color:var(--txt-main); font-size:.95rem; }
+.infobar-strip-text .muted{ color:var(--txt-mute); font-size:.85rem; }
 .infobar-strip-right{ display:flex; align-items:center; gap:10px; min-width:0; }
 .infobar-chips{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
 .chip{ display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; font-size:.85rem; line-height:1; border:1px solid #334155; color:#e2e8f0; background:#0f172a; }
-.chip--xs{ padding: 3px 8px; font-size: .78rem; }
+.chip--xs{ padding:3px 8px; font-size:.78rem; }
 .chip--required{ border-color: rgba(56,189,248,.45); color:#c7eeff; background: rgba(56,189,248,.12); }
 .chip--optional{ border-color: rgba(148,163,184,.45); color:#cbd5e1; background: rgba(148,163,184,.10); }
 .chip--divider{ border:0; background:transparent; color:#64748b; padding:0 4px; }
-.infobar-details-btn.dbt-btn{ height: 32px; padding: 4px 10px; border-radius: 8px; font-size: .86rem; }
+.infobar-details-btn.dbt-btn{ height:32px; padding:4px 10px; border-radius:8px; font-size:.86rem; }
 
-/* POPOVER flottant */
-.infobar-popover{
+/* Popover standard (PAS le panneau Détails) */
+.infobar-popover:not(.csvshop-details-panel){
   position: absolute;
   right: 12px; top: calc(100% + 10px);
   width: min(760px, calc(100vw - 2 * var(--shop-pad-x)));
@@ -283,248 +290,223 @@
   border-radius: 12px;
   box-shadow: 0 16px 40px rgba(0,0,0,.42);
   padding: 12px;
-  z-index: 80;
+  z-index: var(--layer-float);
   animation: popIn .14s ease-out;
 }
-@keyframes popIn{
-  from { opacity: 0; transform: translateY(-4px) scale(.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.popover-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px; }
+@keyframes popIn { from{opacity:0; transform:translateY(-4px) scale(.98);} to{opacity:1; transform:translateY(0) scale(1);} }
+.popover-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
 .popover-head .title{ color:#e6eefc; font-weight:700; font-size:.95rem; }
-.btn-ghost{ background: transparent; border:1px solid #334155; color:#e2e8f0; height:30px; padding:4px 8px; border-radius:8px; font-size:.84rem; }
-
+.btn-ghost{ background:transparent; border:1px solid #334155; color:#e2e8f0; height:30px; padding:4px 8px; border-radius:8px; font-size:.84rem; }
 .cols-table{ display:grid; gap:8px; grid-template-columns: 140px 120px 80px 1fr; }
-.cols-table--compact .cols-head, .cols-table--compact .cols-cell{ font-size: .9rem; }
+.cols-table--compact .cols-head, .cols-table--compact .cols-cell{ font-size:.9rem; }
 .cols-head{ font-weight:700; color:#e6eefc; }
 .cols-cell{ color:#cbd5e1; }
-.cols-desc{ grid-column: 4; }
-
-.sample{ display:grid; gap:6px; margin-top: 10px; }
-.sample--compact .sample-code{ font-size:12px; padding:8px 10px; border-radius:8px; }
-.sample-caption{ color:#cbd5e1; font-size:.88rem; }
-.sample-code{
-  display:block; white-space:pre-wrap; word-break:break-all;
-  background:#0f172a; border:1px solid #334155; color:#e6e9f2;
-  padding:10px 12px; border-radius:10px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-}
-.notes{ margin: 6px 0 0; padding-left: 18px; color:#94a3b8; font-size:.88rem; }
+.cols-desc{ grid-column:4; }
 
 /* =========================
-   ✨ Animations d’entrée — CSV Shop uniquement
+   🧊 Panneau DÉTAILS — Overlay Top
    ========================= */
-
-/* Respecte l’accessibilité */
-@media (prefers-reduced-motion: reduce) {
-  .csvshop-grid > .csvshop-card { animation: none !important; opacity: 1 !important; }
+.csvshop-details-panel{
+  position: fixed !important;
+  z-index: var(--layer-overlay) !important;
+  top: var(--details-top);
+  right: var(--shop-pad-x);
+  width: min(760px, calc(100vw - 2 * var(--shop-pad-x)));
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+  /* 🧊 padding interne pour éviter le texte collé aux bords */
+  padding: 14px 16px;
+  border:1px solid rgba(120,170,255,.10);
+  background:
+    /* léger vignettage bas pour profondeur */
+    radial-gradient(120% 140% at 50% 115%, rgba(0,0,0,.14) 0%, rgba(0,0,0,0) 60%),
+    /* couche quasi transparente : laisse respirer l’aurora du panel */
+    linear-gradient(180deg, rgba(10,16,28,.64) 0%, rgba(8,12,20,.66) 100%);
+  backdrop-filter: blur(15px) saturate(115%);
+  -webkit-backdrop-filter: blur(15px) saturate(115%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 12px 28px rgba(0,0,0,.32);
+  border-radius: 12px;
+  background-clip: padding-box;
 }
 
-/* Keyframes — même logique que Dashboard pour la cohérence visuelle */
-@keyframes csvCardIn {
-  from { opacity: 0; transform: translateY(12px) scale(.98); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
+/* =========================
+   ⛏️ Extracteur inline
+   ========================= */
+.extractor{
+  background:
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12)  0%,
+      rgba(22, 34, 68, 0.09)  42%,
+      rgba(10, 16, 28, 0.08)  62%,
+      rgba(6, 10, 18, 0.06)  82%,
+      transparent 100%
+    ),
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,
+      rgba(6, 10, 18, 0.62) 100%
+    );
+  border: 1px solid var(--card-bd);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 8px;
+  position: relative; z-index: var(--layer-ui);
+  backdrop-filter: blur(4px) saturate(112%);
+  -webkit-backdrop-filter: blur(4px) saturate(112%);
+  background-clip: padding-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
+}
+.extractor__title{ margin:0; text-align:center; font-size:1.1rem; color:var(--txt-soft); font-weight:700; }
+.extractor__subtitle{ text-align:center; margin:4px 0 16px; color:var(--txt-mute); font-size:.9rem; }
+.extractor__presets{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px; }
+.chip{ background:transparent; border:1px solid #334155; color:#e2e8f0; padding:6px 10px; border-radius:999px; font-size:.8rem; }
+.chip:hover{ border-color: var(--title-accent); }
+.extractor__form{ display:grid; gap:12px; grid-template-columns: 1.1fr .9fr 1fr 1fr auto; align-items:end; }
+@media (max-width: 860px){ .extractor__form{ grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px){ .extractor__form{ grid-template-columns: 1fr; } }
+/* V1.3 — Empêche les enfants de forcer la largeur (shrink OK) */
+.extractor__form > *{ min-width: 0; }
+/* ────────────────────────────────────────────────────────────────
+   V1.3  Extracteur — Inputs & Controls (verre + focus ring bleu)
+   ──────────────────────────────────────────────────────────────── */
+.extractor__field input{
+  height: var(--input-h);
+  width: 100%;
+  color:#e9f1ff;
+  background:
+    radial-gradient(80% 120% at 50% 0%, rgba(60,100,220,.08) 0%, rgba(17,24,39,.06) 60%, transparent 100%),
+    #0b1020;
+  border-radius: var(--input-radius);
+  border:1px solid rgba(148,163,184,.28);
+  outline: none;
+  padding:0 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.03),
+    0 6px 16px rgba(0,0,0,.28);
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease, filter .2s ease;
+}
+.extractor__field input::placeholder{ color:#8aa0bd; opacity:.8; }
+.extractor__field input:hover{ filter: brightness(1.02); }
+.extractor__field input:focus{
+  border-color: rgba(59,130,246,.65); /* bleu prod */
+  box-shadow:
+    0 0 0 2px rgba(59,130,246,.22),
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 8px 20px rgba(0,0,0,.34);
+}
+/* Date picker : meilleure intégration de l’icône native */
+.extractor__field input[type="date"]{
+  padding-right: 40px; /* place pour l’icône */
+}
+.extractor__field input[type="date"]::-webkit-calendar-picker-indicator{
+  background: transparent;
+  filter: invert(85%) opacity(.85);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color .2s ease, filter .2s ease;
+}
+.extractor__field input[type="date"]::-webkit-calendar-picker-indicator:hover{
+  background: rgba(59,130,246,.12);
+  filter: invert(95%);
+}
+.extractor__field input[type="date"]:focus::-webkit-calendar-picker-indicator{
+  background: rgba(59,130,246,.16);
 }
 
-/* Applique l’animation à chaque carte du shop (scopée par .csvshop-grid) */
-.csvshop-grid > .csvshop-card {
-  opacity: 0; /* évite le clignotement avant anim */
-  animation: csvCardIn 520ms cubic-bezier(.22,.61,.36,1) both;
-  will-change: opacity, transform;
+/* Segmented control (TF) : verre en fond, actif = bleu “pin” */
+.segmented{
+  display:inline-flex;
+  padding:4px;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(13,19,35,.88) 0%, rgba(9,14,26,.88) 100%);
+  border:1px solid rgba(148,163,184,.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.03),
+    0 6px 16px rgba(0,0,0,.28);
+  /* V1.3 — h-scroll invisible (ne prend pas de place) */
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Masquage natif sans impacter la hauteur */
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* IE/Edge legacy */
 }
 
-/* Stagger léger (12 premiers items) */
-.csvshop-grid > .csvshop-card:nth-child(1)  { animation-delay: 40ms; }
-.csvshop-grid > .csvshop-card:nth-child(2)  { animation-delay: 80ms; }
-.csvshop-grid > .csvshop-card:nth-child(3)  { animation-delay: 120ms; }
-.csvshop-grid > .csvshop-card:nth-child(4)  { animation-delay: 160ms; }
-.csvshop-grid > .csvshop-card:nth-child(5)  { animation-delay: 200ms; }
-.csvshop-grid > .csvshop-card:nth-child(6)  { animation-delay: 240ms; }
-.csvshop-grid > .csvshop-card:nth-child(7)  { animation-delay: 280ms; }
-.csvshop-grid > .csvshop-card:nth-child(8)  { animation-delay: 320ms; }
-.csvshop-grid > .csvshop-card:nth-child(9)  { animation-delay: 360ms; }
-.csvshop-grid > .csvshop-card:nth-child(10) { animation-delay: 400ms; }
-.csvshop-grid > .csvshop-card:nth-child(11) { animation-delay: 440ms; }
-.csvshop-grid > .csvshop-card:nth-child(12) { animation-delay: 480ms; }
+.segmented__btn{
+  background: transparent;
+  color:#cbd5e1;
+  border:0;
+  padding:8px 14px;
+  border-radius: 10px;
+  cursor:pointer;
+  font-size:.9rem;
+  line-height:1;
+  transition: color .15s ease, background .15s ease, box-shadow .15s ease, transform .15s ease;
+  white-space: nowrap; /* évite le wrap qui casse l’alignement */
+}
+/* WebKit : cacher totalement la barre (scroll toujours actif) */
+.segmented::-webkit-scrollbar{ height: 0; display: none; }
 
-
-/* Responsive: popover plein écran sur mobile */
-@media (max-width: 640px){
-  .infobar-popover{
-    left: 12px; right: 12px;
-    width: auto;
-  }
-  .cols-table{ grid-template-columns: 1fr 1fr; }
-  .cols-head:nth-child(3), .cols-cell:nth-child(3n+3){ display:none; } /* cache "Oblig." */
+.segmented__btn:hover{ color:#fff; }
+.segmented__btn.is-active{
+  color:#0b1220;
+  background: linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 0 0 1px rgba(30,58,138,.45),
+    0 8px 18px rgba(37,99,235,.28);
+  transform: translateY(-1px);
 }
 
-/* =========================================================
-   📱 Ultra-narrow fixes (≤360px) — no regression au-delà
-   - Filtres en largeur pleine
-   - Boutons d’action empilés
-   - Segmented scrollable
-   ========================================================= */
+/* V1.3 — Alignement labels = bord gauche des inputs/segmented */
+.extractor__form .extractor__field label{
+  display:block;
+  padding-left: 8px; /* léger offset pour matcher la lèvre du champ */
+  margin-bottom: 3px;
+}
+ 
+/* =========================
+   📱 Responsive
+   ========================= */
+@media (max-width: 480px){
+  .csvshop-card{ padding: calc(var(--card-pad-y) - 4px) calc(var(--card-pad-x) - 4px); min-height: 132px; }
+  .csvshop-title{ font-size: 1.4rem; }
+}
 @media (max-width: 360px){
-  /* Filtres: chaque élément prend la ligne */
-  .csvshop-filters { justify-content: stretch; }
-  .csvshop-filters > * { flex: 1 1 100%; }
-
-  /* Actions cartes: empiler en colonne si trop étroit */
-  .csvshop-card .csv-actions { flex-direction: column; }
-  .csvshop-card .csv-actions > * { width: 100%; }
-
-  /* Segmented (TF/source) scrollable */
-  .segmented {
-    max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .segmented__btn { white-space: nowrap; }
-
-  /* Infobar: permettre le wrap intégral */
-  .csvshop-infobar.infobar--strip { flex-wrap: wrap; }
-  .infobar-strip-right { width: 100%; justify-content: flex-start; }
-}
-
-/* =========================================================
-   📱 CSVShop — Fix overflow extracteur + popover détails
-   (à coller en bas du fichier)
-   ========================================================= */
-
-/* 1) EXTRACTEUR — empêcher le débordement des champs */
-@media (max-width: 640px) {
-  /* grille sur 1 colonne + boîtes qui peuvent rétrécir */
-  .extractor__form { grid-template-columns: 1fr !important; }
-  .extractor__form, .extractor__form * { box-sizing: border-box; }
-  .extractor__field, .extractor__field > * { min-width: 0; }
-
-  /* tous les champs prennent 100% de la largeur utile */
-  .extractor__field input,
-  .extractor__field select,
-  .extractor__field textarea,
-  .extractor__field .segmented,
-  .extractor__field .strt-select {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  /* segmented scrollable si trop long */
-  .segmented { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .segmented__btn { white-space: nowrap; }
-}
-
-/* 2) POPOVER "Détails des colonnes" — toujours visible & scrollable */
+  .segmented{ padding: 3px; } /* léger resserrage, la scrollbar reste fine et noire */
+  .segmented__btn{ padding: 6px 10px; font-size: .85rem; }
+ }
+/* Popover standard — mobile : plein écran + scroll interne */
 @media (max-width: 900px) {
-  .infobar-popover {
-    left: 12px !important;
-    right: 12px !important;
-    width: auto !important;            /* s’adapte au viewport */
-    max-width: none !important;
-    max-height: calc(100vh - 120px) !important; /* reste dans l’écran */
-    overflow: auto !important;         /* scroll interne propre */
-  }
-
-  /* tableau interne: colonnes flexibles + retour à la ligne */
-  .cols-table { grid-template-columns: 120px 90px 1fr; }
-  .cols-head, .cols-cell, .cols-desc {
-    min-width: 0;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-  }
-}
-
-/* très étroit: simplifier davantage la grille du détail */
-@media (max-width: 480px) {
-  .cols-table { grid-template-columns: 1fr 1fr; }
-  .cols-desc  { grid-column: 1 / -1; }
-}
-
-
-
-/* =========================================================
-   📱 CSVShop — Popover "Détails des colonnes"
-   Garder la grille desktop (4 colonnes) + scroll horizontal
-   ========================================================= */
-@media (max-width: 900px) {
-  /* le popover peut défiler en X (et Y) sans casser la grille */
-  .infobar-popover{
-    left: 12px !important;
-    right: 12px !important;
-    width: auto !important;
+  .infobar-popover:not(.csvshop-details-panel){
+    left: 12px !important; right: 12px !important; width: auto !important;
     max-height: calc(100vh - 140px) !important;
-    overflow-x: auto !important;      /* ⬅️ scroll horizontal */
-    overflow-y: auto !important;
-    overscroll-behavior: contain;
+    overflow-x: auto !important; overflow-y: auto !important; overscroll-behavior: contain;
     padding: 14px 14px 16px !important;
   }
-
-  /* 👉 FORCER la même grille qu’en desktop (4 colonnes fixes) */
-  .infobar-popover .cols-table{
+  /* grille du tableau conservée (4 colonnes) → scroll horizontal */
+  .infobar-popover:not(.csvshop-details-panel) .cols-table{
     display: grid !important;
-    grid-auto-flow: row !important;   /* rangées successives 1→4, 1→4, ... */
+    grid-auto-flow: row !important;
     grid-template-columns: 160px 120px 90px minmax(420px,1fr) !important;
-    width: max-content !important;     /* déborde en X = déclenche le scroll */
+    width: max-content !important;
     column-gap: 14px; row-gap: 10px; line-height: 1.35;
   }
-
-  /* Annule toute règle précédente qui cachait/compactait des colonnes */
-  .infobar-popover .cols-head,
-  .infobar-popover .cols-cell,
-  .infobar-popover .cols-desc{
-    display: block !important;
-  }
-
-  /* Les 3 premières colonnes ne wrap pas (alignement strict) */
-  .infobar-popover .cols-table > *:nth-child(4n+1),
-  .infobar-popover .cols-table > *:nth-child(4n+2),
-  .infobar-popover .cols-table > *:nth-child(4n+3){
-    white-space: nowrap !important;
-  }
-
-  /* La colonne Description reste en col 4 et peut wrap */
-  .infobar-popover .cols-desc{
-    grid-column: 4 !important;        /* ⚓ reste en 4e colonne */
-    white-space: normal !important;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-  }
-
-  /* (si un ancien patch a forcé 2 colonnes, on l’écrase) */
-  .infobar-popover .cols-table{ grid-template-columns: 160px 120px 90px minmax(420px,1fr) !important; }
+  .infobar-popover:not(.csvshop-details-panel) .cols-head,
+  .infobar-popover:not(.csvshop-details-panel) .cols-cell,
+  .infobar-popover:not(.csvshop-details-panel) .cols-desc{ display:block !important; }
 }
 
-/* =========================================================
-   📱 Fix "Détails" qui déborde dans la barre d'info (mobile)
-   - On autorise le wrap côté droit
-   - Les "chips" prennent la ligne complète si besoin
-   - Le bouton passe à la ligne, sans déborder
-   ========================================================= */
-@media (max-width: 640px) {
-  /* Autoriser le retour à la ligne du strip entier */
-  .csvshop-infobar.infobar--strip {
-    flex-wrap: wrap;
-  }
-
-  /* Le bloc de droite accepte le wrap et s'aligne en haut */
-  .infobar-strip-right {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    flex-wrap: wrap;        /* ⬅️ clé */
-    min-width: 0;
-  }
-
-  /* Les chips peuvent se compresser et occuper toute la largeur */
-  .infobar-chips {
-    flex: 1 1 100%;         /* ⬅️ prennent la ligne si manque de place */
-    min-width: 0;
-  }
-
-  /* Le bouton "Détails" passe sous les chips et ne déborde pas */
-  .infobar-details-btn.dbt-btn {
-    flex: 0 0 auto;
-    margin-top: 6px;        /* petit espace sous les chips */
-    white-space: nowrap;    /* évite la casse du label */
-    max-width: 100%;        /* ceinture/bretelles si texte long */
-  }
+/* Infobar — mobile : wrap propre */
+@media (max-width: 640px){
+  .csvshop-infobar.infobar--strip{ flex-wrap: wrap; }
+  .infobar-strip-right{ display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap; min-width:0; }
+  .infobar-chips{ flex:1 1 100%; min-width:0; }
+  .infobar-details-btn.dbt-btn{ flex:0 0 auto; margin-top:6px; white-space:nowrap; max-width:100%; }
 }

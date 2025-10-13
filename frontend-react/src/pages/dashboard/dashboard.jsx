@@ -73,6 +73,9 @@ export default function Dashboard() {
               )}
             </section>
 
+            {/* Séparateur premium entre sections */}
+           <div className="section-sep" aria-hidden="true" />
+
             {/* Titre BACKTESTS placé sous la section épingles */}
             <h2 className="panel-title db-title">Mes backtests</h2>
             <BacktestList />

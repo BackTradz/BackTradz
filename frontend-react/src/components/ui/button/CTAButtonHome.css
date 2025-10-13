@@ -1,0 +1,179 @@
+/* ==========================================================================
+   CTAButtonHome — bouton Hero (scopé, zéro conflit global)
+   - Pas de classes génériques, tout commence par .cta-home
+   - Assez spécifique pour battre d’anciennes règles (.cta-button, button {...})
+   - Aucune !important.
+   ========================================================================== */
+
+/* CTAButtonHome.css — variables de .cta-home (compact + charcoal/aurora) */
+.cta-home{
+  /* tailles (plus compact) */
+  /* glow tuning */
+  --blue-rgb: 64,108,255;   /* midnight blue used for blooms */
+  --glow-alpha: .26;        /* top-center intensity */
+  --side-alpha: .18;        /* side intensity */
+
+  /* gradient “charcoal” + bande aurora BLEUE plus nerveuse */
+  --cta-grad: linear-gradient(180deg, #0f1627, #0b1220);
+  --cta-grad-hover: linear-gradient(180deg, #121c31, #0c1422);
+
+  /* texte et ombres */
+  --cta-text: #eaf1ff;
+  --cta-shadow: 0 10px 24px rgba(7,12,22,.55);
+  --cta-shadow-hover: 0 16px 36px rgba(7,12,22,.70);
+
+  /* liseré / reflets / glow */
+  --edge: rgba(255,255,255,.08);
+  --sheen: linear-gradient(to bottom, rgba(255,255,255,.22), rgba(255,255,255,0) 55%);
+  --glow: radial-gradient(60% 120% at 50% 0%, rgba(60,120,255,.28), transparent 70%);
+}
+
+/* micro-ajustement mobile (plus compact encore) */
+@media (max-width: 480px) {
+  .cta-home {
+    --cta-h: 46px;       /* avant 52px */
+    --cta-pad-x: 16px;   /* avant 18px */
+    font-size: 0.95rem;
+  }
+}
+
+
+/* ===== Base =============================================================== */
+/* ============================================================================
+   CTA — HOME (tech 3D, dark + midnight-blue bloom, sans contour apparent)
+   ============================================================================ */
+
+.cta-home {
+  /* layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+
+  /* sizing */
+  padding: 15px 26px;
+  border: 0;
+  border-radius: 18px;
+
+  /* typo */
+  color: #eaf1ff;
+  font-weight: 700;
+  letter-spacing: .2px;
+  text-decoration: none;
+  /* micro boost de lisibilité sur fond sombre */
+  text-shadow: 0 1px 0 rgba(0,0,0,.45);
+
+
+  /* fond plus profond (noir/charcoal) et lueur centrale légère */
+  background:
+    /* lueur centrale un tout petit peu plus visible */
+    radial-gradient(90% 140% at 50% 12%, rgba(64,117,255,.12), transparent 60%),
+    linear-gradient(180deg, #0b121e 0%, #0b121e 55%, #0a101b 100%);
+
+  /* bloom externe (glow) un peu réduite */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -14px 20px rgba(0,0,0,.58),
+    0 10px 28px rgba(2,6,23,.52);
+  filter: saturate(1.06);
+  position: relative;
+  /* easing un peu plus soyeux */
+  transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+/* 🌌 halo bleu nuit, centré en haut, très léger (pas un contour) */
+.cta-home::before{
+  content:"";
+  position:absolute;
+  inset:-2px;                  /* slightly beyond to avoid any ring */
+  border-radius:inherit;
+  pointer-events:none;
+  /* three very soft blooms:
+     1) top-center (main)
+     2) left inner edge
+    3) right inner edge
+  */
+  /* + gradient concentré vers le haut centre, un peu plus subtil */
+  /* 3 halos très doux : centre-haut + bords L/R */
+  background:
+    radial-gradient(80% 60% at 50% 6%,
+      rgba(64,117,255,.16), transparent 60%),
+    radial-gradient(50% 80% at 6% 50%,
+      rgba(64,117,255,.08), transparent 70%),
+    radial-gradient(50% 80% at 94% 50%,
+      rgba(64,117,255,.08), transparent 70%);
+  opacity: .20;
+  filter: blur(13px);
+}
+
+/* ✨ film interne très discret pour homogénéiser (pas de bordure visible) */
+.cta-home::after{
+  content:"";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,.02),
+      rgba(0,0,0,.05));
+  /* pas de “ring” ni de 1px outline : on évite tout effet de contour */
+}
+
+/* hoover : la lueur interne gagne juste un cran (pas de contour) */
+.cta-home:hover::before{
+  opacity: .28;
+  filter: blur(12px);
+}
+
+/* hover : un peu plus de glow bleu + léger lift */
+.cta-home:hover{
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -14px 20px rgba(0,0,0,.58),
+    /* halo extérieur un peu plus bleu, même intensité globale */
+    0 14px 34px rgba(50,86,255,.28),
+    0 10px 28px rgba(2,6,23,.52);
+  filter: saturate(1.06);
+}
+
+/* accessibilité : pas d’animation pour ceux qui la réduisent */
+@media (prefers-reduced-motion: reduce){
+  .cta-home{
+    transition: none;
+    transform: none;
+  }
+}
+
+/* active : appui franc, moins de lift, plus de “press” interne */
+.cta-home:active{
+  transform: translateY(0);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 -8px 14px rgba(0,0,0,.6),
+    0 8px 18px rgba(2,6,23,.48);
+  filter: saturate(1);
+}
+
+/* focus visible : pas d’outline dur, juste un halo doux */
+.cta-home:focus-visible{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -14px 20px rgba(0,0,0,.58),
+    0 0 0 0 rgba(64,108,255,0),
+    0 16px 36px rgba(50,86,255,.24);
+}
+
+/* responsive — bouton un poil plus compact sur mobile */
+@media (max-width: 560px){
+  .cta-home{
+    padding: 14px 20px;
+    border-radius: 16px;
+  }
+}

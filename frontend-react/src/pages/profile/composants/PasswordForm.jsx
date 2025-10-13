@@ -1,5 +1,6 @@
 // src/components/profil/PasswordForm.jsx
 import { useState } from "react";
+import CTAButton from "../../../components/ui/button/CTAButton";
 
 export default function PasswordForm() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -59,7 +60,7 @@ export default function PasswordForm() {
         Utilise au moins 8 caractères, mélange de lettres, chiffres et symboles recommandé.
       </small>
 
-      <button type="submit" className="btn btn-outline">Enregistrer le mot de passe</button>
+      <CTAButton type="submit">Enregistrer le mot de passe</CTAButton>
       {msg && <p className="muted" style={{ marginTop: 6 }}>{msg}</p>}
     </form>
   );

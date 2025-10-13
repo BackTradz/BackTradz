@@ -4,10 +4,11 @@ import { Link } from "react-router-dom";
 import "./support.css";
 import { Section } from "../asavoir/composants/Section";
 import { api } from "../../sdk/apiClient";
-// ⚠️ ajuste le chemin si besoin suivant ton projet
+// composent ui reutilisable //
+import HexNeonBackground from "../../components/background/HexNeonBackground";
 import PillTabs from "../../components/ui/switchonglet/PillTabs";
-// ⚠️ ajuste le chemin si besoin suivant ton projet
 import CTAButton from "../../components/ui/button/CTAButton";
+//SEO//
 import MetaRobots from "../../components/seo/MetaRobots";
 
 export default function SupportPage() {
@@ -65,6 +66,9 @@ export default function SupportPage() {
   return (
     <div className="support-page min-h-screen">
       <MetaRobots content="noindex,nofollow" />
+      {/* BG global (hex neon) */}
+      <HexNeonBackground />
+      
       {/* HERO (centré) */}
       <section className="support-hero">
         <div className="container-std" style={{ textAlign: "center" }}>
@@ -240,7 +244,7 @@ export default function SupportPage() {
           )}
 
           {/* Note légale (2 lignes, centrage de la 1ère sur la 2ème) */}
-          <div className="footer">
+          <div className="spr-footer">
             <div className="note-block">
               <p className="muted small-note line-1">
                 🔒 Vos informations ne sont utilisées que pour répondre à votre demande.

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import TopStrategies from "./composants/TopStrategies";
+// [v1.3 - retouche design] Hero désactivé pour ce clone (fond prioritaire)
 import HeroSection from "./composants/HeroSection";
 import HeroMessage from "./composants/HeroMessage";
 import TopProgress from "../../components/ui/progressbar/TopProgress";
@@ -17,6 +18,7 @@ export default function Home() {
   return (
     <div className="home-page">
       <TopProgress active={pageLoading} />
+      {/* [v1.3 - retouche design] Hero OFF (gardé en commentaire pour portage prod) */}
       <HeroSection />
       {/* Bloc argumentaire sous le graphique */}
       <section className="home-wide section-pad">
@@ -26,13 +28,7 @@ export default function Home() {
         />
       </section>
       
-      {/* Garde le petit texte en container si tu veux, mais mets les cartes en wide */}
-
-        <p className="home-bridge">
-          Explore les stratégies les plus performantes, visualise les heures rentables et 
-          inspire-toi pour booster tes résultats de trading.
-        </p>
-
+     
       <section className="home-wide section-pad">
         <TopStrategies />
       </section>

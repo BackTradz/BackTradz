@@ -1,22 +1,87 @@
 /* ========================================================================== */
-/* 🌐 Navbar.css — Design pro full-width avec fond + padding + clean look   */
+/* 🌐 Navbar.css — Tech/Startup US look, glass + neon underline + scroll     */
 /* ========================================================================== */
 
-.navbar-container {
-  background-color: #0f172a;
-  width: 100%;
-  padding: 0;
-  border: none;
-  outline: none;
-  box-shadow: none;
+/* ---------- Palette & tokens locaux (faciles à re-porter vers le SaaS) ---- */
+:root {
+  --nav-bg: rgba(11,18,32,0.46);          /* base translucide */
+  --nav-bg-scrolled: rgba(11,18,32,0.70); /* plus dense au scroll */
+  --nav-border: rgba(120,144,180,0.22);   /* hairline */
+  /* 🔁 même teinte pour la nav et le menu mobile */
+  --nav-mobile-bg: var(--nav-bg);
+  --brand-neo: #3256ff;                   /* bleu nuit flashy discret */
+  --brand-neo-2: #7aa2ff;                 /* liseré dégradé */
+  --link: #e5e7eb;
+  --link-hover-bg: #101a2e;               /* hover pill */
+  --underline: radial-gradient(50% 150% at 50% 120%, var(--brand-neo), var(--brand-neo-2) 60%, transparent 70%);
+   /* Nouveaux tokens */
+  --container-w: 1320px;               /* largeur “studio” */
+  --sheen-top: rgba(255,255,255,.025); /* liseré doux haut */
+  --sheen-btm: rgba(0,0,0,.06);        /* nuance bas */
+  --ring: rgba(99,102,241,.45);        /* focus ring */
+  --ok: #16a34a;                       /* status dot avatar */
+}
+
+
+/* ---- Shell nav : glass + gradient bottom line, sticky-friendly ----------- */
+.navbar-container{
+  position: relative;
   z-index: 50;
+  width: 100%;
+  background: transparent; /* blur sur ::before uniquement */
+  isolation: isolate;
+}
+
+/* 🧱 Surface UNIQUE (barre + menu), même couleur/blur/hairline */
+.navbar-container::before{
+  content:"";
+  position:absolute;
+  inset:0;                      /* couvre TOUTE la nav, y compris la dropdown */
+  z-index: 0;                   /* 🔹 le blur reste au fond */
+  background: var(--nav-bg);
+  /* Film vertical subtil pour effet “studio” (évite surface plate) */
+  background-image: linear-gradient(to bottom, var(--sheen-top), transparent 38%, var(--sheen-btm));
+  background-blend-mode: overlay;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events:none;          /* ne bloque jamais les clics */
+  /* hairline + ombre identiques partout */
+  box-shadow:
+    inset 0 -1px 0 var(--nav-border),
+    0 10px 24px rgba(0,0,0,0.08);
+    transform: translateZ(0);
+}
+
+
+.navbar-container.nav--scrolled::before{
+  background: var(--nav-bg-scrolled);
+  box-shadow:
+    inset 0 -1px 0 var(--nav-border),
+    0 6px 24px rgba(0,0,0,0.35);
 }
 
 .navbar-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: 14px 22px;
+  position: relative;   /* passe au-dessus de la surface */
+  z-index: 1;
+  /* full-bleed (plus d'écart sur les côtés) */
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  gap: 12px;
+}
+
+/* 🔒 Évite tout recouvrement visuel : contenu > blur  */
+.navbar-left, .navbar-right, .navbar-credits, .navbar-links,
+.navbar-logo, .btz-logo {
+  position: relative;
+  z-index: 2;
+  filter: none !important;
+  -webkit-filter: none !important;
+  mix-blend-mode: normal;
 }
 
 /* 🔷 Logo */
@@ -49,20 +114,51 @@
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #e5e7eb;
-  transition: all 0.25s ease;
-}
-.navbar-link:hover {
-  background-color: #1e293b;
-  color: #3b82f6;
+  color: var(--link);
+  letter-spacing: .2px;                 /* lecture premium */
+  transition: background-color .15s ease, color .15s ease;
+  position: relative; /* underline */
+  outline: none;
 }
 
-/* 📱 Menu mobile */
-.mobile-dropdown {
-  background-color: #0f172a;
-  border-top: 1px solid #374151;
-  padding: 1rem 1.5rem;
+.navbar-link:hover{
+  background-color: var(--link-hover-bg);
+  color: #cfe0ff;
 }
+
+/* Underline néon discret (hover/active) */
+.navbar-link::after{
+  content:"";
+  position:absolute; left:18px; right:18px; bottom:4px;
+  height:3px; transform: scaleX(0);
+  transform-origin: center;
+  background: var(--underline);
+  transition: transform .28s cubic-bezier(.2,.8,.2,1);
+  border-radius: 4px;
+  filter: drop-shadow(0 2px 4px rgba(50,86,255,.25));
+  pointer-events:none;
+}
+.navbar-link:focus-visible{ box-shadow: 0 0 0 3px var(--ring); border-radius: 10px; }
+.navbar-link:focus-visible::after{ transform: scaleX(1); }
+.navbar-link:hover::after{ transform: scaleX(1); }
+.navbar-link.is-active{ color:#ffffff; }
+.navbar-link.is-active::after{ transform: scaleX(1); }
+
+
+.mobile-dropdown {
+  /* ✅ on ne peint plus ici : même surface que la barre via ::before */
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-top: 0;
+  padding: 12px 16px;
+  box-shadow: none;
+  background-clip: padding-box;
+  position: relative;  /* passe au-dessus de la surface */
+  z-index: 1;
+}
+
+
 .mobile-dropdown li {
   list-style: none;
   margin-bottom: 0.5rem;
@@ -80,6 +176,11 @@
 .mobile-dropdown a:hover {
   background-color: #3b82f6;
   color: white;
+}
+
+.mobile-dropdown a.is-active{
+  background: linear-gradient(90deg, rgba(50,86,255,.18), rgba(122,162,255,.10));
+  color:#eaf1ff;
 }
 
 /* --- Avatar & alignment --- */
@@ -109,91 +210,72 @@
 .navbar-left{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:0px;
 }
+/* V1.3 — wrapper logo neutre (zéro padding) + micro marge à droite */
+.logo-wrap{
+  display:flex;
+  align-items:center;
+  padding:0 !important;
+  margin:0 4px 0 0;       /* 4px = respiration visuelle minimale */
+  line-height:1;
+}
+
 
 /* Badge crédits */
 .navbar-credits{
   display:inline-flex;
   align-items:center;
-  gap:8px;
-  padding:6px 10px;
-  border-radius:999px;
+  gap:3px;
+  padding:6px 12px;
+  border-radius:9999px;
   text-decoration:none;
-  background:#0b1324; /* pill sombre comme tes cards */
-  border:1px solid rgba(255,255,255,0.08);
-  color:#cfe0ff;
-  font-size:.92rem;
+  background: rgba(12,18,32,.72);
+  border:1px solid rgba(120,144,180,.20);
+  color:#e6ecff;
+  font-size:.93rem;
   line-height:1;
-  transition:transform .15s ease, border-color .15s ease, background-color .15s ease;
-}
-.navbar-credits:hover{
-  transform: translateY(-1px);
-  border-color: rgba(255,255,255,0.14);
-  background:#0e1830;
+  transition:
+    transform .12s ease,
+    border-color .15s ease,
+    background-color .15s ease,
+    box-shadow .15s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 2px 8px rgba(0,0,0,.25);
+  backdrop-filter: none !important;          /* ❗ pas de blur direct sur le chip */
+  -webkit-backdrop-filter: none !important;
+  z-index: 2;                                 /* > calque blur */
 }
 
-.cr-dot{
-  width:10px; height:10px; border-radius:50%;
-  background: radial-gradient(circle at 30% 30%, #ffe58f, #f59e0b 60%, #b45309);
-  box-shadow: 0 0 8px rgba(245,158,11,.45);
+/* Optionnel : si tu veux un chip “verre + blur local” sans flouter le logo,
+   confine le blur dans un pseudo-élément (clipé au chip) */
+.navbar-credits::before{
+  content:"";
+  position:absolute; inset:0; border-radius:inherit; z-index:-1;
+  background:
+    radial-gradient(120% 160% at 50% 120%, rgba(0,0,0,.14) 0%, rgba(0,0,0,0) 58%),
+    linear-gradient(180deg, rgba(18,24,38,.42) 0%, rgba(12,18,30,.42) 100%);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 14px rgba(0,0,0,.25);
+  backdrop-filter: saturate(112%) blur(6px);
+  -webkit-backdrop-filter: saturate(112%) blur(6px);
+  pointer-events: none;
 }
-.cr-number{ font-weight:800; color:#e6ecff; }
-.cr-unit{ opacity:.85; }
+
+.navbar-credits:hover{
+  transform: translateY(-1px);
+  border-color: rgba(160,185,220,.32);
+  background: rgba(16,24,40,.82);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 6px 18px rgba(0,0,0,.35);
+}
+
+.cr-number{ font-weight:800; color:#ffffff; letter-spacing:.2px; }
+.cr-unit{ opacity:.8; }
 
 /* Mobile : on masque le badge crédits pour gagner de la place */
 @media (max-width: 520px){
   .navbar-credits{ display:none; }
 }
 
-
-.credit-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: #0b1324;
-  border-radius: 9999px;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.9rem;
-  line-height: 1;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  color: #e6ecff;
-}
-
-.credit-badge:hover {
-  background-color: #131c31;
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-1px);
-  text-decoration: none !important;
-}
-
-.credit-badge .coin {
-  font-size: 1rem;
-  color: #facc15;
-}
-
-.credit-badge .number {
-  font-weight: 700;
-  color: #f9fafb;
-}
-
-.credit-badge .unit {
-  opacity: 0.8;
-  font-size: 0.85rem;
-  color: #cbd5e1;
-}
-
-/* Navbar toujours visible */
-.navbar-container {
-  position: relative;           /* ✅ reste dans le flux */
-  z-index: 50;                  /* plus haut que le hero et son canvas */
-  background: rgba(11,18,32,0.9);
-  backdrop-filter: blur(6px);
-}
 
 /* ===== Hover explicite sur l'avatar utilisateur ===== */
 .user-bubble{
@@ -232,7 +314,15 @@
   color: var(--avatar-fg, #ffffff);
   font-weight: 600;
   font-size: 0.85rem; /* taille des initiales adaptée */
+  position: relative;
+  box-shadow: 0 0 0 0 rgba(99,102,241,0);
+  transition: box-shadow .15s ease;
 }
+
+.user-bubble:focus-visible{ box-shadow: 0 0 0 3px var(--ring); }
+
+/* (pastille désactivée) */
+.user-bubble::after{ content: none !important; }
 
 /* ✅ Centre le menu mobile quand le hamburger est ouvert */
 .mobile-dropdown ul{
@@ -267,4 +357,12 @@
 @media (max-width: 450px) {
   .credit-badge { display: none; }
   .navbar-inner { padding: 12px 16px; }        /* léger resserrage global */
+}
+
+/* --------- Accessibilité / reduced motion --------------------------------- */
+@media (prefers-reduced-motion: reduce){
+  .navbar-link,
+  .navbar-link::after,
+  .user-bubble,
+  .credit-badge { transition: none !important; }
 }

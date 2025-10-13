@@ -23,14 +23,16 @@ export default function CompareChart({
   // ✅ minWidth appliquée uniquement si nécessaire (évite le "zoom" desktop)
   const [minWidthPx, setMinWidthPx] = useState(0);
 
-  // Palette cohérente (6 teintes, réutilisées en boucle)
+  // Palette premium BackTradz (lisible sur fond sombre)
+  // 1) Bleu profond   2) Mauve profond   3) Vert profond   4) Orange lisible
+  // + deux variantes si >4 séries (rare sur comparateur)
   const palette = [
-    "#43A6FF", // c1
-    "#9B59FF", // c2
-    "#00D0A6", // c3
-    "#FFA833", // c4
-    "#FF2E8A", // c5
-    "#6266FF", // c6
+    "#2F6BFF", // c1 Bleu profond
+    "#7A5BFF", // c2 Mauve profond
+    "#00A36C", // c3 Vert profond
+    "#FF9A3E", // c4 Orange lisible
+    "#5AC8FF", // c5 Bleu clair de secours
+    "#B495FF", // c6 Mauve clair de secours
   ];
 
   useEffect(() => {

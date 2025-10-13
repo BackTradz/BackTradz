@@ -1,7 +1,16 @@
 
 /* ==========================================================================
-   🎨 Base globale Stratify
+   🎨 Base globale BackTradz
    ========================================================================== */
+
+/* Presets du background hex */
+@import "./components/background/hex-neon.css";
+
+
+:root{
+  /* [v1.3] couleur de fond unique pour TOUTE l’app */
+  --bg-page: #14181e; /* ajuste ici UNE FOIS pour tout */
+}
 
 /* 🔹 Évite les marges/paddings imprévus sur tout le layout */
 html, body {
@@ -9,10 +18,18 @@ html, body {
   padding: 0 !important;
   height: 100%;
   width: 100%;
-  background-color: #1e293b; /* fallback bg Stratify */
+  background-color: var(--bg-page); /* [v1.3] fond unique global */; /* fallback bg BackTradz */
   color: #e5e7eb;
   border: none;
 }
+
+:root{
+  /* [v1.3 - retouche design] paramètres du fond */
+  --hex-edge: 80;                 /* taille alvéole */
+  --hex-gap: 3;                   /* largeur interstice */
+  --hex-glow: rgba(90,170,255,.45); /* teinte halo */
+}
+
 
 /* 🔤 Police lisible + anti-aliasing */
 :root {
@@ -74,6 +91,23 @@ html, body, #root { height: 100%; }
 footer.footer {
   margin-top: auto;
 }
+
+.app-layout{ isolation: isolate; background: transparent; } /* [v1.3] pas de 2e fond */
+
+/* [v1.3] neutralise SEULEMENT les fonds globaux/hero (PAS les <section>) */
+main, .container-std,
+[class*="-page"], [class*="-hero"]{
+  background: transparent;
+}
+
+/* [v1.3] canvas interne au layout, toujours derrière ses enfants */
+#hex-canvas{
+  position: fixed; inset: 0;           /* [v1.3] occupe TOUT le viewport en continu */
+  width: 100vw; height: 100vh;
+  pointer-events: none; z-index: 0;     /* sous le contenu, au-dessus du gradient */
+}
+/* [v1.3] assure le stacking context côté CSS (alternative util class Tailwind `isolate`) */
+.isolate{ isolation:isolate; }
 
 
 /* === Réservation d'espace pour le footer FIXE === */

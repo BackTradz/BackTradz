@@ -21,7 +21,31 @@
 .strt--lg .strt-btn{ height: calc(var(--input-h, 44px) + 4px);  font-size:15px; padding: 0 16px; }
 
 /* ---- Variants (solid recommandé pour coller à l'input) ---- */
-.strt--solid   .strt-btn{ background:#0f172a; border-color:#334155; }
+.strt--solid   .strt-btn{
+  /* Verre profond + léger halo bleu nuit */
+  background:
+    /* aurora : lueur centrale/basse bleutée, très douce */
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12)  0%,     /* halo un poil moins dense */
+      rgba(22, 34, 68, 0.09)  42%,
+      rgba(10, 16, 28, 0.08)  62%,
+      rgba(6, 10, 18, 0.06)  82%,
+      transparent 100%
+    ),
+    /* couche de profondeur quasi noire (comme la navbar) */
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,         /* base plus transparente */
+      rgba(6, 10, 18, 0.62) 100%
+    );
+  border: 1px solid rgba(90,130,255,0.14);      /* bord un peu moins présent */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),   /* léger relief interne */
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
+  transition: box-shadow .4s ease, transform .4s ease, border-color .4s ease;
+  backdrop-filter: blur(4px) saturate(112%);   /* +blur, -saturation = plus “verre” */
+}
+
 .strt--outline .strt-btn{ background:transparent; border-color:#334155; }
 
 /* ---- Trigger (UN seul contour, rectangle arrondi) ---- */
@@ -32,28 +56,47 @@
   border:1px solid #334155;
   display:inline-flex; align-items:center; justify-content:space-between;
   gap:10px; line-height:1.25;
-  transition:border-color .15s ease, box-shadow .2s ease, background .15s ease;
+  transition:border-color .15s ease, box-shadow .2s ease, background .15s ease, transform .08s ease;
   box-shadow:none; outline:none;
   background-clip: padding-box;
 }
-.strt-btn:hover{ border-color:#3f4f6c; }
-.strt-btn:focus-visible{
-  border-color:#7c3aed;                   /* même halo violet que le reste du site */
-  box-shadow:0 0 0 3px rgba(124,58,237,.22);
+
+.strt-btn:hover{
+  border-color: rgba(140,180,255,.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 10px 26px rgba(2,6,23,.50);
+  transform: translateY(-0.5px);
 }
+
+.strt-btn:focus-visible{
+  border-color: rgba(96,165,250,.75);      /* halo bleu BackTradz */
+  box-shadow: 0 0 0 3px rgba(96,165,250,.25), 0 8px 24px rgba(2,6,23,.45);
+}
+
 .strt-btn[disabled]{ opacity:.6; cursor:not-allowed; }
 .strt-label.is-placeholder{ color:#9aa6bf; }
 .strt-chevron{ display:inline-flex; color:#a6b3cc; }
 .strt-btn:hover .strt-chevron{ color:#cbd5e1; }
+/* Chevron animé à l’ouverture (Select.jsx expose data-open sur le root) */
+[data-open="true"] .strt-chevron{ transform: rotate(180deg); transition: transform .15s ease; }
 
 /* ---- Panel (menu dark) ---- */
 .strt-panel{
   position:absolute; top: calc(100% + 8px); left:0; min-width:100%;
   z-index:60;
-  border-radius: 12px;
-  background:#0f172a;
-  border:1px solid #334155;
-  box-shadow: 0 12px 32px rgba(0,0,0,.35);
+   border-radius: 12px;
+  /* Verre + Aurore bleue légère (DA honeycomb/bleu nuit) */
+   background:
+    /* léger vignettage bas pour profondeur */
+    radial-gradient(120% 140% at 50% 115%, rgba(0,0,0,.14) 0%, rgba(0,0,0,0) 60%),
+    /* couche quasi transparente : laisse respirer l’aurora du panel */
+    linear-gradient(180deg, rgba(10,16,28,.64) 0%, rgba(8,12,20,.66) 100%);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 12px 28px rgba(0,0,0,.32);
   overflow:hidden;
 }
 
@@ -62,11 +105,11 @@
   list-style:none; margin:0; padding:6px;
   max-height: 260px; overflow:auto;
   scrollbar-width: thin;                    /* Firefox */
-  scrollbar-color: #44557a #0f172a;
+  scrollbar-color: #44557a rgba(7,11,20,1);
 }
 .strt-list::-webkit-scrollbar{ width: 10px; }
 .strt-list::-webkit-scrollbar-track{
-  background:#0f172a; border-left: 1px solid #2a364f;
+  background:rgba(7,11,20,1); border-left: 1px solid #2a364f;
 }
 .strt-list::-webkit-scrollbar-thumb{
   background:#44557a; border-radius:8px; border:2px solid #0f172a;
@@ -79,13 +122,36 @@
   gap:12px; padding:10px 12px; border-radius:8px;
   color:#e6e9f2; cursor:pointer; user-select:none;
 }
-.strt-item:hover,
-.strt-item.is-highlighted{ background: rgba(124,58,237,.14); }
-.strt-item.is-selected{
-  background: rgba(56,189,248,.14);
-  color:#d9f0ff;
-  border:1px solid rgba(56,189,248,.35);
+
+/* Hover/Highlight — seulement si NON sélectionné */
+.strt-item:hover:not(.is-selected),
+.strt-item.is-highlighted:not(.is-selected){
+  background: linear-gradient(180deg, rgba(56,189,248,.08), rgba(56,189,248,.05));
 }
+
+/* 🔒 Anti "double hover" : dès qu'on survole la liste à la souris,
+   on neutralise le style .is-highlighted pour tous les items NON survolés.
+   => Le 1er item (souvent highlighted par défaut) ne reste plus foncé. */
+.strt-list:hover .strt-item.is-highlighted:not(:hover):not(.is-selected){
+  background: transparent;
+  border-color: transparent;
+}
+
+
+/* Selected — prime sur tout (y compris hover/highlight) */
+.strt-item.is-selected{
+  background: linear-gradient(180deg, rgba(37,99,235,.12), rgba(37,99,235,.08)); /* + sobre */
+  color:#e6f2ff;
+  border:1px solid rgba(96,165,250,.28);   /* bord moins agressif */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+/* Survol d’un item sélectionné : micro accent, pas de double hover */
+.strt-item.is-selected:hover{
+  border-color: rgba(96,165,250,.34);
+  background: linear-gradient(180deg, rgba(37,99,235,.14), rgba(37,99,235,.10));  /* accent très léger */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
 .strt-tick{ opacity:.9; }
 
 /* ---- Kill totale des halos/pseudo-éléments hérités ---- */
@@ -113,6 +179,9 @@
     right: 0;
     min-width: unset;
     width: 100%;
+    /* conserver l’effet verre sur mobile aussi */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }
 

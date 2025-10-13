@@ -1,5 +1,7 @@
 // src/components/profil/ProfileForm.jsx
 import { useEffect, useState } from "react";
+import CTAButton from "../../../components/ui/button/CTAButton";
+import DetailButton from "../../../components/ui/button/DetailButton";
 
 /* util: split "Full Name" -> { first, last } */
 function splitName(name = "") {
@@ -65,12 +67,10 @@ export default function ProfileForm({ user, onSubmit, saving }) {
       />
 
       <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
-        <button type="submit" className="btn btn-primary" disabled={saving}>
+        <CTAButton type="submit" disabled={saving}>
           {saving ? "Enregistrement..." : "Enregistrer"}
-        </button>
-        <button className="btn btn-ghost" onClick={handleReset}>
-          Réinitialiser
-        </button>
+        </CTAButton>
+        <DetailButton onClick={handleReset}>Réinitialiser</DetailButton>
       </div>
     </form>
   );

@@ -138,13 +138,14 @@ export default function ComparateurPage() {
       <div className="cmp-header">
         <div>
           <h1 className="cmp-title">Comparateur</h1>
-          <p className="cmp-sub">
-            Sélectionne jusqu’à 4 analyses depuis ton dashboard pour les comparer
-            sur une métrique (sessions, jours, heures ou global).
+          {/* V1.3 — Sous-titres adaptatifs */}
+          <p className="cmp-sub cmp-sub--desk">
+            Compare jusqu’à 4 analyses de ton dashboard sur la métrique de ton choix
+            (sessions, jours, heures ou global).
           </p>
-        </div>
-        <div className="cmp-counter">
-          <span>{selected.length}</span>/<span>4</span> sélectionnées
+          <p className="cmp-sub cmp-sub--mob">
+            Compare 1 à 4 analyses sur toutes les métriques.
+          </p>
         </div>
       </div>
 
@@ -174,6 +175,8 @@ export default function ComparateurPage() {
           />
 
           <div className="cmp-box cmp-chart">
+            {/* V1.3 Responsive: wrapper fixe (min-width) pour activer le scroll horizontal sur mobile */}
+            <div className="cmp-chart-inner">
             {!data && !error && selected.length === 0 && (
               <div className="cmp-empty">Sélectionne 1 à 4 analyses pour afficher le graphique.</div>
             )}
@@ -287,6 +290,7 @@ export default function ComparateurPage() {
                 </div>
               </>
             )}
+            </div>{/* /cmp-chart-inner */}
           </div>
         </section>
       </div>

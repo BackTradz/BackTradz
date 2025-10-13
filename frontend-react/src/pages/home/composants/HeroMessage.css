@@ -1,203 +1,268 @@
-/* src/components/home/HeroMessage.css */
+/* =====================================================================
+   BackTradz — Home / HeroMessage
+   [V1.3] Thème "Aurora Bleu Nuit" — carte sombre + lueur interne
+   - ZÉRO RÉGRESSION : mêmes classes / structure
+   - Objectif : même profondeur que la navbar, translucide, DA pro
+   ===================================================================== */
 
-.hero-msg { z-index:3; }
+/* ---------------------------------------------------------------------
+   1) Tokens locaux (teintes ajustables)
+   --------------------------------------------------------------------- */
+:root {
+  --hm-ink:        #e6ecff;                 /* texte principal */
+  --hm-muted:      rgba(198,210,235,0.95);  /* texte secondaire */
+  --hm-blue:       #2f51ff;                 /* bleu nuit profond */
+  --hm-blue-glow:  rgba(64,120,255,0.22);   /* glow + doux */
+  --hm-card:       rgba(8,12,20,0.48);      /* + translucide */
+  --hm-border:     rgba(255,255,255,0.08);  /* bord par défaut */
+  --hm-border-blu: rgba(90,130,255,0.18);   /* bord bleuté */
+  --hm-shadow:     0 10px 30px rgba(0,0,0,0.28);
+}
+
+/* ---------------------------------------------------------------------
+   2) Containers / placements (inchangés)
+   --------------------------------------------------------------------- */
+.hero-msg { z-index: 3; }
+
 .hero-msg--docked {
-  position:absolute; inset:0;
-  display:flex; align-items:flex-end; justify-content:center;
-  pointer-events:none; /* laisse cliquer CTA via la card */
-  padding:12px 16px 18px;
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-end; justify-content: center;
+  pointer-events: none; padding: 12px 16px 18px;
 }
+
 .hero-msg--below {
-  position:relative; pointer-events:auto;
-  margin: 22px auto 0; display:flex; justify-content:center;
+  position: relative; pointer-events: auto;
+  margin: 22px auto 0; display: flex; justify-content: center;
 }
 
+/* ---------------------------------------------------------------------
+   3) Carte – style commun (translucide + blur)
+   --------------------------------------------------------------------- */
 .hero-card {
-  background: rgba(15,23,42,0.78);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.28);
-  backdrop-filter: blur(8px);
+  background: var(--hm-card);
+  border: 1px solid var(--hm-border);
   border-radius: 16px;
+  box-shadow: var(--hm-shadow);
+  backdrop-filter: blur(8px)saturate(115%);
+  will-change: transform, filter;       /* perf GPU pendant l’ani */
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
-/* Docked : ruban compact intégré au graphe */
+/* Ruban docké (inchangé visuellement) */
 .hero-card--docked {
   width: min(1100px, 94%);
-  display:flex; align-items:center; justify-content:space-between;
-  gap:14px; padding: 10px 14px;
-  pointer-events:auto;
-}
-.hero-title--small { margin:0; color:#e6ecff; font-size: clamp(16px,1.8vw,20px); font-weight:800; }
-.hero-docked-left { display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
-.hero-docked-right { display:flex; gap:12px; align-items:center; }
-.chips { display:flex; gap:8px; flex-wrap:wrap; }
-.chips--scroll { overflow-x:auto; max-width:56vw; padding-bottom:4px; }
-.chips--scroll::-webkit-scrollbar { height:6px; }
-.chips--scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:999px; }
-.chip {
-  font-size:12px; color:#cfe0ff;
-  border:1px solid rgba(255,255,255,0.08);
-  background: rgba(11,18,33,0.85);
-  padding:6px 10px; border-radius:999px; white-space:nowrap;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; padding: 10px 14px; pointer-events: auto;
 }
 
-/* Below : bloc complet, mais raisonnable */
+/* ---------------------------------------------------------------------
+   4) Carte "below" — Aurora interne bleu nuit
+   --------------------------------------------------------------------- */
 .hero-card--below {
-  width: min(980px, 92vw);
-  padding: 18px 20px;
-}
-.hero-title {
-  margin:0 0 6px; font-size: clamp(24px,4vw,36px);
-  font-weight:800; color:#e6ecff; letter-spacing: .2px;
-}
-.accent { color:#15057b;  }
-.hero-sub {
-  margin:0; color:rgba(198,210,235,0.95);
-  font-size: clamp(14px,2vw,16px); line-height:1.45;
-}
-.hero-actions { display:flex; gap:12px; align-items:center; margin-top:14px; }
-.link-ghost {
-  font-size:14px; color:#cfe6ff; text-decoration:none;
-  padding:8px 10px; border-radius:10px;
-  border:1px solid rgba(255,255,255,0.08);
-  background: rgba(11,18,33,0.6);
-}
-.link-ghost:hover { background: rgba(11,18,33,0.8); }
-
-.hero-bullets {
-  margin:14px 0 0; padding-left:18px; color:rgba(198,210,235,0.92);
-  display:grid; gap:6px; font-size:13px; line-height:1.35;
+  /* Empilement : base sombre + aurora interne + légère lueur externe */
+  background:
+    /* aurora : lueur centrale/basse bleutée, très douce */
+    radial-gradient(140% 100% at 50% 68%,
+      rgba(56, 96, 220, 0.12)  0%,     /* halo un poil moins dense */
+      rgba(22, 34, 68, 0.09)  42%,
+      rgba(10, 16, 28, 0.08)  62%,
+      rgba(6, 10, 18, 0.06)  82%,
+      transparent 100%
+    ),
+    /* couche de profondeur quasi noire (comme la navbar) */
+    linear-gradient(180deg,
+      rgba(5, 8, 14, 0.62) 0%,         /* base plus transparente */
+      rgba(6, 10, 18, 0.62) 100%
+    );
+  border: 1px solid rgba(90,130,255,0.14);      /* bord un peu moins présent */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),   /* léger relief interne */
+    0 10px 38px rgba(0,0,0,0.45),
+    0 0 12px rgba(0,100,255,0.12);
+  transition: box-shadow .4s ease, transform .4s ease, border-color .4s ease;
+  backdrop-filter: blur(4px) saturate(112%);   /* +blur, -saturation = plus “verre” */
 }
 
-/* Responsive */
-@media (max-width:880px){
-  .chips--scroll{ max-width:60vw; }
-  .hero-docked-right .link-ghost{ display:none; }
-}
-@media (max-width:640px){
-  .hero-card--docked{ gap:10px; }
-  .hero-title--small{ font-size:16px; }
-}
-
-/* Conteneur sous le graphe */
-.hero-msg--below {
-  position: relative;
-  pointer-events: auto;
-  margin: 22px auto 0;
-  display: flex;
-  justify-content: center;
+/* Hover : lueur bleue subtile, jamais flashy */
+.hero-card.hero-card--below:hover {
+  transform: translateY(-2px);
+  border-color: rgba(100,150,255,0.18);
+  box-shadow:
+    0 14px 40px rgba(0,0,0,0.45),
+    0 0 18px rgba(64,140,255,0.18);
 }
 
-/* Card */
-.hero-card {
-  background: rgba(15,23,42,0.78);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.22);
-  backdrop-filter: blur(8px);
+/* Variante densité (conserve ton spacing) */
+.hero-card--minimal { padding: clamp(16px, 2.4vw, 24px); }
+
+/* Inner container : centre visuel et limite la ligne de lecture */
+.hero-inner{
+  width: min(1080px, 92%);
+  margin: 0 auto;
+  text-align: center;           /* centre visuel global */
 }
 
-.hero-card--below {
-  /* plus large et respirant */
-  width: min(1280px, 96vw);
-  padding: 18px 22px;
-}
 
-/* version minimal : espaces + compacité */
-.hero-card--minimal {
-  padding: clamp(16px, 2.4vw, 24px);
-}
 
-/* Typo */
+/* ---------------------------------------------------------------------
+   5) Typo / contenus
+   --------------------------------------------------------------------- */
 .hero-title {
   margin: 0 0 6px;
-  font-size: clamp(26px, 4vw, 38px);
+  /* Harmonisation: un cran sous le H1 du Hero */
+  font-size: clamp(22px, 3.2vw, 36px);
+  line-height: 1.12;
   font-weight: 800;
-  color: #e6ecff;
-  letter-spacing: 0.1px;
+  color: var(--hm-ink);
+  letter-spacing: .1px;
+  position: relative;
+  background: linear-gradient(180deg, #f8faff 0%, #cdd9ff 48%, #9ab4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 0 10px rgba(80,130,255,0.06),
+    0 2px 6px rgba(0,0,0,0.35);
+  transition: filter 0.4s ease;
+  will-change: filter;                 /* micro-optimisation */
 }
 
+/* Accentue le glow léger au survol de la carte */
+.hero-card:hover .hero-title {
+  filter: brightness(1.05) drop-shadow(0 0 6px rgba(60,100,255,0.25));
+}
+
+.accent {
+  /* Bleu nuit signature avec profondeur, façon grille */
+  color: var(--hm-blue); /* fallback */
+  background: linear-gradient(
+    180deg,
+    #6aa0ff 0%,
+    #2f51ff 55%,
+    #1a2b6e 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 0 8px rgba(60,110,255,0.25),
+    0 2px 6px rgba(0,0,0,0.35);
+}
 
 .hero-sub {
   margin: 0;
-  color: rgba(198,210,235,0.95);
-  font-size: clamp(14px, 2vw, 16px);
+  color: var(--hm-muted);
+  font-size: clamp(15px, 2vw, 16px);
   line-height: 1.45;
 }
 
-/* Chips réduites à 3 */
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
+/* Chips (compactes, propres) */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .chips--minimal .chip {
-  font-size: 12px;
-  color: #cfe0ff;
-  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 12px; color: #cfe0ff;
+  border: 1px solid var(--hm-border);
   background: rgba(11,18,33,0.85);
-  padding: 6px 10px;
-  border-radius: 999px;
-  white-space: nowrap;
+  padding: 6px 10px; border-radius: 999px; white-space: nowrap;
 }
 
-/* CTA */
-.hero-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-top: 14px;
+/* Option : masquer une puce “bonus” sur petits écrans */
+@media (max-width: 480px){
+  .chip--opt { display:none; }
 }
+
+/* CTA ghost */
+.hero-actions { display: flex; gap: 12px; align-items: center; margin-top: 14px; }
 .link-ghost {
-  font-size: 14px;
-  color: #cfe6ff;
+  font-size: 13.5px;
+  color: rgba(210,225,255,0.88);
   text-decoration: none;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(11,18,33,0.6);
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(20,26,40,0.45);
+  backdrop-filter: blur(6px) saturate(130%);
+  transition: all .25s ease;
 }
-.link-ghost:hover { background: rgba(11,18,33,0.8); }
 
-/* Bullets : 3 points max, en grille sur desktop */
-.hero-bullets {
-  margin: 14px 0 0;
-  padding-left: 18px;
-  color: rgba(198,210,235,0.92);
-  display: grid;
-  gap: 6px;
-  font-size: 13px;
-  line-height: 1.35;
+.link-ghost:hover {
+  color: #fff;
+  border-color: rgba(100,150,255,0.25);
+  background: rgba(25,32,50,0.68);
+  box-shadow: 0 0 10px rgba(60,100,255,0.15);
+  transform: translateY(-1px);
 }
-.hero-bullets--grid {
-  padding-left: 0;            /* on enlève les puces natives */
-  list-style: none;
-  gap: 8px;
-}
-.hero-bullets--grid li { padding-left: 0; }
 
-@media (min-width: 980px) {
-  .hero-bullets--grid {
-    grid-template-columns: repeat(3, 1fr);
+/* Ligne compacte (desktop) : chips + CTA sur une seule ligne */
+.hero-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+
+/* Desktop : garder tout sur la même ligne quand il y a la place */
+@media (min-width: 980px){
+    .hero-row{
+    flex-wrap:wrap;
+    gap:12px;
   }
 }
 
-/* Ajustements responsives */
-@media (max-width: 640px) {
-  .hero-actions .link-ghost { display: none; }
+/* Bullets en grille sur desktop */
+.hero-bullets {
+  margin: 14px 0 0; padding-left: 18px;
+  color: rgba(198,210,235,0.92);
+  display: grid; gap: 6px; font-size: 13.5px; line-height: 1.45;
+}
+.hero-bullets--grid { padding-left: 0; list-style: none; gap: 8px; }
+.hero-bullets--grid li { padding-left: 0; }
+@media (min-width: 980px) { .hero-bullets--grid { grid-template-columns: repeat(3,1fr); } }
+
+/* ---------------------------------------------------------------------
+   6) Responsive micro-tuning (inchangé)
+   --------------------------------------------------------------------- */
+@media (max-width: 880px){
+  .hero-docked-right .link-ghost{ display:none; }
+}
+@media (max-width: 1000px){
+  .hero-card--docked{ gap:10px; }
+  .hero-title--small{ font-size:16px; }
+  .hero-actions .link-ghost{ display:none; }
+  .hero-card--minimal { padding: 16px; }
+  .hero-inner { text-align: center; width: 92%; }
+
+  /* Titre : plus compact et équilibré */
+  .hero-title{
+    font-size: clamp(22px, 6.4vw, 26px);
+    line-height: 1.18;
+    letter-spacing: .15px;
+    text-wrap: balance; /* évite les mots orphelins si supporté */
+  }
+  .hero-title .accent{ white-space: nowrap; } /* “traders” ne passe pas seul à la ligne */
+
+  /* Sous-titre légèrement réduit */
+  .hero-sub{ font-size: 14.5px; }
+
+  /* Chips visibles et CENTRÉES */
+  .hero-row{ display:flex; gap:8px; margin-top:10px; justify-content:center; }
+  .chips{ justify-content:center; }
+  .chips--minimal .chip{ font-size: 12px; padding: 6px 10px; }
+
+  /* On SUPPRIME la ligne d’infos (Massif / Précis / Exportable) sur mobile */
+  .hero-bullets{ display:none !important; }
 }
 
-/* Animation polish */
+/* Très petit mobile : on masque la 3e bullet pour aérer */
+@media (max-width: 420px){
+  .hero-bullets li:nth-child(3){ display:none; }
+  /* déjà masquées ci-dessus */
+  .hero-title{ font-size: 21px; }
+  .hero-sub{ font-size: 14px; }
+}
+
+/* Accessibilité : réduit les transitions si préféré */
 @media (prefers-reduced-motion: reduce) {
-  .hero-card { transition: none !important; }
-}
-
-/* Légère mise en avant visuelle au reveal */
-.hero-card.hero-card--below {
-  transition: box-shadow .35s ease, transform .35s ease;
-}
-.hero-card.hero-card--below:where(:is(:focus-within, :hover)) {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 36px rgba(0,0,0,.32);
+  .hero-card { transition: none !important; filter: none !important; transform: none !important; }
+  .hero-title{ transition: none !important; }
 }

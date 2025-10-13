@@ -8,13 +8,15 @@
 
 /* 🎛️ THEME / TOKENS (reprend les valeurs de l’existant) */
 :root{
-  --ft-h:          72px;           /* ✅ hauteur logique du footer (desktop) */
-  --ft-bg:           #0f172a;       /* fond footer */
-  --ft-text:         #ffffff;       /* couleur du texte */
-  --ft-muted:        #cbd5e1;       /* texte atténué (gauche/droite) */
-  --ft-link:         #a855f7;       /* couleur des liens */
-  --ft-link-hover:   #ffffff;       /* couleur des liens au survol */
-
+  --ft-h:           72px;           
+  /* 🔁 On réutilise les tokens de la navbar s’ils existent, sinon fallback */
+  --ft-bg:          var(--nav-bg, rgba(11,18,32,0.46));
+  --ft-bg-scrolled: var(--nav-bg-scrolled, rgba(11,18,32,0.70));
+  --ft-border:      var(--nav-border, rgba(120,144,180,0.22));
+  --ft-text:        #e6ecff;
+  --ft-muted:       #b6caea;       
+  --ft-link:        #cfe0ff;      
+  --ft-link-hover:  #ffffff;    
   --ft-font-size:    13px;          /* taille du texte */
   --ft-pad-y:        12px;          /* padding vertical du footer */
   --ft-inner-pad-x:   8px;          /* gutter horizontal interne */
@@ -22,19 +24,42 @@
 
   --ft-maxw:         none;          /* largeur max du conteneur (none = 100%) */
   --ft-break:        640px;         /* breakpoint mobile */
+  --ring: rgba(99,102,241,.45); /* même focus ring que la nav */
 }
 
 /* 🧱 Bloc principal du footer */
 .footer {
-  background-color: var(--ft-bg);
+  font-size: 12.5px;
+  /* même technique que la navbar : surface peinte via ::before */
+  background: transparent;
   color: var(--ft-text);
-  padding: var(--ft-pad-y) 0;       /* vertical only (pas de marge latérale ici) */
+  padding: calc(var(--ft-pad-y) + env(safe-area-inset-bottom, 0px)) 0 var(--ft-pad-y);
   font-size: var(--ft-font-size);
-  /* ✅ Footer collé en bas partout */
-  position: fixed;
-  left: 0; right: 0; bottom: 0;
+  /* V1.3: sticky via flex — suit le flux et se plaque en bas quand la page est courte */
+  position: relative;
   width: 100%;
+  margin-top: auto;           /* 🔑 pousse le footer en bas du flex container */
   z-index: 20;
+}
+
+/* V1.3: l’utilitaire de padding n’est plus nécessaire avec le footer non-fixed */
+/* .needs-footer-padding { … } — déprécié */
+
+/* 🎬 Surface unique (glass + hairline identiques à la navbar) */
+.footer::before{
+  content:"";
+  position:absolute; inset:0;
+  background: var(--ft-bg);
+  /* film vertical subtil comme la nav */
+  background-image: linear-gradient(to top, rgba(255,255,255,.018), transparent 40%, rgba(0,0,0,.055));
+  background-blend-mode: overlay;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events:none;
+  /* hairline en HAUT du footer + ombre douce */
+  box-shadow:
+    inset 0 1px 0 var(--ft-border),
+    0 -10px 24px rgba(0,0,0,0.08);
 }
 
 /* 📦 Conteneur interne : grille 3 colonnes, full width */
@@ -43,7 +68,7 @@
   width: 100%;
   margin: 0 auto;
   padding: 0 var(--ft-inner-pad-x); /* léger “air” à gauche/droite */
-
+  position: relative; z-index: 1;   /* passe au-dessus de la surface */
   display: grid;
   grid-template-columns: 1fr auto 1fr; /* gauche | centre | droite */
   align-items: center;
@@ -66,10 +91,18 @@
 .footer-link {
   color: var(--ft-link);
   text-decoration: none;
-  transition: color .2s ease;
+  transition: color .15s ease, background-color .15s ease, box-shadow .15s ease;
+  padding: 4px 8px; border-radius: 8px; /* micro hit-area comme la nav */
 }
 .footer-link:hover {
   color: var(--ft-link-hover);
+  background: rgba(16,24,40,.4);
+}
+
+.footer-link:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+  background: rgba(16,24,40,.42);
 }
 
 /* ▶️ Zone droite */
@@ -139,42 +172,6 @@
 }
 
 /* =========================================================
-   FOOTER — Mobile: réduire à 2 liens (Légal + Support/Contact)
-   - 0 régression desktop
-   - Suppose l’ordre actuel des liens centraux :
-     1) Mentions légales  2) Politique  3) CG  4) Support  5) Contact
-   - Ajuste les :nth-child(...) si ton ordre diffère.
-   ========================================================= */
-@media (max-width: 420px) {
-  .footer-center{
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    justify-content: center;
-  }
-
-  /* On masque tout sauf 1 et 4 */
-  .footer-center .footer-link:nth-child(2),
-  .footer-center .footer-link:nth-child(3),
-  .footer-center .footer-link:nth-child(5){
-    display: none !important;
-  }
-
-  /* On remplace le libellé du 1er et du 4e via ::after */
-  .footer-center .footer-link{
-    font-size: 0;                 /* masque le texte original */
-    display: inline-block;
-  }
-  .footer-center .footer-link:nth-child(1)::after{
-    content: "Légal";
-    font-size: 13px;
-  }
-  .footer-center .footer-link:nth-child(4)::after{
-    content: "Support / Contact";
-    font-size: 13px;
-  }
-}
-
-/* =========================================================
    FOOTER — Mobile strict : 2 liens (Légal + Support/Contact)
    - Cache tous les liens centraux
    - N’affiche que le 1er (legal) et le dernier (support/contact)
@@ -205,4 +202,23 @@
 
   /* Espacement & wrap propre */
   .footer-center{ gap: 8px 16px; flex-wrap: wrap; }
+}
+
+/* espace côté droit, safe sur iOS avec l’encoche */
+.footer-right{
+  /* plus proche du bord, tout en respectant l'encoche */
+  padding-right: calc(6px + env(safe-area-inset-right, 0px));
+}
+
+/* badge version: pill sobre, cohérent avec la nav */
+.footer-badge{
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  letter-spacing: .2px;
+  color: #e6ecff;
+  background: rgba(12,18,32,.72);
+  border: 1px solid rgba(120,144,180,.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 2px 8px rgba(0,0,0,.25);
 }

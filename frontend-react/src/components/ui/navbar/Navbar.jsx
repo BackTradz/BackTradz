@@ -1,6 +1,6 @@
 // src/Navbar.jsx
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.css";
 import HamburgerButton from "./HamburgerButton";
 // src/components/ui/navbar/Navbar.jsx
@@ -46,9 +46,10 @@ export default function Navbar() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const { user } = useAuth(); // ⬅️ source de vérité globale (se met à jour après OAuth/login)
   const navigate = useNavigate();
+  const { pathname } = useLocation();            // ✅ pour l'état "lien actif"
   const creditsText = safeCreditsText(user);
   const [adminOK, setAdminOK] = useState(false);
-
+  const [scrolled, setScrolled] = useState(false); // ✅ nav glass au scroll
 
   useEffect(() => {
     // 1) Lis le token local de façon sûre
@@ -77,6 +78,31 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Effet scroll: opacité + ombre légère quand on descend
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Quand le menu mobile s'ouvre, on empêche le scroll de la page (UX propre)
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.classList.add("menu-open");
+    } else {
+      document.body.classList.remove("menu-open");
+    }
+    return () => document.body.classList.remove("menu-open");
+  }, [menuOpen]);
+
+  // Helper lien actif (tolère sous-chemins)
+  const isActive = (path) => {
+    if (!path) return false;
+    if (path === "/") return pathname === "/";
+    return pathname === path || pathname.startsWith(path + "/");
+  };
+
   // Liens visibles pour tout le monde
   const baseLinks = [
     { label: "Accueil", path: "/" },
@@ -96,20 +122,24 @@ export default function Navbar() {
     ? [...baseLinks, { label: "Admin", path: "/admin" }]
     : baseLinks;
   return (
-    <nav className="navbar-container">
+    <nav className={`navbar-container ${scrolled ? "nav--scrolled" : ""}`}>
       <div className="navbar-inner">
         {/* ⬅️ Groupe gauche : logo + crédits */}
         <div className="navbar-left">
-           <div className="flex items-center justify-start px-4 md:px-6 py-3">
-            <BacktradzLogo size="lg" to="/" className="select-none" />
+          {/* V1.3: wrapper sans padding pour coller le badge crédits */}
+          <div className="logo-wrap">
+            <BacktradzLogo size="xl" to="/" className="select-none" />
           </div>
-          <Link to="/pricing" className="credit-badge" title="Crédits disponibles">
-            <span className="coin">🪙</span>
-            <span className="number">{creditsText}</span>
-            <span className="unit">crédits</span>
+          {/* Badge crédits plus “entreprise” */}
+          <Link
+            to="/pricing"
+            className="navbar-credits"
+            title="Crédits disponibles"
+            aria-label={`Crédits disponibles ${creditsText}`}
+          >
+            <span className="cr-number">{creditsText}</span>
+            <span className="cr-unit">crédits</span>
           </Link>
-
-
         </div>
 
         {/* ✅ Regroupement à droite: liens + avatar */}
@@ -119,7 +149,12 @@ export default function Navbar() {
             <ul className="navbar-links">
               {links.map(({ label, path }) => (
                 <li key={path}>
-                  <Link to={path} className="navbar-link">{label}</Link>
+                  <Link
+                    to={path}
+                    className={`navbar-link ${isActive(path) ? "is-active" : ""}`}
+                  >
+                    {label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -145,7 +180,11 @@ export default function Navbar() {
           <ul>
             {links.map(({ label, path }) => (
               <li key={path}>
-                <Link to={path} onClick={() => setMenuOpen(false)}>
+                <Link
+                  to={path}
+                  className={isActive(path) ? "is-active" : ""}
+                  onClick={() => setMenuOpen(false)}
+                >
                   {label}
                 </Link>
               </li>

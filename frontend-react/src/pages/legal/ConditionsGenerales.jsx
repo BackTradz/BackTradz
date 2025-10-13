@@ -112,7 +112,7 @@ export default function ConditionsGenerales() {
 
       <hr className="legal-sep" />
       <p className="legal-meta">
-        Contact : <strong>BackTradz@outlook.com</strong> — Dernière mise à jour : 2025-09-10
+        Contact : <strong>BackTradz@outlook.com</strong> — Dernière mise à jour : 13-10-2025
       </p>
     </LegalLayout>
   );

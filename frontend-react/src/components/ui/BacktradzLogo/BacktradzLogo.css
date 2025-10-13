@@ -1,103 +1,110 @@
+/* =========================================================
+   BackTradz Logo — V1.3 clean (no blur)
+   - BACK : chrome (même recette que le Hero)
+   - TRADZ : bleu signature profond
+   - AUCUN filter/backdrop sur le logo → rendu net
+   ========================================================= */
 
 
-:root {
-  --btz-primary: #727883;   /* BACK - gris bleuté foncé */
-  --btz-accent:  #15057b;   /* TRADZ - bleu clair/profond */
-  --btz-glow:    rgba(96,165,250,0.18);
+/* Wrapper */
+.btz-logo{
+  --btz-duration: 1.8s;
+  --btz-stagger:  .8s;
+  display:inline-flex; align-items:baseline;
+  font-weight:800; letter-spacing:-0.02em; line-height:1;
+  text-decoration:none; user-select:none;
+  position:relative;
+  /* 🔒 aucun flou/rasterisation */
+  filter:none; -webkit-filter:none;
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+  background:transparent; box-shadow:none;
+  isolation:isolate;
 }
 
+/* V1.3 : upscaling pour navbar */
+.btz-logo--sm{ font-size:1.30rem; }
+.btz-logo--md{ font-size:2.00rem; }
+.btz-logo--lg{ font-size:2.60rem; }  /* sections/hero secondaire */
+.btz-logo--xl{ font-size:3.20rem; }  /* navbar par défaut maintenant */
 
-/* Conteneur logo */
-.btz-logo {
-  --btz-duration: 1.8s;   /* ⬅️ animation plus lente */
-  --btz-stagger:  0.8s;   /* ⬅️ délai plus long entre BACK et TRADZ */
-  display: inline-flex;
-  align-items: baseline;
+/* === SVG ================================================================ */
+.btz-svg{
+  display:block;
+  height:1em;          /* suit la taille choisie */
+  width:auto;
+  overflow:visible;    /* évite tout clipping */
+}
+.btz-txt{
+  font-family: inherit;
   font-weight: 800;
   letter-spacing: -0.02em;
-  line-height: 1;
-  text-decoration: none;
-  user-select: none;
-  position: relative;
-  background: none;       /* ⬅️ enlève tout encadrement */
-  box-shadow: none;       /* ⬅️ enlève halo de bloc */
+  paint-order: stroke fill;      /* piqué net */
+  filter: none;
+  /* Recette chrome/bleu = ombres via filter dans le SVG */
+  transition: filter .4s ease;   /* même transition que tes titres */
 }
 
-/* Tailles */
-.btz-logo--sm { font-size: 1.05rem; }
-.btz-logo--md { font-size: 1.4rem; }
-.btz-logo--lg { font-size: 1.85rem; }
-.btz-logo--xl { font-size: 2.3rem; }
-
-
-/* BACK */
-.btz-back {
-  color: var(--btz-primary);
-  opacity: 0;
-  transform: translateX(-10px);
-  animation: btz-fade-slide var(--btz-duration) ease-out forwards;
+/* 🔵 Animation : “Tradz” glisse depuis l’arrière de Back (slide horizontal) */
+.btz-txt--tradz{
+  transform-box: fill-box;
+  transform-origin: left center;
+  /* V1.3.6: encore plus fluide (buttery) */
+  will-change: transform, opacity;
+  animation: btz-tradz-slide 1.6s cubic-bezier(.22,.8,.16,1) both;
+  animation-delay: var(--btz-stagger, .6s);
+}
+@keyframes btz-tradz-slide{
+  0%  { transform: translateX(-44px); opacity: 0; }
+  30%  { opacity: .25; }
+  66%  { opacity: .85; }
+  100% { transform: translateX(0);    opacity: 1; }
 }
 
-/* TRADZ */
-.btz-tradz {
-  color: var(--btz-accent);
-  margin-left: 6px;
-  opacity: 0;
-  transform: translateX(-14px);
-  animation: btz-follow var(--btz-duration) ease-out forwards;
-  animation-delay: var(--btz-stagger);
+/* ===== Mobile/Tablette : offset initial plus grand pour partir vraiment "derrière" Back ===== */
+@media (max-width: 900px){
+  /* s’applique au logo compact du header mobile de l’Auth */
+  .btz-logo--sm .btz-txt--tradz,
+  .btz-logo--md .btz-txt--tradz{
+    animation-name: btz-tradz-slide-m;   /* override uniquement le keyframe */
+  }
+  @keyframes btz-tradz-slide-m{
+    /* ⬇️ on commence bien derrière “Back” (≈ largeur du mot Back dans ce viewport) */
+    0%   { transform: translateX(-160px); opacity: 0; }
+    30%  { opacity: .25; }
+    66%  { opacity: .85; }
+    100% { transform: translateX(-2px);      opacity: 1; }
+  }
+  /* ✅ Auth header : on garde l’anim desktop (fin à 0px) pour un collage parfait */
+  .btz-logo--auth .btz-txt--tradz{
+    animation-name: btz-tradz-slide !important;
+  }
 }
-/*  color: var(--btz-accent);*/
-/* Animations plus visibles */
-@keyframes btz-fade-slide {
-  0%   { opacity: 0; transform: translateX(-10px) scale(0.95); filter: blur(2px); }
-  50%  { opacity: 0.7; transform: translateX(-3px) scale(1.02); filter: blur(1px); }
-  100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
-}
+/* =========================================================
+   V1.3 Responsive Logo Adjustments
+   - Navbar shrink <1024px
+   - Auth header logo boost <480px
+   ========================================================= */
 
-@keyframes btz-follow {
-  0%   { opacity: 0; transform: translateX(-14px) scale(0.95); filter: blur(2px); }
-  50%  { opacity: 0.7; transform: translateX(-4px) scale(1.02); filter: blur(1px); }
-  100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
-}
-
-/* Accessibilité */
-@media (prefers-reduced-motion: reduce) {
-  .btz-back, .btz-tradz {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-    filter: none !important;
+/* 🔹 1. Logo Navbar — shrink progressif sur tablette/mobile */
+@media (max-width: 1024px) {
+  .navbar .btz-logo {
+    font-size: clamp(1.6rem, 6vw, 2.2rem) !important; /* avant : 3.2rem */
+    transition: font-size 0.25s ease;
   }
 }
 
-/* --- Hard reset: aucun encadrement autour du logo --- */
-.btz-logo,
-.btz-logo * {
-  background: transparent !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-  border: 0 !important;
-  mix-blend-mode: normal !important;
-}
-
-.btz-logo::before,
-.btz-logo::after {
-  content: none !important;
-  display: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  filter: none !important;
-}
-
-/* Si un backdrop venait du logo lui-même */
-.btz-logo {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  isolation: isolate; /* évite des fusions d'arrière-plan bizarres */
-}
-
-.btz-logo--glow .btz-tradz {
-  text-shadow: 0 0 4px rgba(56,189,248,.12);
+/* =========================================================
+   V1.3 — AUTH MOBILE LOGO LOCK (0–750px)
+   - Le logo ne varie plus : taille fixe identique au rendu 450px
+   - Scope ultra-ciblé : uniquement le header mobile de la page Auth
+   ========================================================= */
+@media (max-width: 750px){
+  .auth-mobile-header .btz-logo{
+    font-size: 2.60rem !important;   /* taille fixe = taille "md" de référence */
+    line-height: 1;
+  }
+  .auth-mobile-header .btz-svg{
+    height: 1em;                     /* suit la taille du texte, pas de scale responsive */
+    width: auto;
+  }
 }

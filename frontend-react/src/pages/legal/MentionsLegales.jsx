@@ -54,7 +54,7 @@ export default function MentionsLegales() {
       </p>
 
       <hr className="legal-sep" />
-      <p className="legal-meta">Dernière mise à jour : 2025-03-01</p>
+      <p className="legal-meta">Dernière mise à jour : 13-10-2025</p>
     </LegalLayout>
   );
 }

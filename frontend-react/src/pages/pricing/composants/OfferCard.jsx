@@ -43,7 +43,6 @@ export default function OfferCard({
       const arr = [];
       if (of.credits_monthly)   arr.push(`${of.credits_monthly} crédits inclus / mois`);
       if (of.discount_rate)     arr.push(`${Math.round(of.discount_rate * 100)}% de réduction sur les packs supplémentaires`);
-      if (of.priority_backtest) arr.push("Accès prioritaire aux backtests");
       arr.push("Résiliable à tout moment");
       return arr;
     }
@@ -84,20 +83,28 @@ export default function OfferCard({
       </div>
 
       <ul className="pr-list">
-        {/* 1) crédits inclus (+bonus abo) */}
-        {creditLine && <li key="credits" className="pr-li-anim">{creditLine}</li>}
-
-        {/* 2) paiement unique */}
-        <li key="unique" className="pr-li-anim">Paiement unique, sans engagement</li>
-
-          {/* 3) crypto: 
-        - pack 10€ => "Crypto 10,50 € (min) — +1/+2 crédits"
-        - pack 5€ (ou tout prix < min) => "Paiement crypto disponible à partir de 10.01 €." */}
-          {!isSub && of.id === "CREDIT_10" && (
-            <li key="crypto10" className="pr-li-anim">
-              Crypto 10,50 € (min) — {isSubscriber ? "+2 crédits" : "+1 crédit"}
-            </li>
-          )}
+        {isSub
+          ? (
+            /* 📦 ABONNEMENTS : on rend toutes les lignes prévues (avec clés stables) */
+            lines.map((txt, i) => (
+              <li key={`sub-${of.id}-${i}`} className="pr-li-anim">{txt}</li>
+            ))
+          )
+          : (
+            <>
+              {/* 1) crédits inclus (+bonus abo) */}
+              {creditLine && <li key={`credits-${of.id}`} className="pr-li-anim">{creditLine}</li>}
+              {/* 2) paiement unique */}
+              <li key={`unique-${of.id}`} className="pr-li-anim">Paiement unique, sans engagement</li>
+              {/* 3) info crypto spécifique au pack 10€ */}
+              {of.id === "CREDIT_10" && (
+                <li key={`crypto10-${of.id}`} className="pr-li-anim">
+                  Crypto 10,50 € (min) — {isSubscriber ? "+2 crédits" : "+1 crédit"}
+                </li>
+              )}
+            </>
+          )
+        }
       </ul>
       </div> {/* ferme .pr-card-head */}
 

@@ -1,5 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+//background//
+import HexNeonBackground from "../../components/background/HexNeonBackground";
 import "./legal.css";
 import MetaRobots from "../../components/seo/MetaRobots";
 
@@ -15,6 +17,11 @@ export default function LegalLayout({ title, children }) {
   return (
     <div className="legal-page min-h-screen">
       <MetaRobots content="index,follow" />
+       {/* BG global (hex neon) */}
+      <HexNeonBackground />
+
+      {/* ✅ tout le contenu passe AU-DESSUS du canvas */}
+      <div className="legal-content">
       <header className="legal-hero">
         <div className="container-std">
           <div className="legal-topbar">
@@ -44,10 +51,10 @@ export default function LegalLayout({ title, children }) {
           </nav>
         </div>
       </header>
-
       <main className="container-std">
         <section className="legal-card">{children}</section>
       </main>
+      </div>
     </div>
   );
 }

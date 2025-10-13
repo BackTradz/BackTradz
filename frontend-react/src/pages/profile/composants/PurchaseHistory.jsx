@@ -1,5 +1,6 @@
 // src/components/profil/PurchaseHistory.jsx
 import React, { useMemo, useState, useCallback } from "react";
+import DetailButton from "../../../components/ui/button/DetailButton";
 
 export default function PurchaseHistory({ history }) {
   const [expanded, setExpanded] = useState(false);
@@ -31,11 +32,13 @@ export default function PurchaseHistory({ history }) {
       <div className="purchase-compact">
         {top5.map((p, i) => (
           <PurchaseRow key={`${p?.date || "d"}-${i}`} item={p} />
-        ))}
+        ))}        
         {items.length > 5 && (
-          <button className="btn btn-outline mt-10" onClick={() => setExpanded(true)}>
-            Afficher tout ({items.length - 5} de plus)
-          </button>
+          <div className="purchase-actions">
+            <DetailButton onClick={() => setExpanded(true)}>
+              Afficher tout ({items.length - 5} de plus)
+            </DetailButton>
+          </div>
         )}
       </div>
     );
@@ -43,9 +46,11 @@ export default function PurchaseHistory({ history }) {
 
   return (
     <div className="purchase-full">
-      <button className="btn btn-ghost mb-10" onClick={() => setExpanded(false)}>
-        ⟵ Revenir aux 5 derniers
-      </button>
+      <div className="purchase-actions">
+       <DetailButton onClick={() => setExpanded(false)}>
+          ⟵ Revenir aux 5 derniers
+        </DetailButton>
+      </div>
 
       <div className="accordion">
         {groupEntries.map(([label, rows]) => {

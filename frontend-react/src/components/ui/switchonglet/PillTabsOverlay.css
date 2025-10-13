@@ -1,0 +1,120 @@
+
+
+/* === Groupe principal === */
+.pill-tabs.pill-tabs--overlay{
+  display:flex;             /* ⬅️ shrink à la taille du contenu */
+  align-items:center;
+  justify-content:flex-start;      /* ⬅️ pas de centrage global */
+  gap:8px;
+  padding:4px 6px;                 /* ⬅️ micro-respiration interne */
+  border-radius:14px;
+
+  background:
+    radial-gradient(120% 180% at 50% 160%, rgba(64,120,255,.10) 0%, rgba(64,120,255,0) 58%),
+    linear-gradient(180deg, rgba(10,16,28,.88) 0%, rgba(8,12,20,.90) 100%);
+  border:1px solid rgba(130,160,255,.12);
+  backdrop-filter: blur(8px) saturate(112%);
+  -webkit-backdrop-filter: blur(8px) saturate(112%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 12px 28px rgba(0,0,0,.40);
+  /* Centrage fluide : la box colle aux onglets et se centre si possible */
+  width:max-content;               /* largeur = contenu */
+  max-width: calc(100% - 24px);    /* ⬅️ 12px d’air à gauche/droite sur petit écran */
+  margin: 8px auto 22px;           /* centré dès que la place le permet */
+  box-sizing: border-box;
+  /* — Une seule ligne + scroll si trop large — */
+  overflow-x:auto;                 /* ⬅️ évite le “débordement panel” entre 905–1000px */
+  overflow-y:hidden;
+  white-space:nowrap;                   /* ⬅️ pas de wrap */
+  scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling: touch;
+  /* Empêche le “gros vide” droite : le scroll reste flush */
+  scrollbar-gutter: stable;
+}
+
+.pill-tabs.pill-tabs--overlay.pill-tabs--block{ display:flex; width:100% }
+.pill-tabs.pill-tabs--overlay.pill-tabs--sm{ gap:6px }
+.pill-tabs.pill-tabs--overlay.pill-tabs--md{ gap:8px }
+.pill-tabs.pill-tabs--overlay.pill-tabs--lg{ gap:10px }
+ 
+.pill-tabs.pill-tabs--overlay .pill-tab-btn{
+  /* — Compact & responsive (anti “gros boutons”) — */
+  padding: 7px clamp(10px, 2vw, 12px);
+  min-height: clamp(30px, 5.2vw, 34px);
+  font-size: clamp(12.5px, 1.6vw, 14px);
+
+  background: rgba(12,18,34,.28);
+  border:0;
+  color:#dbe4ff;
+  border-radius:12px;
+  cursor:pointer;
+  transition: background .16s ease, border-color .16s ease, box-shadow .16s ease, color .16s ease;
+  outline:none;
+  backdrop-filter: blur(4px);
+  scroll-snap-align:center;
+  margin:0;                        /* on remet à zéro toutes les marges */
+}
+
+/* espaces latéraux précis : padding basé sur le premier et le dernier bouton */
+.pill-tabs.pill-tabs--overlay .pill-tab-btn:first-child{
+  margin-left: 0;                  /* ⬅️ fix coquille */
+}
+.pill-tabs.pill-tabs--overlay .pill-tab-btn:last-child{
+  margin-right:0;               /* ⬅️ espace visuel droite */
+}
+  /* équilibrage visuel global (évite vide droite sur grands écrans) */
+@media (min-width:1200px){
+  .pill-tabs.pill-tabs--overlay{
+    justify-content:center;       /* reste centré même si peu d’onglets */
+    max-width:98%;
+    margin-left:auto;
+    margin-right:auto;
+  }
+}
+
+.pill-tabs.pill-tabs--overlay .pill-tab-btn:hover{
+  /* hover retravaillé : glow plus net mais subtil, bleu “signature” */
+  background:
+    radial-gradient(140% 220% at 50% 180%, rgba(64,120,255,.20) 0%, rgba(64,120,255,0) 58%),
+    linear-gradient(180deg, rgba(14,20,38,.55) 0%, rgba(10,16,28,.70) 100%);
+  color:#f7faff;
+  box-shadow: 0 0 8px rgba(64,120,255,.15), inset 0 1px 1px rgba(255,255,255,.08);
+}
+
+.pill-tabs.pill-tabs--overlay .pill-tab-btn.active{
+  /* — Actif verre sombre, glow très subtil (pas de “gros bouton bleu”) — */
+  color:#eaf1ff;
+  background:
+    radial-gradient(120% 180% at 50% 160%, rgba(64,120,255,.12) 0%, rgba(64,120,255,0) 58%),
+    linear-gradient(180deg, rgba(12,18,34,.94) 0%, rgba(10,16,28,.94) 100%) !important; /* ⬅️ override le !important du tabs.css */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 6px 16px rgba(64,120,255,.10);
+}
+
+.pill-tabs.pill-tabs--overlay .pill-tab-btn:focus-visible{
+  outline:3px solid rgba(96,165,250,.45);
+  outline-offset:2px;
+}
+
+.pill-tabs.pill-tabs--overlay .pill-ic{ display:inline-flex; margin-right:8px }
+
+/* --- Scrollbar (mobile & desktop) : fine et discrète --- */
+.pill-tabs.pill-tabs--overlay::-webkit-scrollbar{ height:8px }
+.pill-tabs.pill-tabs--overlay::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.18);
+  border-radius:8px;
+}
+.pill-tabs.pill-tabs--overlay{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.22) transparent; }
+
+/* ========== Responsive ========== */
+/* Mobile / tablettes : ajout d'un padding symétrique réel pour ne PAS coller aux bords */
+@media (max-width: 1024px){
+  .pill-tabs.pill-tabs--overlay{
+    padding-inline: 12px;          /* ⬅️ air à GAUCHE et à DROITE */
+    overflow-x:auto;               /* scroll si nécessaire */
+    -webkit-overflow-scrolling: touch;
+  }
+}
+/* Très grand écran : optionnel, léger resserrage */
+@media (min-width: 1400px){
+  .pill-tabs.pill-tabs--overlay{ max-width: calc(100% - 32px); }
+}
+

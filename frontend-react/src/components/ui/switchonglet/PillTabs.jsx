@@ -9,6 +9,7 @@ export default function PillTabs({
   size = "md",           // 'sm' | 'md' | 'lg'
   fullWidth = false,     // occupe toute la largeur
   className = "",
+  variant = "default",   // NEW: "default" | "overlay"
 }) {
   const activeIdx = useMemo(
     () => Math.max(0, items.findIndex((t) => t.id === value)),
@@ -32,6 +33,7 @@ export default function PillTabs({
         `pill-tabs--${size}`,
         fullWidth ? "pill-tabs--block" : "",
         className,
+        variant === "overlay" ? "pill-tabs--overlay" : "", // NEW: modifieur BEM
       ].join(" ")}
       onKeyDown={onKeyDown}
     >

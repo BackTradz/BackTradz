@@ -159,8 +159,9 @@ const csvExample = "2025-05-01 03:15:00+00:00,1809.45,1812.07,1808.98,1812.07,65
        <TopProgress active={loadingPage} height={3} from="#22d3ee" to="#6366f1" />
 
       {/* HERO */}
-      <section className="a-savoir-hero">
+      <section className="a-savoir-hero layer-top">{/* [v1.3] */}
         <div className="container-std">
+          
           <h1 className="title"> À savoir</h1>
           <p className="subtitle">
             Référence BackTradz : stratégies, CSV, chandeliers, crédits, sécurité, FAQ.
@@ -169,7 +170,7 @@ const csvExample = "2025-05-01 03:15:00+00:00,1809.45,1812.07,1808.98,1812.07,65
       </section>
 
       {/* BODY */}
-      <section className="container-std layout">
+      <section className="container-std layout layer-top">{/* [v1.3] */}
         {/* TOC sticky desktop */}
         <aside className="toc-wrap">
           <TOC
