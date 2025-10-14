@@ -20,6 +20,7 @@ html, body {
   width: 100%;
   background-color: var(--bg-page); /* [v1.3] fond unique global */; /* fallback bg BackTradz */
   color: #e5e7eb;
+  color-scheme: dark; /* assure un rendu dark cohérent (barre statut) */
   border: none;
 }
 

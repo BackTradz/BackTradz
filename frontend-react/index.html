@@ -2,7 +2,8 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Viewport unique couvrant l’encoche iOS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
     <!-- ===== TITLE (onglet navigateur) ===== -->
     <title>BackTradz — Backtests pro & data trading</title>
@@ -17,7 +18,15 @@
     <!-- iOS / Android -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0b1220">
+
+    <!-- Harmoniser la barre iOS avec le fond de la page -->
+    <meta name="theme-color" content="#14181e">
+    <meta name="theme-color" content="#14181e" media="(prefers-color-scheme: dark)">
+
+    <!--  barre translucide qui prend la couleur de la page -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <!-- Par défaut le site est indexable ; les pages privées le surchargeront via <MetaRobots> -->
     <meta name="robots" content="index,follow" />
 
