@@ -413,7 +413,26 @@
   margin-top:10px; padding:0 var(--cta-inset);   /* identique au CTA */
 }
 
-@media (max-width:520px){ .dbt-actions-secondary{ grid-template-columns:1fr; } }
+/* ✅ Mobile/Tablet — conserve les 2 boutons côte à côte, mais plus compacts */
+@media (max-width:700px){
+  .dbt-actions-secondary {
+    grid-template-columns: 1fr 1fr;   /* reste côte à côte */
+    gap: 8px;
+  }
+  .dbt-actions-secondary .dbt-btn,
+  .dbt-actions-secondary button,
+  .dbt-actions-secondary a {
+    font-size: 13px;          /* texte plus petit */
+    height: 40px;             /* hauteur réduite */
+    padding: 0 8px;           /* moins de padding horizontal */
+  }
+  .dbt-actions-primary .cta-btn {
+    height: 42px;
+    font-size: 14px;
+    max-width: 320px;         /* réduit un peu le CTA central */
+  }
+}
+
 
 /* Les boutons remplissent leur colonne (100% largeur) */
 .dbt-actions-secondary .col{ display:flex; }
