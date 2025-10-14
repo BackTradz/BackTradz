@@ -17,7 +17,7 @@ export default function HeroSection() {
       {/* bg isolé, toujours derrière */}
       <div className="hero-bg" aria-hidden="true" />
 
-      <div className="content content-tight max-w-3xl px-6 relative z-10 text-center -mt-12">
+      <div className="content content-tight max-w-3xl relative z-10 text-center -mt-12">
         <h1 className="text-4xl md:text-5xl font-bold leading-tight text-white mb-2">
       <span className="only-desktop">Backtests pro, sans coder une ligne.</span>
       <span className="only-mobile">Backtests pro. Sans code.</span>
@@ -33,10 +33,13 @@ export default function HeroSection() {
     </p>
 
 
-        <CTAButton onClick={goAnalyze}>
-          <span className="only-desktop">Lancer mon premier backtest</span>
-          <span className="only-mobile">Lancer un backtest</span>
-        </CTAButton>
+        <div className="hero-cta">
+          <CTAButton onClick={goAnalyze}>
+            <span className="only-desktop">Lancer mon premier backtest</span>
+            <span className="only-mobile">Lancer un backtest</span>
+          </CTAButton>
+        </div>
+
 
         <div className="hero-note mt-2 text-sm text-cyan-200 opacity-90">
           <span className="only-desktop">

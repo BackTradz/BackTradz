@@ -364,16 +364,39 @@
   .home-page .ts-row{ gap:6px; }
 }
 
-/* ---------------------------------------------------------------------
-   MOBILE SAFE GUTTER (≤600px) — CTA principal
-   --------------------------------------------------------------------- */
-@media (max-width:600px){
-  .home-hero, .hero, .hero-content, .hero-inner{
-    padding-left:var(--home-cta-gutter) !important;
-    padding-right:var(--home-cta-gutter) !important;
-    box-sizing:border-box;
+.hero .content {
+  padding-inline: clamp(18px, 5vw, 40px);
+}
+
+@media (max-width:500px){
+  .hero .content {
+    padding-inline: 10px !important;
   }
-  .home-hero .dbt-btn, .hero .dbt-btn{
-    max-width:100% !important; width:100% !important; box-sizing:border-box;
+}
+
+/* CTA mobile — un peu plus de padding interne */
+@media (max-width:500px){
+  .hero .dbt-btn{
+    /* avant: padding-inline: 22px (règle globale) */
+    padding: 12px 28px !important;   /* + espace latéral, léger gain vertical */
+    border-radius: 12px;              /* reste premium sur mobile */
+    font-size: 0.95rem;               /* micro boost de lisibilité */
+  }
+}
+
+/* CTA mobile : padding et largeur contrôlés via le wrapper */
+@media (max-width:400px){
+  .hero .hero-cta{
+    display:flex;
+    justify-content:center;
+    margin-top: 6px;
+  }
+  .hero .hero-cta :is(button, .cta-button, .dbt-btn, a[role="button"]){
+    padding: 12px 50px !important;  /* + padding latéral */
+    min-height: 42px !important;
+    border-radius: 15px !important;
+    font-size: 0.95rem !important;
+    width: auto !important;         /* évite le plein écran */
+    max-width: 280px !important;    /* garde un volume premium */
   }
 }
