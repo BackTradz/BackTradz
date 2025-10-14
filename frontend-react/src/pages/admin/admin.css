@@ -59,6 +59,8 @@
   min-height: calc(100vh - 64px);
   background: linear-gradient(180deg, var(--c-bg-page-start), var(--c-bg-page-end));
   color: var(--c-text);
+  position: relative;       /* crée un plan de pile propre */
+  z-index: 2;               /* place le layout admin au-dessus du fond hex */
 }
 
 .admin-sidebar {
