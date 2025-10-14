@@ -8,17 +8,15 @@
 
 
 :root{
-  /* [v1.3] couleur de fond unique pour TOUTE l’app */
-  --bg-page: #14181e; /* ajuste ici UNE FOIS pour tout */
+  --bg-page:#0a0f19;  /* noir profond identique à ton fond sous la grille */
 }
-
 /* 🔹 Évite les marges/paddings imprévus sur tout le layout */
 html, body {
   margin: 0 !important;
   padding: 0 !important;
   height: 100%;
   width: 100%;
-  background-color: var(--bg-page); /* [v1.3] fond unique global */; /* fallback bg BackTradz */
+  background-color: var(--bg-page) !important; /* [v1.3] fond unique global */; /* fallback bg BackTradz */
   color: #e5e7eb;
   color-scheme: dark; /* assure un rendu dark cohérent (barre statut) */
   border: none;
@@ -121,4 +119,16 @@ main, .container-std,
 /* .page-skeleton-guard => stabilise la hauteur du bloc principal avant l’arrivée des cartes*/
 .page-skeleton-guard {
   min-height: clamp(320px, 60vh, 900px);
+}
+/* iOS notch : peint la bande sous la barre de statut avec le même fond */
+@supports (padding: max(0px)){
+  body::before{
+    content:"";
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: env(safe-area-inset-top);
+    background: var(--bg-page);
+    z-index: 1;          /* sous ta navbar si elle a un z-index plus élevé */
+    pointer-events: none;
+  }
 }
