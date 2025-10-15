@@ -358,7 +358,7 @@ export default function CSVShop() {
                     downloadUrl={
                       !isLoggedIn
                         ? "#"
-                        : (it.path ? withToken(downloadCsvByPathUrl(it.path)) : "")
+                        : (it.path ? downloadCsvByPathUrl(it.path) : "")
                     }
                     className="csvshop-card"
                     downloadLabel="Télécharger(–1 crédit)"   // ← piloté par la page

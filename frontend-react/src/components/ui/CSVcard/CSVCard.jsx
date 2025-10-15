@@ -93,6 +93,13 @@ export default function CsvCard(props) {
             title={downloadTitle}
             fullWidth
             leftIcon={downloadIcon}
+            onClick={(e) => {
+              // Force la navigation HTTP même si CTAButtonHome utilise un <Link>
+              if (!downloadUrl) return;
+              try { e.preventDefault(); } catch {}
+              try { window.location.assign(downloadUrl); }
+              catch { window.location.href = downloadUrl; }
+            }}
           >
             {downloadLabel}
           </CTAButtonHome>
