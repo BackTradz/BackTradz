@@ -351,6 +351,19 @@ function PublicDataSheetView({ folder, sheet }) {
     });
      return mapped;
   }, [rows, isHourSheet, hourCol, tzOffset]);
+
+  // 🔒 Masquer run_id / user_id sur la feuille Config (public results)
+  const isConfigSheet = /^(config)$/i.test(String(sheet || ""));
+  const keyOf = (row) => {
+    const h0 = headers?.[0];
+    return String(row?.Metric ?? row?.metric ?? (h0 ? row?.[h0] : "") ?? "").trim();
+  };
+  const safeRows = useMemo(
+    () => (isConfigSheet
+      ? (rows || []).filter(r => !/^(run_id|user_id|run_seq)$/i.test(keyOf(r)))
+      : rows),
+    [rows, headers, isConfigSheet]
+  );
  
 
   const formatCell = (h, v, row) => {
@@ -426,7 +439,7 @@ function PublicDataSheetView({ folder, sheet }) {
             </tr>
           </thead>
             <tbody>
-              {viewRows.map((r, i) => (
+              {(isConfigSheet ? safeRows : viewRows).map((r, i) => (
                 <tr key={i}>
                   {headers.map((h) => (
                     <td key={h} className={isNumCol(h) ? "right" : ""}>

@@ -491,6 +491,19 @@ function DataSheetView({ active, folder, sheet, meta, isMobile, onSelectSheet })
       return mapped;
     }, [rows, isHourSheet, hourCol, tzOffset]);
 
+    // 🔒 Masquer run_id / user_id / run_seq uniquement sur la feuille "Config"
+    const isConfigSheet = /^(config)$/i.test(String(sheet || ""));
+    const keyOf = (row) => {
+      const h0 = headers?.[0];
+      return String(row?.Metric ?? row?.metric ?? (h0 ? row?.[h0] : "") ?? "").trim();
+    };
+    const filteredRows = useMemo(
+      () => (isConfigSheet
+        ? (tzRows || rows).filter(r => !/^(run_id|user_id|run_seq)$/i.test(keyOf(r)))
+        : (tzRows || rows)),
+      [tzRows, rows, headers, isConfigSheet]
+    );
+
     // pour l’épingle : si la key est l’heure, on prend l’heure affichée
     const keyColForPin = useMemo(() => {
       if (hourCol && keyCol === hourCol && isHourSheet) return "__displayHour__";
@@ -617,7 +630,7 @@ function DataSheetView({ active, folder, sheet, meta, isMobile, onSelectSheet })
               </tr>
             </thead>
             <tbody>
-              {tzRows.map((r, i) => (
+              {filteredRows.map((r, i) => (
                 <tr key={i}>
                   {headers.map((h) => (
                     <td key={h} className={colAlignClass(h)}>
