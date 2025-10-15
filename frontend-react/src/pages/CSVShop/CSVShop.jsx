@@ -280,7 +280,65 @@ export default function CSVShop() {
           start: f.start_date || exStart,
           end: f.end_date || exEnd,
         }));
-        setExtractedFiles(mapped);
+        // ✅ Fallbacks d’affichage :
+        // 1) Mois EXACT déjà en librairie → carte qui pointe vers le CSV mensuel.
+        // 2) Période personnalisée (chevauche plusieurs mois ou sous-période) →
+        //    carte qui pointe vers le fichier combiné généré dans output_live.
+        let toShow = mapped;
+        if (!mapped.length) {
+          const sDate = new Date(exStart);
+          const eDate = new Date(exEnd);
+          const sameYM = (sDate.getFullYear() === eDate.getFullYear()) &&
+                         (sDate.getMonth()  === eDate.getMonth());
+          if (sameYM) {
+            // borne du mois complet
+            const first = new Date(sDate.getFullYear(), sDate.getMonth(), 1);
+            const last  = new Date(sDate.getFullYear(), sDate.getMonth()+1, 0);
+            const isFullMonth = (sDate.getDate() === first.getDate()) &&
+                                (eDate.getDate() === last.getDate());
+            // Cherche le CSV mensuel existant dans la librairie
+            const ym = {
+              year: String(sDate.getFullYear()).padStart(4,"0"),
+              month: String(sDate.getMonth()+1).padStart(2,"0")
+            };
+            const monthly = items.find(it =>
+              it.pair === exSymbol.toUpperCase() &&
+              it.timeframe === exTimeframe.toUpperCase() &&
+             it.year === ym.year && it.month === ym.month
+            );
+            if (monthly && isFullMonth) {
+              toShow = [{
+                pair: exSymbol.toUpperCase(),
+                timeframe: exTimeframe.toUpperCase(),
+                year: ym.year,
+                month: ym.month,
+                path: monthly.path,          // 👉 on réutilise le fichier mensuel existant
+                source: "output",            // lib publique
+                start: exStart,
+                end: exEnd,
+              }];
+            }
+          }
+          // 2) Si toujours rien → période perso → construit le chemin output_live
+          if (!toShow.length) {
+            const S = exSymbol.toUpperCase();
+            const TF = exTimeframe.toUpperCase();
+            const s = exStart.replaceAll("-", "");
+            const e = exEnd.replaceAll("-", "");
+            const rel = `output_live/${S}/${TF}/${S}_${TF}_${s}_to_${e}.csv`;
+            toShow = [{
+              pair: S,
+              timeframe: TF,
+              year: String(new Date(exStart).getFullYear()),
+              month: String(new Date(exStart).getMonth()+1).padStart(2,"0"),
+              path: rel,
+              source: "live",
+              start: exStart,
+              end: exEnd,
+            }];
+          }
+        }
+        setExtractedFiles(toShow);
         setShowExtractSection(true);
         await refreshList();
       }
@@ -362,7 +420,7 @@ export default function CSVShop() {
                     }
                     className="csvshop-card"
                     downloadLabel="Télécharger(–1 crédit)"   // ← piloté par la page
-                    downloadTitle="Télécharger(–1 crédit))"
+                    downloadTitle="Télécharger(–1 crédit)"
                     downloadIcon="⬇️"
                   />
                 ))}

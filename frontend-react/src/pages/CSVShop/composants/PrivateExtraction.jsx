@@ -2,26 +2,15 @@ import React from "react";
 import CTAButton from "../../../components/ui/button/CTAButton";
 import CsvCard from "../../../components/ui/CSVcard/CSVCard";
 
+// URL builder officiel (ajoute déjà ?token=…)
+import { downloadCsvByPathUrl } from "../../../sdk/catalogApi";
+
 // 🧠 Formatte une date "YYYY-MM-DD" -> "DD/MM/YYYY"
 function fmtFR(d) {
   if (!d || typeof d !== "string") return "";
   const [Y, M, D] = d.split("-");
   if (!Y || !M || !D) return d;
   return `${D}/${M}/${Y}`;
-}
-
-// BTZ-PATCH: token robuste
-function getApiTokenSafe() {
-  try {
-    return localStorage.getItem("apiKey") ||
-           (JSON.parse(localStorage.getItem("user")||"{}")?.token) ||
-           "";
-  } catch { return localStorage.getItem("apiKey") || ""; }
-}
-function withToken(url) {
-  const t = getApiTokenSafe();
-  const sep = url.includes("?") ? "&" : "?";
-  return `${url}${sep}token=${encodeURIComponent(t)}`;
 }
 
 /**
@@ -55,7 +44,7 @@ export default function PrivateExtraction({
       {showExtractSection && (
         <div className="csvshop-grid">
           {extractedFiles.map((it, idx) => {
-            const url = it.path ? withToken(downloadCsvByPathUrl(it.path)) : "";
+            const url = it.path ? downloadCsvByPathUrl(it.path) : "";
             return (
               <div key={idx} className="span-all">
                 <CsvCard
