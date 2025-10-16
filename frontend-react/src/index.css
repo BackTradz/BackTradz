@@ -62,19 +62,63 @@ html {
   scrollbar-gutter: stable; /* garde la place seulement du côté scrollbar */
 }
 
-/* WebKit (Chrome, Edge, Safari, iOS/Android WebView) */
-*::-webkit-scrollbar{ width:10px; height:10px; }
-*::-webkit-scrollbar-track{ background: var(--scroll-track); }
-*::-webkit-scrollbar-thumb{
-  background: var(--scroll-thumb);
-  border-radius:12px;
-  border:2px solid var(--scroll-track);
-}
-*::-webkit-scrollbar-thumb:hover{ background: var(--scroll-thumb-hover); }
-*::-webkit-scrollbar-corner{ background: var(--scroll-track); }
+/* ============================================================
+   [v1.3.1] Scrollbar Desktop uniquement
+   ------------------------------------------------------------
+   - Scrollbar dark visible uniquement à partir de 1025px
+   - Masquée complètement sur mobile (≤1024px)
+   ============================================================ */
 
+@media (min-width: 1025px) {
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: var(--scroll-track);
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    border-radius: 12px;
+    border: 2px solid var(--scroll-track);
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-thumb-hover);
+  }
+  *::-webkit-scrollbar-corner {
+    background: var(--scroll-track);
+  }
+}
+
+/* Toujours clip horizontal (desktop & mobile) */
 html, body, #root {
-  overflow-x: clip;  /* bloque le débordement horizontal */
+  overflow-x: clip;
+}
+
+/* ============================================================
+   Scrollbar masquée sur mobile / tablette
+   ------------------------------------------------------------
+   - Masque toutes les barres (Android/iOS, Chrome, Safari, Firefox)
+   - Garde le scroll tactile natif intact
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  /* Chrome / Safari / WebView */
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  /* Firefox */
+  html, body {
+    scrollbar-width: none !important;
+  }
+
+  /* Scroll tactile fluide */
+  html, body, #root {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* Par sécurité : pas de largeur calculée en dehors de l'écran */
