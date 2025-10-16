@@ -146,7 +146,8 @@ fvg_pullback_multi: {
     { name: "min_pips",         desc: "Taille minimale du gap (en pips) pour valider une FVG." },
     { name: "min_wait_candles", desc: "Nombre minimum de bougies à attendre avant d’entrer sur un retour." },
     { name: "max_wait_candles", desc: "Durée maximale d’attente avant d’invalider une FVG non touchée." },
-    { name: "max_touch",        desc: "Nombre maximal de retours autorisés dans la FVG." }
+    { name: "max_touch",        desc: "Nombre maximal de retours autorisés dans la FVG." },
+    { name: "min_overlap_ratio",desc: "Profondeur minimale du retour dans la zone (0.01 = 1%). Laisser vide = entrée à la touche (défaut)." }
   ],
 },
 
@@ -165,7 +166,8 @@ fvg_pullback_multi_ema: {
     { name: "min_wait_candles", desc: "Nombre minimum de bougies à attendre avant un retour." },
     { name: "max_wait_candles", desc: "Durée maximale d’attente avant expiration de la FVG." },
     { name: "max_touch",        desc: "Nombre maximal de retests autorisés." },
-    { name: "ema_key",          desc: "Nom de la colonne EMA utilisée comme filtre (ex: 'EMA_50')." }
+    { name: "ema_key",          desc: "Nom de la colonne EMA utilisée comme filtre (ex: 'EMA_50')." },
+    { name: "min_overlap_ratio",desc: "Profondeur minimale du retour dans la zone (0.01 = 1%). Laisser vide = entrée à la touche (défaut)." }
   ],
 },
 
@@ -183,7 +185,8 @@ fvg_pullback_multi_rsi: {
     { name: "min_wait_candles", desc: "Nombre minimum de bougies à attendre avant un retour." },
     { name: "max_wait_candles", desc: "Durée maximale d’attente avant expiration de la FVG." },
     { name: "max_touch",        desc: "Nombre maximal de retests autorisés." },
-    { name: "rsi_threshold",    desc: "Seuil RSI global (ex: 30 → BUY si RSI <30, SELL si RSI >70)." }
+    { name: "rsi_threshold",    desc: "Seuil RSI global (ex: 30 → BUY si RSI <30, SELL si RSI >70)." },
+    { name: "min_overlap_ratio",desc: "Profondeur minimale du retour dans la zone (0.01 = 1%). Laisser vide = entrée à la touche (défaut)." }
   ],
 },
 
@@ -203,7 +206,8 @@ fvg_pullback_tendance_ema: {
     { name: "max_wait_candles", desc: "Durée maximale d’attente avant expiration de la FVG." },
     { name: "max_touch",        desc: "Nombre maximal de retests autorisés." },
     { name: "ema_fast",         desc: "Nom de la colonne EMA rapide (ex: 'EMA_50')." },
-    { name: "ema_slow",         desc: "Nom de la colonne EMA lente (ex: 'EMA_200')." }
+    { name: "ema_slow",         desc: "Nom de la colonne EMA lente (ex: 'EMA_200')." },
+    { name: "min_overlap_ratio",desc: "Profondeur minimale du retour dans la zone (0.01 = 1%). Laisser vide = entrée à la touche (défaut)." }
   ],
 },
 
@@ -223,7 +227,8 @@ fvg_pullback_tendance_ema_rsi: {
     { name: "max_touch",        desc: "Nombre maximal de retests autorisés." },
     { name: "ema_fast",         desc: "Nom de la colonne EMA rapide (ex: 'EMA_50')." },
     { name: "ema_slow",         desc: "Nom de la colonne EMA lente (ex: 'EMA_200')." },
-    { name: "rsi_threshold",    desc: "Seuil RSI global (ex: 30 → BUY si RSI <30, SELL si RSI >70)." }
+    { name: "rsi_threshold",    desc: "Seuil RSI global (ex: 30 → BUY si RSI <30, SELL si RSI >70)." },
+    { name: "min_overlap_ratio",desc: "Profondeur minimale du retour dans la zone (0.01 = 1%). Laisser vide = entrée à la touche (défaut)." }
   ],
 },
 // ------------------- OB PULLBACK GAP (famille) -------------------
@@ -241,7 +246,8 @@ ob_pullback_gap: {
   params: [
     { name: "min_wait_candles",     desc: "Nombre minimum de bougies à attendre avant qu’un retour dans l’OB soit valide." },
     { name: "max_wait_candles",     desc: "Durée maximale (en bougies) avant d’invalider l’OB si aucun retour." },
-    { name: "allow_multiple_entries", desc: "Autoriser plusieurs entrées sur le même OB* (true/false)." }
+    { name: "allow_multiple_entries", desc: "Autoriser plusieurs entrées sur le même OB* (true/false)." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 
@@ -259,7 +265,8 @@ ob_pullback_gap_ema_simple: {
     { name: "min_wait_candles",     desc: "Nombre minimum de bougies à attendre avant un retour valide." },
     { name: "max_wait_candles",     desc: "Durée maximale d’attente avant expiration de l’OB*." },
     { name: "allow_multiple_entries", desc: "Permet plusieurs entrées successives dans le même OB* (true/false)." },
-    { name: "ema_key",              desc: "Nom de la colonne EMA utilisée comme filtre (ex: 'EMA_50')." }
+    { name: "ema_key",              desc: "Nom de la colonne EMA utilisée comme filtre (ex: 'EMA_50')." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 
@@ -277,7 +284,8 @@ ob_pullback_gap_rsi: {
     { name: "min_wait_candles",     desc: "Nombre minimum de bougies à attendre avant un retour valide." },
     { name: "max_wait_candles",     desc: "Durée maximale d’attente avant expiration de l’OB*." },
     { name: "allow_multiple_entries", desc: "Permet plusieurs entrées successives dans le même OB* (true/false)." },
-    { name: "rsi_threshold",        desc: "Seuil RSI global (ex: 40 → BUY si RSI <40, SELL si RSI >60)." }
+    { name: "rsi_threshold",        desc: "Seuil RSI global (ex: 40 → BUY si RSI <40, SELL si RSI >60)." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 
@@ -297,7 +305,8 @@ ob_pullback_gap_tendance_ema: {
     { name: "max_wait_candles",     desc: "Durée maximale d’attente avant expiration de l’OB*." },
     { name: "allow_multiple_entries", desc: "Permet plusieurs entrées successives dans la même zone (true/false)." },
     { name: "ema_fast",             desc: "Nom de la colonne EMA rapide (ex: 'EMA_50')." },
-    { name: "ema_slow",             desc: "Nom de la colonne EMA lente (ex: 'EMA_200')." }
+    { name: "ema_slow",             desc: "Nom de la colonne EMA lente (ex: 'EMA_200')." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 
@@ -318,7 +327,8 @@ ob_pullback_gap_ema_rsi: {
     { name: "allow_multiple_entries", desc: "Permet plusieurs entrées successives dans la même zone (true/false)." },
     { name: "ema_fast",             desc: "Nom de l’EMA rapide utilisée (ex: 'EMA_50')." },
     { name: "ema_slow",             desc: "Nom de l’EMA lente utilisée (ex: 'EMA_200')." },
-    { name: "rsi_threshold",        desc: "Seuil RSI global (ex: 40 → BUY si RSI <40, SELL si RSI >60)." }
+    { name: "rsi_threshold",        desc: "Seuil RSI global (ex: 40 → BUY si RSI <40, SELL si RSI >60)." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 // ------------------- OB PULLBACK (pur) -------------------
@@ -337,7 +347,8 @@ ob_pullback_pure: {
   params: [
     { name: "min_wait_candles",     desc: "Attente minimale (en bougies) avant une entrée valide." },
     { name: "max_wait_candles",     desc: "Expiration de l’OB si non touché avant ce délai (en bougies)." },
-    { name: "allow_multiple_entries", desc: "Autoriser plusieurs entrées dans la même zone OB (true/false)." }
+    { name: "allow_multiple_entries", desc: "Autoriser plusieurs entrées dans la même zone OB (true/false)." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 
@@ -354,7 +365,8 @@ ob_pullback_pure_ema_simple: {
     { name: "min_wait_candles",     desc: "Attente minimale avant entrée." },
     { name: "max_wait_candles",     desc: "Expiration de l’OB si non touché." },
     { name: "allow_multiple_entries", desc: "Plusieurs entrées autorisées dans la même zone (true/false)." },
-    { name: "ema_key",              desc: "Nom de la colonne EMA utilisée (ex : 'EMA_50')." }
+    { name: "ema_key",              desc: "Nom de la colonne EMA utilisée (ex : 'EMA_50')." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 
@@ -371,7 +383,8 @@ ob_pullback_pure_rsi: {
     { name: "min_wait_candles",     desc: "Attente minimale avant entrée." },
     { name: "max_wait_candles",     desc: "Expiration de l’OB si non touché." },
     { name: "allow_multiple_entries", desc: "Plusieurs entrées autorisées (true/false)." },
-    { name: "rsi_threshold",        desc: "Seuil RSI global (ex : 40 → BUY si <40, SELL si >60)." }
+    { name: "rsi_threshold",        desc: "Seuil RSI global (ex : 40 → BUY si <40, SELL si >60)." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 
@@ -389,7 +402,8 @@ ob_pullback_pure_ema_simple_rsi: {
     { name: "max_wait_candles",     desc: "Expiration de l’OB si non touché." },
     { name: "allow_multiple_entries", desc: "Plusieurs entrées autorisées (true/false)." },
     { name: "ema_key",              desc: "Colonne EMA utilisée (ex : 'EMA_50')." },
-    { name: "rsi_threshold",        desc: "Seuil RSI global (ex : 40 → BUY si <40, SELL si >60)." }
+    { name: "rsi_threshold",        desc: "Seuil RSI global (ex : 40 → BUY si <40, SELL si >60)." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 
@@ -407,7 +421,8 @@ ob_pullback_pure_tendance_ema: {
     { name: "max_wait_candles",     desc: "Expiration de l’OB si non touché." },
     { name: "allow_multiple_entries", desc: "Plusieurs entrées autorisées (true/false)." },
     { name: "ema_fast",             desc: "Nom de l’EMA rapide (ex : 'EMA_50')." },
-    { name: "ema_slow",             desc: "Nom de l’EMA lente (ex : 'EMA_200')." }
+    { name: "ema_slow",             desc: "Nom de l’EMA lente (ex : 'EMA_200')." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 
@@ -426,7 +441,8 @@ ob_pullback_pure_tendance_ema_rsi: {
     { name: "allow_multiple_entries", desc: "Plusieurs entrées autorisées (true/false)." },
     { name: "ema_fast",             desc: "Colonne EMA rapide (ex : 'EMA_50')." },
     { name: "ema_slow",             desc: "Colonne EMA lente (ex : 'EMA_200')." },
-    { name: "rsi_threshold",        desc: "Seuil RSI global (ex : 40 → BUY si <40, SELL si >60)." }
+    { name: "rsi_threshold",        desc: "Seuil RSI global (ex : 40 → BUY si <40, SELL si >60)." },
+    { name: "min_overlap_ratio",      desc: "Profondeur minimale du retour (0.01 = 1%). Vide = touche." }
   ],
 },
 

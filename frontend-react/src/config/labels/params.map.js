@@ -28,6 +28,8 @@ export const ParamAliases = {
   minPips:                { internal: "min_pips",               type: "float" },
   maxTouch:               { internal: "max_touch",              type: "int"   },
   obSide:                 { internal: "ob_side",                type: "str"   },
+  // Option UI (facultatif) — si jamais tu exposes un champ % côté UI:
+  // overlapPct:          { internal: "min_overlap_ratio",      type: "float" },
 
   // Temps
   timeKey:                { internal: "time_key",               type: "str",   default: "time" },
@@ -58,6 +60,7 @@ const BackendTypeHints = {
   min_wait_candles:       "int",
   max_wait_candles:       "int",
   allow_multiple_entries: "bool",
+  min_overlap_ratio:      "float",    // ⬅️ NEW: profondeur de retour (0.0–1.0)
   rsi_key:                "str",
   rsi_threshold:          "float",
   ema_key:                "str",

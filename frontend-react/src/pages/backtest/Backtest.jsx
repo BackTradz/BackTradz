@@ -268,6 +268,10 @@ export default function Backtest() {
       fd.append("timeframe", customTF || "CUSTOM");
       fd.append("start_date", customStart);
       fd.append("end_date", customEnd);
+      // 🔗 Paramètres stratégie (inclut min_overlap_ratio si décoché → ratio décimal)
+      //    Même logique que l'officiel (collectParams("custom")).
+      const paramsUI = collectParams("custom");
+      fd.append("params_json", JSON.stringify(paramsUI));
 
       const res = await runBacktestCustom(fd);
       setResult(res);
@@ -668,22 +672,18 @@ export default function Backtest() {
                     <ParamInput
                       key={p.name}
                       id={`param_custom_${p.name}`}
+                      name={p.name}                      
+                      scope="custom"                        
                       label={`${formatParam(p.name, { strategyKey: selectedStratCustom })} (${p.default ?? "obligatoire"})`}
                       defaultValue={p.default ?? ""}
+                      type={p.type || (typeof p.default === "number" ? "number" : (typeof p.default === "boolean" ? "boolean" : "text"))}
                       onChange={() => {}}
                     />
                   ))}
                   </div>
-                {paramsCustom.map(p => (
-                  <input
-                    key={`hid_cus_${p.name}`}
-                    type="hidden"
-                    name={p.name}
-                    data-scope="custom"
-                    data-param="1"
-                    defaultValue={p.default ?? ""}
-                  />
-                ))}
+                  {/* ⚠️ On ne redouble PAS les inputs via des hidden
+                    pour éviter des collisions de valeurs, surtout
+                    pour min_overlap_ratio qui a une UI dédiée. */}
               </div>
                 
               {/* Validation + action */}

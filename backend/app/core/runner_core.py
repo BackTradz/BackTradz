@@ -168,6 +168,14 @@ def run_backtest(df, strategy_name, strategy_func, sl_pips=100, tp1_pips=100, tp
         # Ne garder que les clés que la stratégie accepte
         eff_params = {k: v for k, v in eff_params.items() if k in expected}
 
+     # 🧩 DEBUG: afficher les paramètres réellement transmis à la stratégie
+    try:
+        print("🧩 Params effectifs (runner → stratégie):", eff_params)
+        if expected:
+            print("🔐 Params attendus par la stratégie:", sorted(list(expected)))
+    except Exception:
+        pass
+
     # 3) --- Appel stratégie avec les bons paramètres ---
     try:
         signals = strategy_func(df.copy(), **eff_params)

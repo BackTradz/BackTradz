@@ -15,6 +15,7 @@ const STRATEGIES_MAP = {
       min_wait_candles: "Bougies d’attente",
       max_wait_candles: "Expiration (bougies)",
       allow_multiple_entries: "Entrées multiples",
+      min_overlap_ratio: "Profondeur min retour (%)", // ⬅️ NEW
     },
   },
   ob_pullback_pure_ema_simple: {
@@ -26,6 +27,7 @@ const STRATEGIES_MAP = {
       max_wait_candles: "Expiration (bougies)",
       allow_multiple_entries: "Entrées multiples",
       ema_key: "EMA (colonne)",
+       min_overlap_ratio: "Profondeur min retour (%)", // ⬅️ NEW
     },
   },
   ob_pullback_pure_rsi: {
@@ -37,6 +39,7 @@ const STRATEGIES_MAP = {
       max_wait_candles: "Expiration (bougies)",
       allow_multiple_entries: "Entrées multiples",
       rsi_threshold: "Seuil RSI",
+       min_overlap_ratio: "Profondeur min retour (%)", // ⬅️ NEW
     },
   },
   ob_pullback_pure_ema_simple_rsi: {
@@ -49,6 +52,7 @@ const STRATEGIES_MAP = {
       allow_multiple_entries: "Entrées multiples",
       ema_key: "EMA (colonne)",
       rsi_threshold: "Seuil RSI",
+       min_overlap_ratio: "Profondeur min retour (%)", // ⬅️ NEW
     },
   },
   ob_pullback_pure_tendance_ema: {
@@ -61,6 +65,7 @@ const STRATEGIES_MAP = {
       allow_multiple_entries: "Entrées multiples",
       ema_fast: "EMA rapide",
       ema_slow: "EMA lente",
+       min_overlap_ratio: "Profondeur min retour (%)", // ⬅️ NEW
     },
   },
   ob_pullback_pure_tendance_ema_rsi: {
@@ -74,6 +79,7 @@ const STRATEGIES_MAP = {
       ema_fast: "EMA rapide",
       ema_slow: "EMA lente",
       rsi_threshold: "Seuil RSI",
+       min_overlap_ratio: "Profondeur min retour (%)", // ⬅️ NEW
     },
   },
 
@@ -86,6 +92,7 @@ const STRATEGIES_MAP = {
       min_wait_candles: "Bougies d’attente",
       max_wait_candles: "Expiration (bougies)",
       allow_multiple_entries: "Entrées multiples",
+      min_overlap_ratio: "Profondeur min retour (%)",
     },
   },
   ob_pullback_gap_ema_simple: {
@@ -97,6 +104,7 @@ const STRATEGIES_MAP = {
       max_wait_candles: "Expiration (bougies)",
       allow_multiple_entries: "Entrées multiples",
       ema_key: "EMA (colonne)",
+      min_overlap_ratio: "Profondeur min retour (%)",
     },
   },
   ob_pullback_gap_rsi: {
@@ -108,6 +116,7 @@ const STRATEGIES_MAP = {
       max_wait_candles: "Expiration (bougies)",
       allow_multiple_entries: "Entrées multiples",
       rsi_threshold: "Seuil RSI",
+      min_overlap_ratio: "Profondeur min retour (%)",
     },
   },
   ob_pullback_gap_tendance_ema: {
@@ -120,6 +129,7 @@ const STRATEGIES_MAP = {
       allow_multiple_entries: "Entrées multiples",
       ema_fast: "EMA rapide",
       ema_slow: "EMA lente",
+      min_overlap_ratio: "Profondeur min retour (%)",
     },
   },
   ob_pullback_gap_ema_rsi: {
@@ -133,6 +143,7 @@ const STRATEGIES_MAP = {
       ema_fast: "EMA rapide",
       ema_slow: "EMA lente",
       rsi_threshold: "Seuil RSI",
+      min_overlap_ratio: "Profondeur min retour (%)",
     },
   },
 
@@ -146,6 +157,7 @@ const STRATEGIES_MAP = {
       min_wait_candles: "Bougies d’attente",
       max_wait_candles: "Expiration (bougies)",
       max_touch: "Retours max",
+      min_overlap_ratio: "Profondeur min retour (%)",
     },
   },
   fvg_pullback_multi_ema: {
@@ -158,6 +170,7 @@ const STRATEGIES_MAP = {
       max_wait_candles: "Expiration (bougies)",
       max_touch: "Retours max",
       ema_key: "EMA (colonne)",
+      min_overlap_ratio: "Profondeur min retour (%)",
     },
   },
   fvg_pullback_multi_rsi: {
@@ -170,6 +183,7 @@ const STRATEGIES_MAP = {
       max_wait_candles: "Expiration (bougies)",
       max_touch: "Retours max",
       rsi_threshold: "Seuil RSI",
+      min_overlap_ratio: "Profondeur min retour (%)",
     },
   },
   fvg_pullback_tendance_ema: {
@@ -183,6 +197,7 @@ const STRATEGIES_MAP = {
       max_touch: "Retours max",
       ema_fast: "EMA rapide",
       ema_slow: "EMA lente",
+      min_overlap_ratio: "Profondeur min retour (%)",
     },
   },
   fvg_pullback_tendance_ema_rsi: {
@@ -197,6 +212,7 @@ const STRATEGIES_MAP = {
       ema_fast: "EMA rapide",
       ema_slow: "EMA lente",
       rsi_threshold: "Seuil RSI",
+      min_overlap_ratio: "Profondeur min retour (%)",
     },
   },
   // ========== FVG IMPULSIVE ==========
