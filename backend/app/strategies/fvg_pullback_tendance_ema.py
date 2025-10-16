@@ -9,7 +9,7 @@ def detect_fvg_pullback_tendance_ema(
     max_touch: int = 4,
     ema_fast: str = "EMA_50",
     ema_slow: str = "EMA_200",
-    min_overlap_ratio: float = 0.0  # [BTZ] TOUCH par défaut
+    min_overlap_ratio: float = 0.01  # [BTZ] défaut aligné OB = 1%
 ) -> List[Dict]:
     """
     Détection multi-FVG avec filtre de tendance EMA : plusieurs FVG peuvent être actives en parallèle et sont
@@ -88,11 +88,13 @@ def detect_fvg_pullback_tendance_ema(
                 zone_w = high_b - low_b
                 if zone_w <= 0:
                     continue
+                
                 overlap = max(0.0, min(high2, high_b) - max(low2, low_b))
                 if min_overlap_ratio > 0:
                     meets_depth = (overlap / zone_w) >= min_overlap_ratio
                 else:
-                    meets_depth = overlap > 0.0
+                    meets_depth = overlap > 1e-9
+
                 # Tendance EMA
                 if fvg["type"] == "bullish" and meets_depth and fast > slow:
                     fvg["touch_count"] += 1

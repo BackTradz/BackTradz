@@ -13,7 +13,7 @@ def detect_fvg_pullback_multi_rsi(
     max_touch: int = 4,
     # rsi_key supprimé de la signature  [BTZ]
     rsi_threshold: float = 30.0,
-    min_overlap_ratio: float = 0.0  # [BTZ] TOUCH par défaut
+    min_overlap_ratio: float = 0.01  # [BTZ] défaut aligné OB = 1%
 ) -> List[Dict]:
     """
     Détection multi-FVG avec filtre RSI global (symétrique) :
@@ -95,11 +95,12 @@ def detect_fvg_pullback_multi_rsi(
                 zone_w = high_b - low_b
                 if zone_w <= 0:
                     continue
+                
                 overlap = max(0.0, min(high2, high_b) - max(low2, low_b))
                 if min_overlap_ratio > 0:
                     meets_depth = (overlap / zone_w) >= min_overlap_ratio
                 else:
-                    meets_depth = overlap > 0.0
+                    meets_depth = overlap > 1e-9
 
                 # RSI filtre global : buy < threshold / sell > 100 - threshold
                 if fvg["type"] == "bullish" and meets_depth and rsi < rsi_threshold:

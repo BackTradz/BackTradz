@@ -7,7 +7,7 @@ def detect_fvg_pullback_multi(
     min_wait_candles: int = 1,
     max_wait_candles: int = 20,
     max_touch: int = 4,
-    min_overlap_ratio: float = 0.0  # [BTZ] 0.0 = TOUCH par défaut (0 régression)
+    min_overlap_ratio: float = 0.01  # [BTZ] défaut aligné OB = 1% (anti-bruit)
 ) -> List[Dict]:
     """
     Détection multi-FVG avec pullback : plusieurs FVG peuvent être actives en parallèle et sont consommées
@@ -84,7 +84,8 @@ def detect_fvg_pullback_multi(
                 if min_overlap_ratio > 0:
                     meets_depth = (overlap / zone_w) >= min_overlap_ratio
                 else:
-                    meets_depth = overlap > 0.0
+                    # garde anti-bruit (touch "réel")
+                    meets_depth = overlap > 1e-9
 
                 if fvg["type"] == "bullish" and meets_depth:
                     fvg["touch_count"] += 1

@@ -8,7 +8,7 @@ def detect_fvg_pullback_multi_ema(
     max_wait_candles: int = 20,
     max_touch: int = 4,
     ema_key: str = "EMA_50",
-    min_overlap_ratio: float = 0.0  # [BTZ] TOUCH par défaut
+    min_overlap_ratio: float = 0.01  # [BTZ] défaut aligné OB = 1%
 ) -> List[Dict]:
     """
     Détection multi-FVG avec filtre EMA simple :
@@ -88,7 +88,7 @@ def detect_fvg_pullback_multi_ema(
                 if min_overlap_ratio > 0:
                     meets_depth = (overlap / zone_w) >= min_overlap_ratio
                 else:
-                    meets_depth = overlap > 0.0
+                    meets_depth = overlap > 1e-9
 
                 if fvg["type"] == "bullish" and meets_depth and close2 > ema_val:
                     fvg["touch_count"] += 1

@@ -16,7 +16,7 @@ def detect_fvg_pullback_tendance_ema_rsi(
     ema_slow: str = "EMA_200",
     # rsi_key supprimé de la signature  [BTZ]
     rsi_threshold: float = 30.0,
-    min_overlap_ratio: float = 0.0  # [BTZ] TOUCH par défaut
+    min_overlap_ratio: float = 0.01  # [BTZ] défaut aligné OB = 1%
 ) -> List[Dict]:
     """
     Détection multi-FVG avec double filtre EMA + RSI :
@@ -90,11 +90,12 @@ def detect_fvg_pullback_tendance_ema_rsi(
                 zone_w = high_b - low_b
                 if zone_w <= 0:
                     continue
+                
                 overlap = max(0.0, min(high2, high_b) - max(low2, low_b))
                 if min_overlap_ratio > 0:
                     meets_depth = (overlap / zone_w) >= min_overlap_ratio
                 else:
-                    meets_depth = overlap > 0.0
+                    meets_depth = overlap > 1e-9
 
                 # BUY condition
                 if (
