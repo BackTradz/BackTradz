@@ -15,7 +15,8 @@ def detect_fvg_pullback_tendance_ema_rsi(
     ema_fast: str = "EMA_50",
     ema_slow: str = "EMA_200",
     # rsi_key supprimé de la signature  [BTZ]
-    rsi_threshold: float = 30.0
+    rsi_threshold: float = 30.0,
+    min_overlap_ratio: float = 0.0  # [BTZ] TOUCH par défaut
 ) -> List[Dict]:
     """
     Détection multi-FVG avec double filtre EMA + RSI :
@@ -83,17 +84,29 @@ def detect_fvg_pullback_tendance_ema_rsi(
                 if rsi is None or ema_fast_val is None or ema_slow_val is None:
                     continue
 
+                # [ADD min_overlap_ratio BTZ-2025-10]
+                low_b  = min(fvg["start"], fvg["end"])
+                high_b = max(fvg["start"], fvg["end"])
+                zone_w = high_b - low_b
+                if zone_w <= 0:
+                    continue
+                overlap = max(0.0, min(high2, high_b) - max(low2, low_b))
+                if min_overlap_ratio > 0:
+                    meets_depth = (overlap / zone_w) >= min_overlap_ratio
+                else:
+                    meets_depth = overlap > 0.0
+
                 # BUY condition
                 if (
                     fvg["type"] == "bullish"
-                    and low2 <= fvg["end"]
+                    and meets_depth
                     and rsi < rsi_threshold
                     and ema_fast_val > ema_slow_val
                 ):
                     fvg["touch_count"] += 1
                     if fvg["touch_count"] <= max_touch:
                         signals.append({
-                            "time": time,
+                            "time": candle2.get("Datetime", candle2.get("time")),
                             "entry": fvg["end"],
                             "direction": "buy"
                         })
@@ -105,13 +118,14 @@ def detect_fvg_pullback_tendance_ema_rsi(
                 elif (
                     fvg["type"] == "bearish"
                     and high2 >= fvg["start"]
+                    and meets_depth
                     and rsi > (100 - rsi_threshold)
                     and ema_fast_val < ema_slow_val
                 ):
                     fvg["touch_count"] += 1
                     if fvg["touch_count"] <= max_touch:
                         signals.append({
-                            "time": time,
+                            "time": candle2.get("Datetime", candle2.get("time")),
                             "entry": fvg["start"],
                             "direction": "sell"
                         })

@@ -1,10 +1,16 @@
 import pandas as pd
 from typing import List, Dict, Union
 
-def detect_fvg_pullback_tendance_ema(data: Union[pd.DataFrame, List[Dict]], min_pips: float = 5.0,
-                                      min_wait_candles: int = 1, max_wait_candles: int = 20,
-                                      max_touch: int = 4,
-                                      ema_fast: str = "EMA_50", ema_slow: str = "EMA_200") -> List[Dict]:
+def detect_fvg_pullback_tendance_ema(
+    data: Union[pd.DataFrame, List[Dict]],
+    min_pips: float = 5.0,
+    min_wait_candles: int = 1,
+    max_wait_candles: int = 20,
+    max_touch: int = 4,
+    ema_fast: str = "EMA_50",
+    ema_slow: str = "EMA_200",
+    min_overlap_ratio: float = 0.0  # [BTZ] TOUCH par défaut
+) -> List[Dict]:
     """
     Détection multi-FVG avec filtre de tendance EMA : plusieurs FVG peuvent être actives en parallèle et sont
     consommées uniquement si la tendance EMA est respectée (ema_fast > ema_slow pour buy, inverse pour sell).
@@ -75,13 +81,24 @@ def detect_fvg_pullback_tendance_ema(data: Union[pd.DataFrame, List[Dict]], min_
 
                 if fast is None or slow is None:
                     continue  # skip si données manquantes
-
+                
+                # [ADD min_overlap_ratio BTZ-2025-10]
+                low_b  = min(fvg["start"], fvg["end"])
+                high_b = max(fvg["start"], fvg["end"])
+                zone_w = high_b - low_b
+                if zone_w <= 0:
+                    continue
+                overlap = max(0.0, min(high2, high_b) - max(low2, low_b))
+                if min_overlap_ratio > 0:
+                    meets_depth = (overlap / zone_w) >= min_overlap_ratio
+                else:
+                    meets_depth = overlap > 0.0
                 # Tendance EMA
-                if fvg["type"] == "bullish" and low2 <= fvg["end"] and fast > slow:
+                if fvg["type"] == "bullish" and meets_depth and fast > slow:
                     fvg["touch_count"] += 1
                     if fvg["touch_count"] <= max_touch:
                         signals.append({
-                            "time": time,
+                            "time": candle2.get("Datetime", candle2.get("time")),
                             "entry": fvg["end"],
                             "direction": "buy"
                         })
@@ -89,11 +106,11 @@ def detect_fvg_pullback_tendance_ema(data: Union[pd.DataFrame, List[Dict]], min_
                     else:
                         valid = False
 
-                elif fvg["type"] == "bearish" and high2 >= fvg["start"] and fast < slow:
+                elif fvg["type"] == "bearish" and meets_depth and fast < slow:
                     fvg["touch_count"] += 1
                     if fvg["touch_count"] <= max_touch:
                         signals.append({
-                            "time": time,
+                            "time": candle2.get("Datetime", candle2.get("time")),
                             "entry": fvg["start"],
                             "direction": "sell"
                         })

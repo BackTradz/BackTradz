@@ -1,12 +1,15 @@
 import pandas as pd
 from typing import List, Dict, Union
 
-def detect_fvg_pullback_multi_ema(data: Union[pd.DataFrame, List[Dict]],
-                                   min_pips: float = 5.0,
-                                   min_wait_candles: int = 1,
-                                   max_wait_candles: int = 20,
-                                   max_touch: int = 4,
-                                   ema_key: str = "EMA_50") -> List[Dict]:
+def detect_fvg_pullback_multi_ema(
+    data: Union[pd.DataFrame, List[Dict]],
+    min_pips: float = 5.0,
+    min_wait_candles: int = 1,
+    max_wait_candles: int = 20,
+    max_touch: int = 4,
+    ema_key: str = "EMA_50",
+    min_overlap_ratio: float = 0.0  # [BTZ] TOUCH par défaut
+) -> List[Dict]:
     """
     Détection multi-FVG avec filtre EMA simple :
     - BUY si close > EMA
@@ -75,11 +78,23 @@ def detect_fvg_pullback_multi_ema(data: Union[pd.DataFrame, List[Dict]],
                 if ema_val is None:
                     continue
 
-                if fvg["type"] == "bullish" and low2 <= fvg["end"] and close2 > ema_val:
+                # [ADD min_overlap_ratio BTZ-2025-10]
+                low_b  = min(fvg["start"], fvg["end"])
+                high_b = max(fvg["start"], fvg["end"])
+                zone_w = high_b - low_b
+                if zone_w <= 0:
+                    continue
+                overlap = max(0.0, min(high2, high_b) - max(low2, low_b))
+                if min_overlap_ratio > 0:
+                    meets_depth = (overlap / zone_w) >= min_overlap_ratio
+                else:
+                    meets_depth = overlap > 0.0
+
+                if fvg["type"] == "bullish" and meets_depth and close2 > ema_val:
                     fvg["touch_count"] += 1
                     if fvg["touch_count"] <= max_touch:
                         signals.append({
-                            "time": time,
+                            "time": candle2.get("Datetime", candle2.get("time")),
                             "entry": fvg["end"],
                             "direction": "buy"
                         })
@@ -87,11 +102,11 @@ def detect_fvg_pullback_multi_ema(data: Union[pd.DataFrame, List[Dict]],
                     else:
                         valid = False
 
-                elif fvg["type"] == "bearish" and high2 >= fvg["start"] and close2 < ema_val:
+                elif fvg["type"] == "bearish" and meets_depth and close2 < ema_val:
                     fvg["touch_count"] += 1
                     if fvg["touch_count"] <= max_touch:
                         signals.append({
-                            "time": time,
+                            "time": candle2.get("Datetime", candle2.get("time")),
                             "entry": fvg["start"],
                             "direction": "sell"
                         })

@@ -12,7 +12,8 @@ def detect_fvg_pullback_multi_rsi(
     max_wait_candles: int = 20,
     max_touch: int = 4,
     # rsi_key supprimé de la signature  [BTZ]
-    rsi_threshold: float = 30.0
+    rsi_threshold: float = 30.0,
+    min_overlap_ratio: float = 0.0  # [BTZ] TOUCH par défaut
 ) -> List[Dict]:
     """
     Détection multi-FVG avec filtre RSI global (symétrique) :
@@ -88,12 +89,24 @@ def detect_fvg_pullback_multi_rsi(
                     # 0 régression : si la colonne RSI manque, on ignore comme avant.
                     continue
 
+                # [ADD min_overlap_ratio BTZ-2025-10]
+                low_b  = min(fvg["start"], fvg["end"])
+                high_b = max(fvg["start"], fvg["end"])
+                zone_w = high_b - low_b
+                if zone_w <= 0:
+                    continue
+                overlap = max(0.0, min(high2, high_b) - max(low2, low_b))
+                if min_overlap_ratio > 0:
+                    meets_depth = (overlap / zone_w) >= min_overlap_ratio
+                else:
+                    meets_depth = overlap > 0.0
+
                 # RSI filtre global : buy < threshold / sell > 100 - threshold
-                if fvg["type"] == "bullish" and low2 <= fvg["end"] and rsi < rsi_threshold:
+                if fvg["type"] == "bullish" and meets_depth and rsi < rsi_threshold:
                     fvg["touch_count"] += 1
                     if fvg["touch_count"] <= max_touch:
                         signals.append({
-                            "time": time,
+                            "time": candle2.get("Datetime", candle2.get("time")),
                             "entry": fvg["end"],
                             "direction": "buy"
                         })
@@ -101,11 +114,11 @@ def detect_fvg_pullback_multi_rsi(
                     else:
                         valid = False
 
-                elif fvg["type"] == "bearish" and high2 >= fvg["start"] and rsi > (100 - rsi_threshold):
+                elif fvg["type"] == "bearish" and meets_depth and rsi > (100 - rsi_threshold):
                     fvg["touch_count"] += 1
                     if fvg["touch_count"] <= max_touch:
                         signals.append({
-                            "time": time,
+                            "time": candle2.get("Datetime", candle2.get("time")),
                             "entry": fvg["start"],
                             "direction": "sell"
                         })
