@@ -64,6 +64,11 @@ def detect_ob_pullback_pure_ema_simple_rsi(
         else:
             wait_count += 1
 
+            # [FIX v1.3 wait_count logic BTZ-2025-10]
+            if wait_count > max_wait_candles and not active_ob["touched"]:
+                active_ob = None
+                continue
+
             ema_val = current.get(ema_key)
             rsi_val = current.get(RSI_COL)
             close = current.get("Close")
@@ -74,7 +79,7 @@ def detect_ob_pullback_pure_ema_simple_rsi(
                 if current["Low"] <= active_ob["ob_high"] and current["High"] >= active_ob["ob_low"]:
                     if wait_count >= min_wait_candles:
                         signals.append({
-                            "time": current[TIME_COL],
+                            "time": current.get(TIME_COL, current.get("time")),
                             "entry": active_ob["ob_high"],
                             "direction": "buy",
                             "phase": "TP1"
@@ -87,7 +92,7 @@ def detect_ob_pullback_pure_ema_simple_rsi(
                 if current["High"] >= active_ob["ob_low"] and current["Low"] <= active_ob["ob_high"]:
                     if wait_count >= min_wait_candles:
                         signals.append({
-                            "time": current[TIME_COL],
+                            "time": current.get(TIME_COL, current.get("time")),
                             "entry": active_ob["ob_low"],
                             "direction": "sell",
                             "phase": "TP1"
