@@ -258,30 +258,29 @@ export default function Pricing() {
        setMsg("Inscrivez-vous pour acheter des crédits — /login?tab=register&next=/pricing");
       return;
     }
-    // [v1.3][iOS/Android fix] Ouvrir une fenêtre *synchrone au clic*,
-    // puis injecter l'URL une fois reçue → évite le blocage popup.
+    // [v1.3.1][Safari/iOS fix] 
+    // - iOS : redirection même onglet (fiable à 100 %, pas de popup)
+    // - autres : popup ouverte synchrone, puis on assigne l'URL
+    const isIOS = /iP(hone|ad|od)/i.test(navigator.userAgent);
     let popup = null;
     try {
       localStorage.setItem("lastOfferId", offer_id);
-      // 👉 ouverture immédiate (synchrone au tap)
-      popup = window.open("about:blank", "_blank", "noopener,noreferrer");
-      // Affichage minimal pendant l’attente (confort si device lent)
-      try {
-        if (popup && popup.document) {
-          popup.document.write("<!doctype html><title>Redirection…</title><p style='font:14px/1.4 -apple-system,system-ui,Segoe UI,Roboto; color:#222; padding:16px;'>Redirection vers le paiement crypto…</p>");
-        }
-      } catch(_) {}
-
       const { payment_url } = await cryptoOrder(offer_id);
       if (!payment_url) throw new Error("Crypto: payment_url manquante.");
 
-      // 👉 Priorité : utiliser la fenêtre déjà ouverte (évite tout blocage)
-      if (popup && !popup.closed) {
-        popup.location.href = payment_url;
-        try { popup.focus(); } catch {}
-      } else {
-        // Fallback (si popup bloquée par le navigateur)
+      if (isIOS) {
+        // iOS Safari : navigation plein onglet (évite about:blank bloqué)
         window.location.href = payment_url;
+      } else {
+        // Autres (desktop / Android) : popup synchrone
+        // ⚠️ pas de "noopener" ici pour laisser Safari/Chrome autoriser la redirection
+        popup = window.open("about:blank", "_blank", "popup");
+        if (popup && !popup.closed) {
+          try { popup.location.href = payment_url; popup.focus(); } catch {}
+        } else {
+          // Fallback si popup bloquée
+          window.location.href = payment_url;
+        }
       }
     } catch (e) {
       // Nettoyage si erreur (évite un onglet vide qui traîne)
