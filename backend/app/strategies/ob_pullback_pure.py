@@ -11,7 +11,7 @@ def detect_ob_pullback_pure(
     min_wait_candles: int = 3,
     max_wait_candles: int = 20,
     allow_multiple_entries: bool = False,
-    min_overlap_ratio: float = 1.0,
+    min_overlap_ratio: float = 0.01,  # [BTZ] défaut pro = touche anti-bruit (1 %)
     **kwargs,  # [BTZ] compat descendante : ex-arg time_key ignoré
 ) -> List[Dict]:
     """
@@ -75,10 +75,12 @@ def detect_ob_pullback_pure(
                 # zone dégénérée (ne devrait pas arriver) → on ignore proprement
                 continue
             overlap = max(0.0, min(current["High"], high_b) - max(current["Low"], low_b))
+            # [BTZ-DEPTH] profondeur standardisée (ratio + garde flottant)
+            _ratio = float(min_overlap_ratio)
+            meets_depth = (overlap / zone_w) >= _ratio if _ratio > 0 else (overlap > 1e-9)
 
             if ob_direction == "buy":
-                # Ancien critère (couverture totale) ≡ ratio==1.0, préservé par défaut.
-                if (overlap / zone_w) >= min_overlap_ratio:
+                if meets_depth:
                     if wait_count >= min_wait_candles:
                         signals.append({
                             "time": current.get(TIME_COL, current.get("time")),
@@ -91,7 +93,7 @@ def detect_ob_pullback_pure(
                             active_ob = None
 
             elif ob_direction == "sell":
-                if (overlap / zone_w) >= min_overlap_ratio:
+                if meets_depth:
                     if wait_count >= min_wait_candles:
                         signals.append({
                             "time": current.get(TIME_COL, current.get("time")),

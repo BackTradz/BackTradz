@@ -11,7 +11,7 @@ def detect_ob_pullback_gap(
     min_wait_candles: int = 3,
     max_wait_candles: int = 20,
     allow_multiple_entries: bool = False,
-    min_overlap_ratio: float = 1.0,
+    min_overlap_ratio: float = 0.01,  # [BTZ] défaut pro
     **kwargs,  # [BTZ] compat descendante : on ignore d'anciens kwargs (ex: time_key)
 ) -> List[Dict]:
     """
@@ -88,9 +88,13 @@ def detect_ob_pullback_gap(
             if zone_w <= 0:
                 continue
             overlap = max(0.0, min(current["High"], high_b) - max(current["Low"], low_b))
+            # [BTZ-DEPTH] ratio standardisé + garde flottant
+            _ratio = float(min_overlap_ratio)
+            meets_depth = (overlap / zone_w) >= _ratio if _ratio > 0 else (overlap > 1e-9)
+
 
             if ob_direction == "buy":
-                if (overlap / zone_w) >= min_overlap_ratio:
+                if meets_depth:
                     if wait_count >= min_wait_candles:
                         signals.append({
                             "time": current.get(TIME_COL, current.get("time")),  # fallback safe
@@ -103,7 +107,7 @@ def detect_ob_pullback_gap(
                             active_ob = None
 
             elif ob_direction == "sell":
-                if (overlap / zone_w) >= min_overlap_ratio:
+                if meets_depth:
                     if wait_count >= min_wait_candles:
                         signals.append({
                             "time": current.get(TIME_COL, current.get("time")),  # fallback safe

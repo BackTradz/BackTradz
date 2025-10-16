@@ -13,7 +13,7 @@ def detect_ob_pullback_gap_ema_simple(
     max_wait_candles: int = 20,
     allow_multiple_entries: bool = False,
     ema_key: str = "EMA_50",
-    min_overlap_ratio: float = 1.0,
+    min_overlap_ratio: float = 0.01,  # [BTZ] défaut pro
     **kwargs,  # [BTZ] compat descendante (ex: time_key ignoré)
 ) -> List[Dict]:
     """
@@ -86,6 +86,8 @@ def detect_ob_pullback_gap_ema_simple(
             if zone_w <= 0:
                 continue
             overlap = max(0.0, min(current["High"], high_b) - max(current["Low"], low_b))
+            _ratio = float(min_overlap_ratio)
+            meets_depth = (overlap / zone_w) >= _ratio if _ratio > 0 else (overlap > 1e-9)
 
             ema_val = current.get(ema_key)
             if ema_val is None:
@@ -94,7 +96,7 @@ def detect_ob_pullback_gap_ema_simple(
             close = current.get("Close")
 
             if ob_direction == "buy" and close > ema_val:
-                if (overlap / zone_w) >= min_overlap_ratio:
+                if meets_depth:
                     if wait_count >= min_wait_candles:
                         signals.append({
                             "time": current.get(TIME_COL, current.get("time")),  # fallback safe
@@ -107,7 +109,7 @@ def detect_ob_pullback_gap_ema_simple(
                             active_ob = None
 
             elif ob_direction == "sell" and close < ema_val:
-                if (overlap / zone_w) >= min_overlap_ratio:
+                if meets_depth:
                     if wait_count >= min_wait_candles:
                         signals.append({
                             "time": current.get(TIME_COL, current.get("time")),  # fallback safe
