@@ -258,33 +258,14 @@ export default function Pricing() {
        setMsg("Inscrivez-vous pour acheter des crédits — /login?tab=register&next=/pricing");
       return;
     }
-    // [v1.3.1][Safari/iOS fix] 
-    // - iOS : redirection même onglet (fiable à 100 %, pas de popup)
-    // - autres : popup ouverte synchrone, puis on assigne l'URL
-    const isIOS = /iP(hone|ad|od)/i.test(navigator.userAgent);
-    let popup = null;
+    // [v1.3.1] Forcer une navigation plein onglet pour TOUT le monde
+    // → supprime définitivement l’onglet about:blank résiduel.
     try {
       localStorage.setItem("lastOfferId", offer_id);
       const { payment_url } = await cryptoOrder(offer_id);
       if (!payment_url) throw new Error("Crypto: payment_url manquante.");
-
-      if (isIOS) {
-        // iOS Safari : navigation plein onglet (évite about:blank bloqué)
-        window.location.href = payment_url;
-      } else {
-        // Autres (desktop / Android) : popup synchrone
-        // ⚠️ pas de "noopener" ici pour laisser Safari/Chrome autoriser la redirection
-        popup = window.open("about:blank", "_blank", "popup");
-        if (popup && !popup.closed) {
-          try { popup.location.href = payment_url; popup.focus(); } catch {}
-        } else {
-          // Fallback si popup bloquée
-          window.location.href = payment_url;
-        }
-      }
+      window.location.href = payment_url; // ✅ navigation directe, universelle
     } catch (e) {
-      // Nettoyage si erreur (évite un onglet vide qui traîne)
-      try { if (popup && !popup.closed) popup.close(); } catch {}
       setMsg(e.message);
     }
   };
