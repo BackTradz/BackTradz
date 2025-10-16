@@ -41,7 +41,7 @@ export default function ParamInput({
 
     return (
       <div className="bt-field">
-        <label htmlFor={id} className="text-sm">{label}</label>
+        <label htmlFor={`${id}_touch`} className="text-sm">{label}</label>
        {/* Hidden réel envoyé au collector */}
         <input
           id={id}
@@ -54,11 +54,11 @@ export default function ParamInput({
         />
 
         {/* Ligne 1 : toggle "Entrée à la touche" (par défaut cochée) */}
-        <div className="flex items-center gap-3 mt-1">
+        <div className="flex items-center mt-1">
           <input
             id={`${id}_touch`}
             type="checkbox"
-            className="h-4 w-4 accent-blue-600"
+            className="bt-check"          
             checked={touch}
             onChange={(e) => {
               const v = e.target.checked;
@@ -76,15 +76,15 @@ export default function ParamInput({
         {!touch && (
           <div className="mt-2 space-y-2">
             <div className="flex items-center gap-2">
-              <button type="button" className="px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-xs"
+              <button type="button" className="bt-chip bt-chip--solid text-xs"
                 onClick={() => { setQuick(10); onChange?.(name, 0.10); }}>
                 10%
               </button>
-              <button type="button" className="px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-xs"
+              <button type="button" className="bt-chip bt-chip--solid text-xs"
                 onClick={() => { setQuick(25); onChange?.(name, 0.25); }}>
                 25%
               </button>
-              <button type="button" className="px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-xs"
+              <button type="button" className="bt-chip bt-chip--solid text-xs"
                 onClick={() => { setQuick(50); onChange?.(name, 0.50); }}>
                 50%
               </button>
@@ -114,8 +114,7 @@ export default function ParamInput({
   if (type === "boolean" || type === "bool") {
     const checked = Boolean(defaultValue);
     return (
-      <div className="bt-field">
-        <label htmlFor={id} className="text-sm">{label}</label>
+      <div className="bt-field bt-field--inline">
         <input
           id={id}
           name={name}
@@ -124,8 +123,9 @@ export default function ParamInput({
           data-scope={scope}
           data-param="1"
           onChange={(e) => onChange?.(name, e.target.checked)}
-          className="h-4 w-4 accent-blue-600 ml-1"
+          className="bt-check"
         />
+        <label htmlFor={id}>{label}</label>
       </div>
     );
   }
