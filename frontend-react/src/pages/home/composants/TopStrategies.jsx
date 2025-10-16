@@ -84,23 +84,26 @@ export default function TopStrategies() {
   const [preview, setPreview] = useState({ open: false, item: null });
   const prefersReduced = useReducedMotion();
 
-  (async () => {
-      // [v1.3.3] Timeout et fallback réseau lent
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 6000); // 6s max
+  useEffect(() => {
+    let mounted = true;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000); // 6s max
 
+    (async () => {
       try {
         const res = await fetch(`${API_BASE}/api/top-strategy`, { signal: controller.signal });
         if (!res.ok) throw new Error("Aucune stratégie trouvée");
         const data = await res.json();
-
-        // On vérifie qu'on a bien un tableau
+        if (!mounted) return;
         if (Array.isArray(data) && data.length > 0) {
           setStrategies(data.slice(0, 6));
+          setError("");
         } else {
+          setStrategies([]);
           setError("⚠️ Aucune stratégie disponible pour le moment.");
         }
       } catch (err) {
+        if (!mounted) return;
         if (err.name === "AbortError") {
           console.warn("⏱ Timeout fetch top-strategy (connexion lente)");
           setError("⏱ Connexion lente — données non disponibles pour l’instant.");
@@ -109,10 +112,17 @@ export default function TopStrategies() {
           setError("❌ Impossible de charger les stratégies actuellement.");
         }
       } finally {
+        if (mounted) setLoading(false);
         clearTimeout(timeout);
-        setLoading(false);
       }
     })();
+
+    return () => {
+      mounted = false;
+      controller.abort();
+      clearTimeout(timeout);
+    };
+  }, []);
   const skel = Array.from({ length: 3 });
 
   return (
