@@ -258,6 +258,7 @@ async def upload_csv_and_backtest(
     start_date: str = Form(None),
     end_date: str = Form(None),
     csv_file: UploadFile = File(...),
+    params_json: str = Form(None),   # ⬅️ NEW: permet de passer les params stratégie (dont min_overlap_ratio)
     authorization: str = Header(None, alias="X-API-Key")
 ):
     """
@@ -369,6 +370,16 @@ async def upload_csv_and_backtest(
         strategy_module = importlib.import_module(module_path)
         strategy_func = getattr(strategy_module, f"detect_{strategy}")
 
+        # 🎛️ Params stratégie (depuis le form) — par défaut {}
+        params_dict = {}
+        if params_json:
+            try:
+                parsed = json.loads(params_json)
+                if isinstance(parsed, dict):
+                    params_dict = parsed
+            except Exception as _e:
+                print("⚠️ params_json illisible, fallback {} :", _e)
+
         # 🏃 Lancement du runner
         t0 = time.perf_counter()
         period_str = "upload_custom"
@@ -383,7 +394,7 @@ async def upload_csv_and_backtest(
             timeframe=tf,
             period=period_str,
             auto_analyze=False,
-            params={},  # Pas de params dynamiques ici pour l'instant
+            params=params_dict,  # ⬅️ NEW: supporte min_overlap_ratio & co
         )
 
         if isinstance(csv_result_path, dict) and "error" in csv_result_path:
