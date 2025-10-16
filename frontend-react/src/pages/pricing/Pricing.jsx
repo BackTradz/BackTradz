@@ -258,12 +258,36 @@ export default function Pricing() {
        setMsg("Inscrivez-vous pour acheter des crédits — /login?tab=register&next=/pricing");
       return;
     }
+    // [v1.3][iOS/Android fix] Ouvrir une fenêtre *synchrone au clic*,
+    // puis injecter l'URL une fois reçue → évite le blocage popup.
+    let popup = null;
     try {
       localStorage.setItem("lastOfferId", offer_id);
+      // 👉 ouverture immédiate (synchrone au tap)
+      popup = window.open("about:blank", "_blank", "noopener,noreferrer");
+      // Affichage minimal pendant l’attente (confort si device lent)
+      try {
+        if (popup && popup.document) {
+          popup.document.write("<!doctype html><title>Redirection…</title><p style='font:14px/1.4 -apple-system,system-ui,Segoe UI,Roboto; color:#222; padding:16px;'>Redirection vers le paiement crypto…</p>");
+        }
+      } catch(_) {}
+
       const { payment_url } = await cryptoOrder(offer_id);
       if (!payment_url) throw new Error("Crypto: payment_url manquante.");
-      window.open(payment_url, "_blank");
-    } catch (e) { setMsg(e.message); }
+
+      // 👉 Priorité : utiliser la fenêtre déjà ouverte (évite tout blocage)
+      if (popup && !popup.closed) {
+        popup.location.href = payment_url;
+        try { popup.focus(); } catch {}
+      } else {
+        // Fallback (si popup bloquée par le navigateur)
+        window.location.href = payment_url;
+      }
+    } catch (e) {
+      // Nettoyage si erreur (évite un onglet vide qui traîne)
+      try { if (popup && !popup.closed) popup.close(); } catch {}
+      setMsg(e.message);
+    }
   };
 
   // Seuil côté UI (aligné sur le backend qui force 10.01€ pour NOWPayments)
