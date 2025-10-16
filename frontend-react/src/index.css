@@ -208,3 +208,18 @@ body.no-hex {
 body.lite-mode {
   background: var(--bg-page) !important;
 }
+
+/* ==========================================================================
+ Message d'erreur 
+ ========================================================================== */
+
+/*top strategies
+
+/* Message d'erreur ou fallback (section Top Stratégies) */
+.ts-error, .ts-fallback {
+  color: #aab7ff;
+  font-size: 0.95rem;
+  text-align: center;
+  margin-top: 0.8rem;
+  opacity: 0.85;
+}

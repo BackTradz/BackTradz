@@ -84,22 +84,35 @@ export default function TopStrategies() {
   const [preview, setPreview] = useState({ open: false, item: null });
   const prefersReduced = useReducedMotion();
 
-  // Fetch Top stratégies (public)
-  useEffect(() => {
-    (async () => {
+  (async () => {
+      // [v1.3.3] Timeout et fallback réseau lent
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 6000); // 6s max
+
       try {
-        const res = await fetch(`${API_BASE}/api/top-strategy`);
+        const res = await fetch(`${API_BASE}/api/top-strategy`, { signal: controller.signal });
         if (!res.ok) throw new Error("Aucune stratégie trouvée");
         const data = await res.json();
-        setStrategies(Array.isArray(data) ? data.slice(0, 6) : []);
-      } catch {
-        setError("❌ Aucune stratégie disponible pour l’instant.");
+
+        // On vérifie qu'on a bien un tableau
+        if (Array.isArray(data) && data.length > 0) {
+          setStrategies(data.slice(0, 6));
+        } else {
+          setError("⚠️ Aucune stratégie disponible pour le moment.");
+        }
+      } catch (err) {
+        if (err.name === "AbortError") {
+          console.warn("⏱ Timeout fetch top-strategy (connexion lente)");
+          setError("⏱ Connexion lente — données non disponibles pour l’instant.");
+        } else {
+          console.error("Erreur API top-strategy:", err);
+          setError("❌ Impossible de charger les stratégies actuellement.");
+        }
       } finally {
+        clearTimeout(timeout);
         setLoading(false);
       }
     })();
-  }, []);
-
   const skel = Array.from({ length: 3 });
 
   return (
@@ -118,7 +131,12 @@ export default function TopStrategies() {
         </SectionTitle>
       </motion.div>
 
-      {error && <p className="ts-error">{error}</p>}
+      {/* Fallback visuel si rien n’a pu être chargé */}
+      {!loading && !strategies.length && !error && (
+        <p className="ts-fallback">
+          ⚠️ Aucune stratégie disponible actuellement.
+        </p>
+      )}
 
       {/* Grille */}
       <motion.div className="ts-grid" variants={sectionVariants}>
