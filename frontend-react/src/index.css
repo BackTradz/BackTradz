@@ -188,3 +188,23 @@ main, .container-std,
     pointer-events: none;
   }
 }
+/* ==========================================================================
+ 💡 FALLBACKS & MODES RÉDUITS
+ ========================================================================== */
+
+/* Si le canvas échoue : fond noir uniforme (pas de flash blanc) */
+.no-hex body,
+body.no-hex {
+  background: var(--bg-page) !important;
+}
+
+/* Mode lite : supprime le canvas animé */
+.lite-mode #hex-canvas {
+  display: none !important;
+}
+
+/* S'assure que la page reste visuellement identique */
+.lite-mode body,
+body.lite-mode {
+  background: var(--bg-page) !important;
+}

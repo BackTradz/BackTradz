@@ -4,12 +4,33 @@ import { useEffect, useRef } from "react";
 export default function HexNeonBackground() {
   const ref = useRef(null);
   useEffect(() => {
-    const cvs = ref.current;                 // canvas déjà dans le DOM (dans .app-layout)
-    const ctx = cvs.getContext("2d");
+    const cvs = ref.current; // canvas déjà dans le DOM
 
-    // --- init
+    // ============================================================
+    // [v1.3.3]  Fallback intelligent + mode "lite"
+    // ------------------------------------------------------------
+    // - Si le canvas échoue → on garde fond noir statique
+    // - Si appareil à faible mémoire (≤2 Go) → désactivation auto
+    // ============================================================
+
+    // Détection device faible
+    const lowPerfDevice = navigator.deviceMemory && navigator.deviceMemory <= 2;
+    if (lowPerfDevice) {
+      document.body.classList.add("lite-mode");
+      console.warn("Mode lite activé (RAM ≤2 Go)");
+      return; // on ne lance pas l'animation
+    }
+
+    let ctx;
+    try {
+      ctx = cvs.getContext("2d");
+    } catch (err) {
+      console.warn("Canvas non supporté, fallback statique appliqué.", err);
+      document.body.classList.add("no-hex");
+      return;
+    }
+    // --- init animation complète
     let DPR, W, H, a, gap, mask, mctx, glow, gctx, edges = [], raf = 0;
-    // [v1.3] 3 ellipses bleues (lumière sous la grille)
     let blobs = [];
 
     const css = () => getComputedStyle(document.body);
