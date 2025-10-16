@@ -1,43 +1,46 @@
-
 /* ==========================================================================
-   🎨 Base globale BackTradz
-   ========================================================================== */
+ 🎨 BACKTRADZ — STYLES GLOBAUX (v1.3.2)
+ Nettoyage complet + uniformisation du fond noir profond
+ ========================================================================== */
 
-/* Presets du background hex */
+/* Import du preset visuel de la grille hex */
 @import "./components/background/hex-neon.css";
 
+/* ==========================================================================
+ 🎨 VARIABLES ROOT
+ ========================================================================== */
+:root {
+  /* 🎯 Noir profond identique au canvas hex (#05070a) */
+  --bg-page: #05070a;
 
-:root{
-  --bg-page:#0a0f19;  /* noir profond identique à ton fond sous la grille */
-  /* === Scrollbar (dark) tokens === */
-  --scroll-track:#0a0f19;
-  --scroll-thumb:#151b26;
-  --scroll-thumb-hover:#1f2937;
+  /* Scrollbar (mode desktop uniquement) */
+  --scroll-track: var(--bg-page);
+  --scroll-thumb: #151b26;
+  --scroll-thumb-hover: #1f2937;
+
+  /* Paramètres hex par défaut */
+  --hex-edge: 80;
+  --hex-gap: 3;
+  --hex-glow: rgba(90,170,255,.45);
 }
-/* 🔹 Évite les marges/paddings imprévus sur tout le layout */
+
+/* ==========================================================================
+ ⚙️ BASE HTML / BODY
+ ========================================================================== */
 html, body {
   margin: 0 !important;
   padding: 0 !important;
   height: 100%;
   width: 100%;
-  background-color: var(--bg-page) !important; /* [v1.3] fond unique global */; /* fallback bg BackTradz */
+  background-color: var(--bg-page) !important;
   color: #e5e7eb;
-  color-scheme: dark; /* assure un rendu dark cohérent (barre statut + UI natives) */
-  /* Firefox (desktop & mobile) */
-  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  color-scheme: dark; /* synchronise la barre de statut */
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track); /* Firefox */
   scrollbar-width: thin;
   border: none;
 }
 
-:root{
-  /* [v1.3 - retouche design] paramètres du fond */
-  --hex-edge: 80;                 /* taille alvéole */
-  --hex-gap: 3;                   /* largeur interstice */
-  --hex-glow: rgba(90,170,255,.45); /* teinte halo */
-}
-
-
-/* 🔤 Police lisible + anti-aliasing */
+/* 🔤 Police globale & lissage */
 :root {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI",
                Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
@@ -46,8 +49,14 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 📊 Layout responsive spécifique aux stats (à garder) */
-.topstrat-row { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+/* ==========================================================================
+ 📊 SECTIONS RÉACTIVES (TOP STRATEGIES)
+ ========================================================================== */
+.topstrat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
 .topstrat-item { width: 100%; }
 
 @media (min-width: 640px) {
@@ -57,18 +66,16 @@ html, body {
   .topstrat-item { width: calc(33.333% - 1rem); }
 }
 
-/* Empêche tout débordement horizontal site-wide */
+/* ==========================================================================
+ 🧭 SCROLLBARS (dark desktop / masquées mobile)
+ ========================================================================== */
+
+/* Empêche le décalage horizontal permanent */
 html {
-  scrollbar-gutter: stable; /* garde la place seulement du côté scrollbar */
+  scrollbar-gutter: stable;
 }
 
-/* ============================================================
-   [v1.3.1] Scrollbar Desktop uniquement
-   ------------------------------------------------------------
-   - Scrollbar dark visible uniquement à partir de 1025px
-   - Masquée complètement sur mobile (≤1024px)
-   ============================================================ */
-
+/* --- Desktop : visible et stylée --- */
 @media (min-width: 1025px) {
   *::-webkit-scrollbar {
     width: 10px;
@@ -90,106 +97,94 @@ html {
   }
 }
 
-/* Toujours clip horizontal (desktop & mobile) */
-html, body, #root {
-  overflow-x: clip;
-}
-
-/* ============================================================
-   Scrollbar masquée sur mobile / tablette
-   ------------------------------------------------------------
-   - Masque toutes les barres (Android/iOS, Chrome, Safari, Firefox)
-   - Garde le scroll tactile natif intact
-   ============================================================ */
-
+/* --- Mobile & tablette : masquée --- */
 @media (max-width: 1024px) {
-  /* Chrome / Safari / WebView */
   *::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
   }
-  /* Firefox */
   html, body {
     scrollbar-width: none !important;
   }
-
-  /* Scroll tactile fluide */
   html, body, #root {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
 }
 
-/* Par sécurité : pas de largeur calculée en dehors de l'écran */
-* {
-  box-sizing: border-box;
-}
-
-/* === GLOBAL STICKY LAYOUT === */
-html, body, #root { height: 100%; }
+/* ==========================================================================
+ 🧱 STRUCTURE GLOBALE DU LAYOUT
+ ========================================================================== */
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; overflow-x: clip; }
 
 #root {
-  min-height: 100dvh;          /* couvre toujours l'écran */
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
-/* Le wrapper AppLayout devient la colonne principale */
+/* Layout principal */
 .app-layout {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;          /* évite tout gap au chargement */
+  min-height: 100dvh;
+  isolation: isolate;
+  background: transparent;
 }
 
-/* Le contenu prend la place restante même vide (avant fetch) */
+/* Contenu flexible */
 .app-layout > main {
   flex: 1 0 auto;
+  padding-bottom: var(--ft-h, 72px); /* Footer space */
 }
 
-/* Le footer colle en bas tant que la page < 100vh */
+/* Footer collé en bas */
 footer.footer {
   margin-top: auto;
 }
 
-.app-layout{ isolation: isolate; background: transparent; } /* [v1.3] pas de 2e fond */
-
-/* [v1.3] neutralise SEULEMENT les fonds globaux/hero (PAS les <section>) */
+/* Neutralisation des fonds inutiles sur les pages */
 main, .container-std,
-[class*="-page"], [class*="-hero"]{
+[class*="-page"], [class*="-hero"] {
   background: transparent;
 }
 
-/* [v1.3] canvas interne au layout, toujours derrière ses enfants */
-#hex-canvas{
-  position: fixed; inset: 0;           /* [v1.3] occupe TOUT le viewport en continu */
-  width: 100vw; height: 100vh;
-  pointer-events: none; z-index: 0;     /* sous le contenu, au-dessus du gradient */
+/* ==========================================================================
+ 🌌 CANVAS HEX (background)
+ ========================================================================== */
+#hex-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--bg-page); /* même noir profond que la grille */
 }
-/* [v1.3] assure le stacking context côté CSS (alternative util class Tailwind `isolate`) */
-.isolate{ isolation:isolate; }
+.isolate { isolation: isolate; }
 
-
-/* === Réservation d'espace pour le footer FIXE === */
-/* Le main du layout garde un padding-bottom égal à la hauteur du footer */
-.app-layout > main {
-  padding-bottom: var(--ft-h, 72px); /* desktop 72px, mobile 96px via @media */
-}
-
-
-/* .page-skeleton-guard => stabilise la hauteur du bloc principal avant l’arrivée des cartes*/
+/* ==========================================================================
+ 📏 FOOTER + SECTIONS DYNAMIQUES
+ ========================================================================== */
 .page-skeleton-guard {
   min-height: clamp(320px, 60vh, 900px);
 }
-/* iOS notch : peint la bande sous la barre de statut avec le même fond */
-@supports (padding: max(0px)){
-  body::before{
-    content:"";
+
+/* ==========================================================================
+ 📱 SAFE AREA (iOS/Android notches)
+ ========================================================================== */
+@supports (padding: max(0px)) {
+  body::before {
+    content: "";
     position: fixed;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     height: env(safe-area-inset-top);
     background: var(--bg-page);
-    z-index: 1;          /* sous ta navbar si elle a un z-index plus élevé */
+    z-index: 1;
     pointer-events: none;
   }
 }
