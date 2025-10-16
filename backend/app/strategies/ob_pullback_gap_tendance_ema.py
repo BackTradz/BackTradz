@@ -14,6 +14,7 @@ def detect_ob_pullback_gap_tendance_ema(
     allow_multiple_entries: bool = False,
     ema_fast: str = "EMA_50",
     ema_slow: str = "EMA_200",
+    min_overlap_ratio: float = 1.0,
     **kwargs,  # [BTZ] compat descendante (ex: time_key ignoré)
 ) -> List[Dict]:
     """
@@ -77,13 +78,22 @@ def detect_ob_pullback_gap_tendance_ema(
                 active_ob = None
                 continue
 
+            # [ADD min_overlap_ratio BTZ-2025-10]
+            low_b  = min(active_ob["ob_high"], active_ob["ob_low"])
+            high_b = max(active_ob["ob_high"], active_ob["ob_low"])
+            zone_w = high_b - low_b
+            if zone_w <= 0:
+                continue
+            overlap = max(0.0, min(current["High"], high_b) - max(current["Low"], low_b))
+
+
             fast = current.get(ema_fast)
             slow = current.get(ema_slow)
             if fast is None or slow is None:
                 continue
 
             if ob_direction == "buy" and fast > slow:
-                if current["Low"] <= active_ob["ob_high"] and current["High"] >= active_ob["ob_low"]:
+                if (overlap / zone_w) >= min_overlap_ratio:
                     if wait_count >= min_wait_candles:
                         signals.append({
                             "time": current.get(TIME_COL, current.get("time")),  # fallback safe
@@ -96,7 +106,7 @@ def detect_ob_pullback_gap_tendance_ema(
                             active_ob = None
 
             elif ob_direction == "sell" and fast < slow:
-                if current["High"] >= active_ob["ob_low"] and current["Low"] <= active_ob["ob_high"]:
+                if (overlap / zone_w) >= min_overlap_ratio:
                     if wait_count >= min_wait_candles:
                         signals.append({
                             "time": current.get(TIME_COL, current.get("time")),  # fallback safe

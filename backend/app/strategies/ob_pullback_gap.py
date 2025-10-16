@@ -11,6 +11,7 @@ def detect_ob_pullback_gap(
     min_wait_candles: int = 3,
     max_wait_candles: int = 20,
     allow_multiple_entries: bool = False,
+    min_overlap_ratio: float = 1.0,
     **kwargs,  # [BTZ] compat descendante : on ignore d'anciens kwargs (ex: time_key)
 ) -> List[Dict]:
     """
@@ -80,8 +81,16 @@ def detect_ob_pullback_gap(
                 active_ob = None
                 continue
 
+            # [ADD min_overlap_ratio BTZ-2025-10]
+            low_b  = min(active_ob["ob_high"], active_ob["ob_low"])
+            high_b = max(active_ob["ob_high"], active_ob["ob_low"])
+            zone_w = high_b - low_b
+            if zone_w <= 0:
+                continue
+            overlap = max(0.0, min(current["High"], high_b) - max(current["Low"], low_b))
+
             if ob_direction == "buy":
-                if current["Low"] <= active_ob["ob_high"] and current["High"] >= active_ob["ob_low"]:
+                if (overlap / zone_w) >= min_overlap_ratio:
                     if wait_count >= min_wait_candles:
                         signals.append({
                             "time": current.get(TIME_COL, current.get("time")),  # fallback safe
@@ -94,7 +103,7 @@ def detect_ob_pullback_gap(
                             active_ob = None
 
             elif ob_direction == "sell":
-                if current["High"] >= active_ob["ob_low"] and current["Low"] <= active_ob["ob_high"]:
+                if (overlap / zone_w) >= min_overlap_ratio:
                     if wait_count >= min_wait_candles:
                         signals.append({
                             "time": current.get(TIME_COL, current.get("time")),  # fallback safe
